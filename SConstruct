@@ -5,8 +5,8 @@ import sys
 from methods import print_error
 
 
-libname = "EXTENSION-NAME"
-projectdir = "demo"
+libname = "cavegen2"
+projectdir = "project"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
 
