@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <string>
 
 void MeshGen::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("generate", "global_cfg", "room_cfg", "noise", "border_noise"), &MeshGen::generate);
