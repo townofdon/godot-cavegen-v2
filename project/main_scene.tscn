@@ -1,5 +1,71 @@
-[gd_scene format=3 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=12 format=3 uid="uid://dldu5uhu5swo2"]
+
+[ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
+[ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
+[ext_resource type="RoomConfig" uid="uid://b0amjm0lwfuce" path="res://data/room_config.tres" id="3_8mm7a"]
+[ext_resource type="Script" uid="uid://btxqynndstb2p" path="res://scripts/testcube.gd" id="3_gyfs4"]
+[ext_resource type="GlobalConfig" uid="uid://5fjn4vb33rgv" path="res://data/global_config.tres" id="4_d5x1h"]
+[ext_resource type="FastNoiseLite" uid="uid://p3rfigim3d" path="res://data/noise.tres" id="4_nfk4m"]
+[ext_resource type="FastNoiseLite" uid="uid://cmirlmxyie640" path="res://data/border_noise.tres" id="5_66tet"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
+render_priority = 0
+shader = ExtResource("2_gyfs4")
+shader_parameter/light_direction = Vector3(0, 0, 1)
+shader_parameter/color_lit = Color(1, 1, 1, 1)
+shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
+shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/y_ceil = 0.24
+shader_parameter/y_min = -0.35
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_8mm7a"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
+render_priority = 0
+shader = ExtResource("2_gyfs4")
+shader_parameter/light_direction = Vector3(0, 0, 1)
+shader_parameter/color_lit = Color(1, 1, 1, 1)
+shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
+shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/y_ceil = 12.5
+shader_parameter/y_min = 0.0
+
+[sub_resource type="Environment" id="Environment_nfk4m"]
+background_mode = 1
+background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 
 [node name="MainScene" type="Node3D"]
 
-[node name="MeshGen" type="MeshGen" parent="."]
+[node name="CaveGen" type="Node3D" parent="."]
+script = ExtResource("1_2c62f")
+cfg = ExtResource("4_d5x1h")
+room = ExtResource("3_8mm7a")
+noise = ExtResource("4_nfk4m")
+borderNoise = ExtResource("5_66tet")
+metadata/_custom_type_script = "uid://djfffelu7xi37"
+
+[node name="MeshGen" type="MeshGen" parent="CaveGen"]
+unique_name_in_owner = true
+material_override = SubResource("ShaderMaterial_d5x1h")
+mesh = SubResource("ImmediateMesh_8mm7a")
+skeleton = NodePath("../..")
+
+[node name="Timer" type="Timer" parent="CaveGen"]
+unique_name_in_owner = true
+wait_time = 0.1
+ignore_time_scale = true
+
+[node name="TestCube" type="CSGBox3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 15, 15)
+size = Vector3(30, 30, 30)
+material = SubResource("ShaderMaterial_gyfs4")
+script = ExtResource("3_gyfs4")
+cfg = ExtResource("4_d5x1h")
+metadata/_custom_type_script = "uid://btxqynndstb2p"
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 15, 50, 15)
+environment = SubResource("Environment_nfk4m")

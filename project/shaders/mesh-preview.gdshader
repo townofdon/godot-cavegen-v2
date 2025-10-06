@@ -12,7 +12,7 @@ uniform vec4 color_ceil : source_color = vec4(0.0, 1.0, 0.2, 1.0);
 
 uniform vec4 color_bottom : source_color = vec4(0.1, 0.1, 0.1, 1.0);
 
-uniform float y_ceil = 0.5;
+uniform float y_ceil = 0.1;
 
 uniform float y_min = -1;
 

@@ -15,7 +15,7 @@ void GlobalConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_CellSize"), &GlobalConfig::GetCellSize);
 	ClassDB::bind_method(D_METHOD("set_CellSize", "p_CellSize"), &GlobalConfig::SetCellSize);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cell_size", PROPERTY_HINT_RANGE, "0.25,5.0,0.25"), "set_CellSize", "get_CellSize");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "cell_size", PROPERTY_HINT_RANGE, "0.5,5.0,0.5"), "set_CellSize", "get_CellSize");
 
 	ClassDB::bind_method(D_METHOD("get_Ceiling"), &GlobalConfig::GetCeiling);
 	ClassDB::bind_method(D_METHOD("set_Ceiling", "p_Ceiling"), &GlobalConfig::SetCeiling);
@@ -32,11 +32,11 @@ void GlobalConfig::_bind_methods() {
 
 GlobalConfig::GlobalConfig() {
 	// Initialize any variables here.
-	RoomWidth = 30.0;
-	RoomHeight = 30.0;
-	RoomDepth = 30.0;
-	CellSize = 1.0;
-	Ceiling = 0.75;
+	RoomWidth = 30.0f;
+	RoomHeight = 30.0f;
+	RoomDepth = 30.0f;
+	CellSize = 1.0f;
+	Ceiling = 0.75f;
 	ActivePlaneOffset = 10;
 }
 
@@ -44,56 +44,56 @@ GlobalConfig::~GlobalConfig() {
 	// Add your cleanup here.
 }
 
-double GlobalConfig::GetRoomWidth() {
+float GlobalConfig::GetRoomWidth() {
 	return RoomWidth;
 }
 
-void GlobalConfig::SetRoomWidth(double p_RoomWidth) {
+void GlobalConfig::SetRoomWidth(float p_RoomWidth) {
 	RoomWidth = p_RoomWidth;
 	emit_signal("on_changed");
 }
 
-double GlobalConfig::GetRoomHeight() {
+float GlobalConfig::GetRoomHeight() {
 	return RoomHeight;
 }
 
-void GlobalConfig::SetRoomHeight(double p_RoomHeight) {
+void GlobalConfig::SetRoomHeight(float p_RoomHeight) {
 	RoomHeight = p_RoomHeight;
 	emit_signal("on_changed");
 }
 
-double GlobalConfig::GetRoomDepth() {
+float GlobalConfig::GetRoomDepth() {
 	return RoomDepth;
 }
 
-void GlobalConfig::SetRoomDepth(double p_RoomDepth) {
+void GlobalConfig::SetRoomDepth(float p_RoomDepth) {
 	RoomDepth = p_RoomDepth;
 	emit_signal("on_changed");
 }
 
-double GlobalConfig::GetCellSize() {
+float GlobalConfig::GetCellSize() {
 	return CellSize;
 }
 
-void GlobalConfig::SetCellSize(double p_CellSize) {
+void GlobalConfig::SetCellSize(float p_CellSize) {
 	CellSize = p_CellSize;
 	emit_signal("on_changed");
 }
 
-double GlobalConfig::GetCeiling() {
+float GlobalConfig::GetCeiling() {
 	return Ceiling;
 }
 
-void GlobalConfig::SetCeiling(double p_Ceiling) {
+void GlobalConfig::SetCeiling(float p_Ceiling) {
 	Ceiling = p_Ceiling;
 	emit_signal("on_changed");
 }
 
-double GlobalConfig::GetActivePlaneOffset() {
+float GlobalConfig::GetActivePlaneOffset() {
 	return ActivePlaneOffset;
 }
 
-void GlobalConfig::SetActivePlaneOffset(double p_ActivePlaneOffset) {
+void GlobalConfig::SetActivePlaneOffset(float p_ActivePlaneOffset) {
 	ActivePlaneOffset = p_ActivePlaneOffset;
 	emit_signal("on_changed");
 }

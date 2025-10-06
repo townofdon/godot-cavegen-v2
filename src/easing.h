@@ -1,32 +1,33 @@
 #ifndef EASING_H
 #define EASING_H
 
-namespace Easing {
-// Core functions
-float Remap(float value, float min, float max, float (*easingFunc)(float));
-float InverseLerp(float min, float max, float value, float (*easingFunc)(float));
-float Lerp(float min, float max, float value, float (*easingFunc)(float));
+class Easing {
+public:
+	// // Core functions
+	// static double Remap(double value, double min, double max, double (*easingFunc)(double));
+	// static double InverseLerp(double min, double max, double value, double (*easingFunc)(double));
+	// static double Lerp(double min, double max, double value, double (*easingFunc)(double));
 
-// Basic easing functions
-float Linear(float x);
-float InQuad(float x);
-float OutQuad(float x);
-float InOutQuad(float x);
-float InCubic(float x);
-float OutCubic(float x);
-float InOutCubic(float x);
-float InQuart(float x);
-float OutQuart(float x);
-float InOutQuart(float x);
-float InQuint(float x);
-float OutQuint(float x);
-float InOutQuint(float x);
-float InExpo(float x);
-float OutExpo(float x);
-float InOutExpo(float x);
-float InBack(float x, float backAmount = 1.70158f);
-float OutBack(float x, float backAmount = 1.70158f);
-float InOutBack(float x, float backAmount = 1.70158f, float stabilize = 1.525f);
-} //namespace Easing
+	// Basic easing functions
+	static double Linear(double x);
+	static double InQuad(double x);
+	static double OutQuad(double x);
+	static double InOutQuad(double x);
+	static double InCubic(double x);
+	static double OutCubic(double x);
+	static double InOutCubic(double x);
+	static double InQuart(double x);
+	static double OutQuart(double x);
+	static double InOutQuart(double x);
+	static double InQuint(double x);
+	static double OutQuint(double x);
+	static double InOutQuint(double x);
+	static double InExpo(double x);
+	static double OutExpo(double x);
+	static double InOutExpo(double x);
+	static double InBack(double x, double backAmount = 1.70158f);
+	static double OutBack(double x, double backAmount = 1.70158f);
+	static double InOutBack(double x, double backAmount = 1.70158f, double stabilize = 1.525f);
+}; //class Easing
 
 #endif // EASING_H

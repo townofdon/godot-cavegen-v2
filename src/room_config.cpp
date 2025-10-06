@@ -67,16 +67,16 @@ RoomConfig::RoomConfig() {
 	ShowNoise = true;
 	ShowBorder = true;
 	ShowOuterWalls = true;
-	IsoValue = 0.5;
-	Curve = 1.0;
-	Tilt = 1.0;
-	FalloffAboveCeiling = 0.5;
+	IsoValue = 0.5f;
+	Curve = 1.0f;
+	Tilt = 1.0f;
+	FalloffAboveCeiling = 0.5f;
 	Interpolate = true;
 	RemoveOrphans = true;
 	UseBorderNoise = false;
 	BorderSize = 1;
 	SmoothBorderNoise = 0.5f;
-	FalloffNearBorder = 2;
+	FalloffNearBorder = 2.0f;
 }
 
 RoomConfig::~RoomConfig() {
@@ -92,16 +92,16 @@ bool RoomConfig::GetShowBorder() {
 bool RoomConfig::GetShowOuterWalls() {
 	return ShowOuterWalls;
 }
-double RoomConfig::GetIsoValue() {
+float RoomConfig::GetIsoValue() {
 	return IsoValue;
 }
-double RoomConfig::GetCurve() {
+float RoomConfig::GetCurve() {
 	return Curve;
 }
-double RoomConfig::GetTilt() {
+float RoomConfig::GetTilt() {
 	return Tilt;
 }
-double RoomConfig::GetFalloffAboveCeiling() {
+float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
 }
 bool RoomConfig::GetInterpolate() {
@@ -116,7 +116,7 @@ bool RoomConfig::GetUseBorderNoise() {
 int RoomConfig::GetBorderSize() {
 	return BorderSize;
 }
-double RoomConfig::GetSmoothBorderNoise() {
+float RoomConfig::GetSmoothBorderNoise() {
 	return SmoothBorderNoise;
 }
 int RoomConfig::GetFalloffNearBorder() {
@@ -135,19 +135,19 @@ void RoomConfig::SetShowOuterWalls(bool p_ShowOuterWalls) {
 	ShowOuterWalls = p_ShowOuterWalls;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetIsoValue(double p_IsoValue) {
+void RoomConfig::SetIsoValue(float p_IsoValue) {
 	IsoValue = p_IsoValue;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetCurve(double p_Curve) {
+void RoomConfig::SetCurve(float p_Curve) {
 	Curve = p_Curve;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetTilt(double p_Tilt) {
+void RoomConfig::SetTilt(float p_Tilt) {
 	Tilt = p_Tilt;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetFalloffAboveCeiling(double p_FalloffAboveCeiling) {
+void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
 	FalloffAboveCeiling = p_FalloffAboveCeiling;
 	emit_signal("on_changed");
 }
@@ -167,7 +167,7 @@ void RoomConfig::SetBorderSize(int p_BorderSize) {
 	BorderSize = p_BorderSize;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetSmoothBorderNoise(double p_SmoothBorderNoise) {
+void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 	SmoothBorderNoise = p_SmoothBorderNoise;
 	emit_signal("on_changed");
 }
