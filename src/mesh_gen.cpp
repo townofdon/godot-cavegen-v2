@@ -89,6 +89,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	};
 
 	// initialize noiseSamples
+	// float noiseSamples[numCells.x * numCells.y * numCells.z];
 	float *noiseSamples = new float[numCells.x * numCells.y * numCells.z];
 
 	auto t0 = std::chrono::high_resolution_clock::now();
@@ -116,8 +117,7 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	auto noise = ctx.noise;
-	auto ShowNoise = cfg.ShowNoise;
-	float noiseBuffer[numCells.x * numCells.y * numCells.z];
+	float *noiseBuffer = new float[numCells.x * numCells.y * numCells.z];
 	float minV = INFINITY;
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
@@ -128,7 +128,7 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 				int i = NoiseIndex(ctx, x, y, z);
 				noiseBuffer[i] = 0.0f;
 				noiseSamples[i] = 0.0f;
-				if (ShowNoise) {
+				if (cfg.ShowNoise) {
 					float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
 					noiseSamples[i] = val;
 					if (val < minV) {
@@ -142,7 +142,7 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 		}
 	}
 	// second pass - normalize noise values, apply mods
-	if (ShowNoise) {
+	if (cfg.ShowNoise) {
 		for (size_t x = 0; x < numCells.x; x++) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t z = 0; z < numCells.z; z++) {
@@ -171,6 +171,8 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
+
+	delete[] noiseBuffer;
 }
 
 int MeshGen::NoiseIndex(MeshGen::Context ctx, int x, int y, int z) {
