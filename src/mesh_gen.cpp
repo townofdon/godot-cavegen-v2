@@ -11,35 +11,31 @@ void MeshGen::_bind_methods() {
 }
 
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
-	struct MeshGen::Context ctx = build_context(p_global_cfg, p_room_cfg, p_noise, p_border_noise);
-	if (ctx.cfg.CellSize <= 0) {
+	if (p_global_cfg == nullptr) {
+		UtilityFunctions::printerr("global_cfg cannot be null");
+		return;
+	}
+	if (p_room_cfg == nullptr) {
+		UtilityFunctions::printerr("room_cfg cannot be null");
+		return;
+	}
+	if (p_noise == nullptr) {
+		UtilityFunctions::printerr("noise cannot be null");
+		return;
+	}
+	if (p_border_noise == nullptr) {
+		UtilityFunctions::printerr("border_noise cannot be null");
+		return;
+	}
+	if (p_global_cfg->CellSize <= 0) {
 		UtilityFunctions::printerr("cell_size must be greater than zero");
 		return;
 	}
 
-	// initialize noiseSamples
-	Vector3i numCells = ctx.numCells;
-	float noiseSamples[numCells.x * numCells.y * numCells.z];
-
-	auto t0 = std::chrono::high_resolution_clock::now();
-	process_noise(ctx, noiseSamples);
-	auto t1 = std::chrono::high_resolution_clock::now();
-	float t0_millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
-	UtilityFunctions::print("process_noise() took " + String(std::to_string(t0_millis).c_str()) + "ms");
-
-	// TODO: REMOVE
-	UtilityFunctions::print(ctx.cfg.Ceiling);
-	UtilityFunctions::print(ctx.cfg.BorderSize);
-	UtilityFunctions::print(noiseSamples[0]);
-	UtilityFunctions::print(noiseSamples[1]);
-	auto count = sizeof(noiseSamples) / sizeof(float);
-	UtilityFunctions::print("count=" + String(std::to_string(count).c_str()));
-}
-
-MeshGen::Context MeshGen::build_context(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
+	// setup context
 	GlobalConfig cfg = *p_global_cfg;
 	RoomConfig room = *p_room_cfg;
-	Vector3i numCells;
+	struct Vector3i numCells;
 	numCells.x = (int)floor(cfg.RoomWidth / cfg.CellSize);
 	numCells.y = (int)floor(cfg.RoomHeight / cfg.CellSize);
 	numCells.z = (int)floor(cfg.RoomDepth / cfg.CellSize);
@@ -74,9 +70,26 @@ MeshGen::Context MeshGen::build_context(GlobalConfig *p_global_cfg, RoomConfig *
 		*p_border_noise,
 		numCells,
 	};
-	return ctx;
+
+	// initialize noiseSamples
+	float noiseSamples[numCells.x * numCells.y * numCells.z];
+
+	auto t0 = std::chrono::high_resolution_clock::now();
+	process_noise(ctx, noiseSamples);
+	auto t1 = std::chrono::high_resolution_clock::now();
+	float t0_millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
+	UtilityFunctions::print("process_noise() took " + String(std::to_string(t0_millis).c_str()) + "ms");
+
+	// TODO: REMOVE
+	UtilityFunctions::print(ctx.cfg.Ceiling);
+	UtilityFunctions::print(ctx.cfg.BorderSize);
+	UtilityFunctions::print(noiseSamples[0]);
+	UtilityFunctions::print(noiseSamples[1]);
+	auto count = sizeof(noiseSamples) / sizeof(float);
+	UtilityFunctions::print("count=" + String(std::to_string(count).c_str()));
 }
 
+// note - this mutates noiseSamples
 void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
@@ -91,8 +104,8 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t z = 0; z < numCells.z; z++) {
 				int i = NoiseIndex(ctx, x, y, z);
-				noiseBuffer[i] = 0.0;
-				noiseSamples[i] = 0.0;
+				noiseBuffer[i] = 0.0f;
+				noiseSamples[i] = 0.0f;
 				if (ShowNoise) {
 					float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
 					noiseSamples[i] = val;
@@ -149,22 +162,22 @@ float MeshGen::GetAboveCeilAmount(MeshGen::Context ctx, int y) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	if (cfg.Ceiling >= 1) {
-		return 0.0;
+		return 0.0f;
 	}
 	float ceiling = GetCeiling(ctx);
 	float maxY = numCells.y - 1 - cfg.BorderSize * 2;
 	if (Math::is_zero_approx(Math::abs(ceiling - maxY))) {
-		return 0.0;
+		return 0.0f;
 	}
 	maxY = Math::lerp(ceiling, maxY, cfg.FalloffAboveCeiling);
 	if (y < ceiling) {
-		return 0.0;
+		return 0.0f;
 	}
 	if (y >= maxY) {
-		return 1.0;
+		return 1.0f;
 	}
 	if (ceiling >= maxY || Math::is_zero_approx(Math::abs(ceiling - maxY))) {
-		return 1.0;
+		return 1.0f;
 	}
 	return Math::clamp(Math::inverse_lerp(ceiling, maxY, y), 0.0f, 1.0f);
 }

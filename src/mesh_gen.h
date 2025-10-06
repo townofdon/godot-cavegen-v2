@@ -53,7 +53,6 @@ public:
 	void generate(GlobalConfig *global_cfg, RoomConfig *room_cfg, Noise *noise, Noise *border_noise);
 
 private:
-	Context build_context(GlobalConfig *global_cfg, RoomConfig *room_cfg, Noise *noise, Noise *border_noise);
 	void process_noise(MeshGen::Context ctx, float noiseSamples[]);
 	int NoiseIndex(MeshGen::Context ctx, int x, int y, int z);
 	float GetAboveCeilAmount(MeshGen::Context ctx, int y);
