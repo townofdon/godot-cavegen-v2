@@ -2,6 +2,7 @@
 
 entry_symbol = "cavegen2_library_init"
 compatibility_minimum = "4.5"
+reloadable = true
 
 [libraries]
 ; Relative paths ensure that our GDExtension can be placed anywhere in the project directory.

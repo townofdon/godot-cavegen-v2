@@ -5,6 +5,8 @@
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
 
+#include "global_config.h"
+#include "room_config.h"
 #include "mesh_gen.h"
 
 using namespace godot;
@@ -14,7 +16,9 @@ void initialize_gdextension_types(ModuleInitializationLevel p_level)
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	GDREGISTER_CLASS(MeshGen);
+	GDREGISTER_RUNTIME_CLASS(GlobalConfig);
+	GDREGISTER_RUNTIME_CLASS(RoomConfig);
+	GDREGISTER_RUNTIME_CLASS(MeshGen);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
