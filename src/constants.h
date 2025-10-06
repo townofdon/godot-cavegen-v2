@@ -3,6 +3,8 @@
 
 using namespace godot;
 
+inline constexpr const int MAX_NUM_CELLS = 1000000;
+
 // clang-format off
 inline constexpr const int POINTS[8 * 3] = {
 	0, 0, 0,

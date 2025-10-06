@@ -2,6 +2,7 @@
 #include "easing.h"
 #include "godot_cpp/core/math.hpp"
 
+#include "constants.h"
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -32,13 +33,29 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		return;
 	}
 
-	// setup context
 	GlobalConfig cfg = *p_global_cfg;
 	RoomConfig room = *p_room_cfg;
 	struct Vector3i numCells;
 	numCells.x = (int)floor(cfg.RoomWidth / cfg.CellSize);
 	numCells.y = (int)floor(cfg.RoomHeight / cfg.CellSize);
 	numCells.z = (int)floor(cfg.RoomDepth / cfg.CellSize);
+	if (numCells.x <= 0 || numCells.y <= 0 || numCells.z <= 0) {
+		auto x = String(std::to_string(numCells.x).c_str());
+		auto y = String(std::to_string(numCells.y).c_str());
+		auto z = String(std::to_string(numCells.z).c_str());
+		UtilityFunctions::printerr("invalid numCells: (" + x + "," + y + "," + z + ")");
+		return;
+	}
+	if (numCells.x * numCells.y * numCells.z > MAX_NUM_CELLS) {
+		auto x = String(std::to_string(numCells.x).c_str());
+		auto y = String(std::to_string(numCells.y).c_str());
+		auto z = String(std::to_string(numCells.z).c_str());
+		auto sum = String(std::to_string(numCells.x * numCells.y * numCells.z).c_str());
+		UtilityFunctions::printerr("numCells too large: (" + x + "," + y + "," + z + "), total=" + sum);
+		return;
+	}
+
+	// setup context
 	struct MeshGen::Context::Config ctxCfg = {
 		// global
 		cfg.RoomWidth,
@@ -72,7 +89,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	};
 
 	// initialize noiseSamples
-	float noiseSamples[numCells.x * numCells.y * numCells.z];
+	float *noiseSamples = new float[numCells.x * numCells.y * numCells.z];
 
 	auto t0 = std::chrono::high_resolution_clock::now();
 	process_noise(ctx, noiseSamples);
@@ -85,8 +102,13 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	UtilityFunctions::print(ctx.cfg.BorderSize);
 	UtilityFunctions::print(noiseSamples[0]);
 	UtilityFunctions::print(noiseSamples[1]);
-	auto count = sizeof(noiseSamples) / sizeof(float);
+	auto count = numCells.x * numCells.y * numCells.z;
 	UtilityFunctions::print("count=" + String(std::to_string(count).c_str()));
+	UtilityFunctions::print(numCells.x);
+	UtilityFunctions::print(numCells.y);
+	UtilityFunctions::print(numCells.z);
+
+	delete[] noiseSamples;
 }
 
 // note - this mutates noiseSamples
@@ -153,8 +175,19 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 
 int MeshGen::NoiseIndex(MeshGen::Context ctx, int x, int y, int z) {
 	auto numCells = ctx.numCells;
-	int i = x + y * numCells.x + z * numCells.y * numCells.z;
-	ERR_FAIL_INDEX_V_MSG(i, numCells.x * numCells.y * numCells.z, 0, "noise index out of bounds");
+	int i = x + y * numCells.x + z * numCells.y * numCells.x;
+	// debug
+	// if (i >= (numCells.x * numCells.y * numCells.z)) {
+	// 	auto ax = String(std::to_string(x).c_str());
+	// 	auto ay = String(std::to_string(y).c_str());
+	// 	auto az = String(std::to_string(z).c_str());
+	// 	auto bx = String(std::to_string(numCells.x).c_str());
+	// 	auto by = String(std::to_string(numCells.y).c_str());
+	// 	auto bz = String(std::to_string(numCells.z).c_str());
+	// 	UtilityFunctions::printerr("noise index out of bounds: (" + ax + "," + ay + "," + az + "), numCells((" + bx + "," + by + "," + bz + ")");
+	// 	return -1;
+	// }
+	ERR_FAIL_INDEX_V_MSG(i, (numCells.x * numCells.y * numCells.z), 0, "noise index out of bounds");
 	return i;
 }
 

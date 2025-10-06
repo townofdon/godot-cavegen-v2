@@ -1,3 +1,6 @@
 [gd_resource type="GlobalConfig" format=3 uid="uid://5fjn4vb33rgv"]
 
 [resource]
+room_height = 50.0
+room_depth = 50.0
+ceiling = 1.0
