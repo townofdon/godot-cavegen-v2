@@ -1,6 +1,5 @@
 #include "mesh_gen.h"
 #include "easing.hpp"
-// #include "godot_cpp/core/math.hpp"
 
 #include "constants.h"
 #include <chrono>
@@ -40,36 +39,32 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		UtilityFunctions::printerr("cell_size must be greater than zero");
 		return;
 	}
+	if (p_global_cfg->RoomWidth <= 0 || p_global_cfg->RoomHeight <= 0 || p_global_cfg->RoomDepth <= 0) {
+		auto x = String(std::to_string(p_global_cfg->RoomWidth).c_str());
+		auto y = String(std::to_string(p_global_cfg->RoomHeight).c_str());
+		auto z = String(std::to_string(p_global_cfg->RoomDepth).c_str());
+		UtilityFunctions::printerr("invalid room dimensions: (" + x + "," + y + "," + z + ")");
+		return;
+	}
 
 	GlobalConfig cfg = *p_global_cfg;
 	RoomConfig room = *p_room_cfg;
 	struct Vector3i numCells;
-	numCells.x = (int)floor(cfg.RoomWidth / cfg.CellSize);
-	numCells.y = (int)floor(cfg.RoomHeight / cfg.CellSize);
-	numCells.z = (int)floor(cfg.RoomDepth / cfg.CellSize);
-	if (numCells.x <= 0 || numCells.y <= 0 || numCells.z <= 0) {
-		auto x = String(std::to_string(numCells.x).c_str());
-		auto y = String(std::to_string(numCells.y).c_str());
-		auto z = String(std::to_string(numCells.z).c_str());
-		UtilityFunctions::printerr("invalid numCells: (" + x + "," + y + "," + z + ")");
-		return;
-	}
-	if (numCells.x * numCells.y * numCells.z > MAX_NUM_CELLS) {
-		auto x = String(std::to_string(numCells.x).c_str());
-		auto y = String(std::to_string(numCells.y).c_str());
-		auto z = String(std::to_string(numCells.z).c_str());
-		auto sum = String(std::to_string(numCells.x * numCells.y * numCells.z).c_str());
-		UtilityFunctions::printerr("numCells too large: (" + x + "," + y + "," + z + "), total=" + sum);
-		return;
-	}
+	float cellSize = cfg.CellSize - 0.5f;
+	do {
+		cellSize = cellSize + 0.5f;
+		numCells.x = (int)floor(cfg.RoomWidth / cellSize);
+		numCells.y = (int)floor(cfg.RoomHeight / cellSize);
+		numCells.z = (int)floor(cfg.RoomDepth / cellSize);
+	} while (numCells.x * numCells.y * numCells.z > MAX_NOISE_NODES);
 
 	// setup context
-	struct MeshGen::Context::Config ctxCfg = {
+	struct GenUtil::Context::Config ctxCfg = {
 		// global
 		cfg.RoomWidth,
 		cfg.RoomHeight,
 		cfg.RoomDepth,
-		cfg.CellSize,
+		cellSize, // actual cell-size might not reflect value from config
 		cfg.Ceiling,
 		cfg.ActivePlaneOffset,
 		// debug
@@ -89,7 +84,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
 	};
-	struct MeshGen::Context ctx = {
+	struct GenUtil::Context ctx = {
 		ctxCfg,
 		*p_noise,
 		*p_border_noise,
@@ -107,7 +102,9 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	// benchmark process_noise()
 	{
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
-		UtilityFunctions::print("process_noise() took " + String(std::to_string(millis).c_str()) + "ms");
+		auto dmillis = String(std::to_string(millis).c_str());
+		auto dnodes = String(std::to_string(numCells.x * numCells.y * numCells.z).c_str());
+		UtilityFunctions::print("process_noise() took " + dmillis + "ms for " + dnodes + " nodes");
 		float minv = INFINITY;
 		float maxv = -INFINITY;
 		float total = 0.0f;
@@ -142,7 +139,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 }
 
 // note - this mutates noiseSamples
-void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
+void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	auto noise = ctx.noise;
@@ -154,7 +151,7 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
-				int i = NoiseIndex(ctx, x, y, z);
+				int i = GenUtil::NoiseIndex(ctx, x, y, z);
 				noiseBuffer[i] = 0.0f;
 				noiseSamples[i] = 0.0f;
 				if (cfg.ShowNoise) {
@@ -176,7 +173,7 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t x = 0; x < numCells.x; x++) {
 					// normalize
-					int i = NoiseIndex(ctx, x, y, z);
+					int i = GenUtil::NoiseIndex(ctx, x, y, z);
 					float val;
 					val = inverse_lerp(minV, maxV, noiseSamples[i]);
 					val = clamp(val, 0.0f, 1.0f);
@@ -188,9 +185,9 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 					// apply falloff above ceiling
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					zeroValue = lerp(0.0f, zeroValue, cfg.FalloffAboveCeiling);
-					val = lerp(val, zeroValue, GetAboveCeilAmount2(ctx, y));
+					val = lerp(val, zeroValue, GenUtil::GetAboveCeilAmount2(ctx, y));
 					// apply tilt
-					float yPct = GetFloorToCeilAmount(ctx, y);
+					float yPct = GenUtil::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerp(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerp(1.0f, 0.0f, yPct);
 					val = lerp(valTiltTop, val, clamp(cfg.Tilt, 0.0f, 1.0f));
@@ -200,86 +197,34 @@ void MeshGen::process_noise(MeshGen::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
+	// third pass - apply bounds, borders
+	for (size_t z = 0; z < numCells.z; z++) {
+		for (size_t y = 0; y < numCells.y; y++) {
+			for (size_t x = 0; x < numCells.x; x++) {
+				int i = GenUtil::NoiseIndex(ctx, x, y, z);
+				// apply bounds
+				if (GenUtil::IsAtBoundaryXZ(ctx, x, z) && cfg.ShowOuterWalls || GenUtil::IsAtBoundaryY(ctx, y)) {
+					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					continue;
+				}
+				// apply border
+				if (GenUtil::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || GenUtil::IsAtBorderEdge(ctx, x, y, z))) {
+					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					if (GenUtil::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
+						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
+					}
+					continue;
+				}
+				// apply falloff to noise above ceil && close to border
+				if (!GenUtil::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
+					float dist = GenUtil::DistFromBorder(ctx, x, y, z);
+					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - GenUtil::GetAboveCeilAmount2(ctx, y));
+					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					noiseSamples[i] = lerp(zeroValue, noiseSamples[i], clamp(t, 0, 1));
+				}
+			}
+		}
+	}
 
 	delete[] noiseBuffer;
-}
-
-int MeshGen::NoiseIndex(MeshGen::Context ctx, int x, int y, int z) {
-	auto numCells = ctx.numCells;
-	int i = x + y * numCells.x + z * numCells.y * numCells.x;
-	// debug
-	// if (i >= (numCells.x * numCells.y * numCells.z)) {
-	// 	auto ax = String(std::to_string(x).c_str());
-	// 	auto ay = String(std::to_string(y).c_str());
-	// 	auto az = String(std::to_string(z).c_str());
-	// 	auto bx = String(std::to_string(numCells.x).c_str());
-	// 	auto by = String(std::to_string(numCells.y).c_str());
-	// 	auto bz = String(std::to_string(numCells.z).c_str());
-	// 	UtilityFunctions::printerr("noise index out of bounds: (" + ax + "," + ay + "," + az + "), numCells((" + bx + "," + by + "," + bz + ")");
-	// 	return -1;
-	// }
-	ERR_FAIL_INDEX_V_MSG(i, (numCells.x * numCells.y * numCells.z), 0, "noise index out of bounds");
-	return i;
-}
-
-float MeshGen::GetAboveCeilAmount(MeshGen::Context ctx, int y) {
-	auto cfg = ctx.cfg;
-	auto numCells = ctx.numCells;
-	if (cfg.Ceiling >= 1) {
-		return 0.0f;
-	}
-	float ceiling = GetCeiling(ctx);
-	float maxY = numCells.y - 1 - cfg.BorderSize * 2;
-	if (Math::is_zero_approx(Math::abs(ceiling - maxY))) {
-		return 0.0f;
-	}
-	maxY = Math::lerp(ceiling, maxY, cfg.FalloffAboveCeiling);
-	if (y < ceiling) {
-		return 0.0f;
-	}
-	if (y >= maxY) {
-		return 1.0f;
-	}
-	if (ceiling >= maxY || Math::is_zero_approx(Math::abs(ceiling - maxY))) {
-		return 1.0f;
-	}
-	return Math::clamp(Math::inverse_lerp(ceiling, maxY, y), 0.0f, 1.0f);
-}
-
-float MeshGen::GetAboveCeilAmount2(MeshGen::Context ctx, int y) {
-	auto cfg = ctx.cfg;
-	auto numCells = ctx.numCells;
-	// if (cfg.Ceiling >= 1) return 0.0f;
-	float high_ceiling_mask = 1.0f - float(cfg.Ceiling >= 1);
-	float ceiling = GetCeiling(ctx);
-	float maxY = numCells.y - 1 - cfg.BorderSize * 2;
-	// if (Math::is_zero_approx(Math::abs(ceiling - maxY))) return 0.0f;
-	float zero_approx_mask = 1.0f - float(Math::is_zero_approx(Math::abs(ceiling - maxY)));
-	maxY = lerp(ceiling, maxY, cfg.FalloffAboveCeiling);
-	// if (y < ceiling) return 0.0f;
-	float below_ceiling_mask = 1.0f - float(y < ceiling);
-	// if (y >= maxY) return 1.0f;
-	float y_above_max_t = float(y >= maxY);
-	// if (Math::is_zero_approx(Math::abs(ceiling - maxY))) return 1.0f;
-	float ceiling_at_max_y_t = float(Math::is_zero_approx(Math::abs(ceiling - maxY)));
-	// if (ceiling >= maxY) return 1.0f;
-	float ceiling_above_max_t = float(ceiling >= maxY);
-	// clang-format off
-	return clamp(inverse_lerp(ceiling, maxY, y), 0.0f, 1.0f)
-		* high_ceiling_mask * zero_approx_mask * below_ceiling_mask
-		* (1.0f - y_above_max_t) * (1.0f - ceiling_above_max_t) * (1.0f - ceiling_at_max_y_t)
-		+ y_above_max_t * ceiling_above_max_t * ceiling_at_max_y_t;
-	// clang-format on
-}
-
-float MeshGen::GetCeiling(MeshGen::Context ctx) {
-	auto cfg = ctx.cfg;
-	auto numCells = ctx.numCells;
-	return clamp(cfg.Ceiling * (numCells.y - 1), 1.0f, (float)numCells.y - 2);
-	// return maxf(1.0f, minf(cfg.Ceiling * (numCells.y - 1), (float)numCells.y - 2));
-}
-
-float MeshGen::GetFloorToCeilAmount(MeshGen::Context ctx, int y) {
-	float ceiling = GetCeiling(ctx);
-	return (float)y / ceiling;
 }

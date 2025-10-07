@@ -29,7 +29,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = -1.3000000000000007
+shader_parameter/y_ceil = 6.0
 shader_parameter/y_min = 0.0
 
 [sub_resource type="Environment" id="Environment_nfk4m"]
@@ -59,8 +59,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 15, 15)
-size = Vector3(30, 30, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 25, 25)
+size = Vector3(50, 50, 50)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")

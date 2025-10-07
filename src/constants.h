@@ -3,7 +3,7 @@
 
 using namespace godot;
 
-inline constexpr const int MAX_NUM_CELLS = 1000000;
+inline constexpr const int MAX_NOISE_NODES = 200000;
 
 // clang-format off
 inline constexpr const int POINTS[8 * 3] = {
