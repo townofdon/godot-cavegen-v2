@@ -30,7 +30,7 @@ inline constexpr double InCubic(double x) {
 	return x * x * x;
 }
 
-inline constexpr double OutCubic(double x) {
+inline double OutCubic(double x) {
 	return 1.0 - std::pow(1.0 - x, 3.0);
 }
 
@@ -44,7 +44,7 @@ inline constexpr double InQuart(double x) {
 	return x * x * x * x;
 }
 
-inline constexpr double OutQuart(double x) {
+inline double OutQuart(double x) {
 	return 1.0 - std::pow(1.0 - x, 4.0);
 }
 
@@ -58,7 +58,7 @@ inline constexpr double InQuint(double x) {
 	return x * x * x * x * x;
 }
 
-inline constexpr double OutQuint(double x) {
+inline double OutQuint(double x) {
 	return 1.0 - std::pow(1.0 - x, 5.0);
 }
 
@@ -91,7 +91,7 @@ inline constexpr double InBack(double x, double backAmount) {
 	return (backAmount + 1.0) * x * x * x - backAmount * x * x;
 }
 
-inline constexpr double OutBack(double x, double backAmount) {
+inline double OutBack(double x, double backAmount) {
 	return 1.0 + (backAmount + 1.0) * std::pow(x - 1.0, 3.0) + backAmount * std::pow(x - 1.0, 2.0);
 }
 

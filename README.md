@@ -25,6 +25,8 @@ This project was started from the [godot-cpp template](https://github.com/godote
 
 ## Compiling
 
+This project uses [SCons](https://scons.org/) for compiling binaries.
+
 ```bash
 # ENVIRONMENT=windows|linux|macos
 scons platform=<ENVIRONMENT>
