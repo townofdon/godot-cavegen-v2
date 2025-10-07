@@ -271,10 +271,171 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 	}
 
-	// // apply border noise
-	// if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1){
-	// 	auto ceiling = GetCeiling(ctx);
-	// }
+	// apply border noise
+	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
+		auto ceiling = GetCeiling(ctx);
+		// first pass - sample and normalize border noise on x plane
+		// step 0 => sample noise at x=0
+		// step 1 => normalize at x=0
+		// step 2 => sample noise at x=max
+		// step 3 => normalize at x=max
+		for (int step = 0; step < 4; step++) {
+			if (step == 0 || step == 2) {
+				minV = INFINITY;
+				maxV = -INFINITY;
+			}
+			for (int z = 0; z < numCells.z; z++) {
+				for (int y = 0; y < numCells.y && y <= ceiling; y++) {
+					int x = 0;
+					if (step >= 2) {
+						x = numCells.x - 1;
+					}
+					if (step == 0 || step == 2) {
+						float val = ctx.borderNoise.get_noise_3d(x, y, z);
+						noiseBuffer[NoiseIndex(ctx, x, y, z)] = val;
+						if (val < minV) {
+							minV = val;
+						}
+						if (val > maxV) {
+							maxV = val;
+						}
+					} else {
+						int i = NoiseIndex(ctx, x, y, z);
+						float val = clampf(inverse_lerpf(minV, maxV, noiseBuffer[i]), 0.0f, 1.0f);
+						noiseBuffer[i] = val;
+					}
+				}
+			}
+		}
+		// second pass - sample and normalize border noise on z plane
+		// step 0 => sample noise at z=0
+		// step 1 => normalize at z=0
+		// step 2 => sample noise at z=max
+		// step 3 => normalize at z=max
+		for (int step = 0; step < 4; step++) {
+			if (step == 0 || step == 2) {
+				minV = INFINITY;
+				maxV = -INFINITY;
+			}
+			for (int y = 0; y < numCells.y && y <= ceiling; y++) {
+				for (int x = 0; x < numCells.x; x++) {
+					int z = 0;
+					if (step >= 2) {
+						z = numCells.z - 1;
+					}
+					if (step == 0 || step == 2) {
+						float val = ctx.borderNoise.get_noise_3d(x, y, z);
+						noiseBuffer[NoiseIndex(ctx, x, y, z)] = val;
+						if (val < minV) {
+							minV = val;
+						}
+						if (val > maxV) {
+							maxV = val;
+						}
+					} else {
+						int i = NoiseIndex(ctx, x, y, z);
+						float val = clampf(inverse_lerpf(minV, maxV, noiseBuffer[i]), 0.0f, 1.0f);
+						noiseBuffer[i] = val;
+					}
+				}
+			}
+		}
+		// third pass: apply noise to border points
+		// side: x=0
+		for (int z = 2; z < numCells.z - 2; z++) {
+			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
+				for (int x = 2; x < cfg.BorderSize + 1; x++) {
+					float n0 = noiseBuffer[NoiseIndex(ctx, 0, y, z)];
+					// use surrounding cells for avg smoothing
+					float kernel = 0.0f;
+					if (cfg.SmoothBorderNoise > 0) {
+						for (int j = -1; j <= 1; j++) {
+							for (int k = -1; k <= 1; k++) {
+								if (j == 0 && k == 0)
+									continue;
+								kernel += noiseBuffer[NoiseIndex(ctx, 0, y + j, z + k)] * 0.125f;
+							}
+						}
+					}
+					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
+					int i = NoiseIndex(ctx, x, y, z);
+					float t = (x - 1) / (float)cfg.BorderSize;
+					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
+				}
+			}
+		}
+		// side: z=max
+		for (int z = numCells.z - 3; z > numCells.z - cfg.BorderSize - 2; z--) {
+			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
+				for (int x = 2; x < numCells.x - 2; x++) {
+					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, numCells.z - 1)];
+					// use surrounding cells for avg smoothing
+					float kernel = 0.0f;
+					if (cfg.SmoothBorderNoise > 0) {
+						for (int j = -1; j <= 1; j++) {
+							for (int k = -1; k <= 1; k++) {
+								if (j == 0 && k == 0)
+									continue;
+								kernel += noiseBuffer[NoiseIndex(ctx, x + j, y + k, numCells.z - 1)] * 0.125f;
+							}
+						}
+					}
+					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
+					int i = NoiseIndex(ctx, x, y, z);
+					float t = (numCells.z - 2 - z) / (float)(cfg.BorderSize - 1);
+					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
+				}
+			}
+		}
+		// side: x=max
+		for (int z = 2; z < numCells.z - 2; z++) {
+			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
+				for (int x = numCells.x - 3; x > numCells.x - cfg.BorderSize - 2; x--) {
+					float n0 = noiseBuffer[NoiseIndex(ctx, numCells.x - 1, y, z)];
+					// use surrounding cells for avg smoothing
+					float kernel = 0.0f;
+					if (cfg.SmoothBorderNoise > 0) {
+						for (int j = -1; j <= 1; j++) {
+							for (int k = -1; k <= 1; k++) {
+								if (j == 0 && k == 0)
+									continue;
+								kernel += noiseBuffer[NoiseIndex(ctx, numCells.x - 1, y + j, z + k)] * 0.125f;
+							}
+						}
+					}
+					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
+					int i = NoiseIndex(ctx, x, y, z);
+					float t = (numCells.x - 2 - x) / (float)(cfg.BorderSize - 1);
+					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
+				}
+			}
+		}
+		// side: z=0
+		for (int z = 2; z < cfg.BorderSize + 1; z++) {
+			for (int x = 2; x < numCells.x - 2; x++) {
+				for (int y = 2; y < numCells.y && y <= ceiling; y++) {
+					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, 0)];
+					// use surrounding cells for avg smoothing
+					float kernel = 0.0f;
+					for (int j = -1; j <= 1; j++) {
+						for (int k = -1; k <= 1; k++) {
+							if (j == 0 && k == 0)
+								continue;
+							kernel += noiseBuffer[NoiseIndex(ctx, x + j, y + k, 0)] * 0.125f;
+						}
+					}
+					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
+					int i = NoiseIndex(ctx, x, y, z);
+					float t = (z - 1) / (float)cfg.BorderSize;
+					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
+				}
+			}
+		}
+	}
 
 	delete[] noiseBuffer;
 }
