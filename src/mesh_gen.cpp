@@ -59,7 +59,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	} while (numCells.x * numCells.y * numCells.z > MAX_NOISE_NODES);
 
 	// setup context
-	struct GenUtil::Context::Config ctxCfg = {
+	struct MG::Context::Config ctxCfg = {
 		// global
 		cfg.RoomWidth,
 		cfg.RoomHeight,
@@ -84,7 +84,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
 	};
-	struct GenUtil::Context ctx = {
+	struct MG::Context ctx = {
 		ctxCfg,
 		*p_noise,
 		*p_border_noise,
@@ -139,7 +139,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 }
 
 // note - this mutates noiseSamples
-void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
+void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	auto noise = ctx.noise;
@@ -151,7 +151,7 @@ void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
-				int i = GenUtil::NoiseIndex(ctx, x, y, z);
+				int i = MG::NoiseIndex(ctx, x, y, z);
 				noiseBuffer[i] = 0.0f;
 				noiseSamples[i] = 0.0f;
 				if (cfg.ShowNoise) {
@@ -173,7 +173,7 @@ void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t x = 0; x < numCells.x; x++) {
 					// normalize
-					int i = GenUtil::NoiseIndex(ctx, x, y, z);
+					int i = MG::NoiseIndex(ctx, x, y, z);
 					float val;
 					val = inverse_lerp(minV, maxV, noiseSamples[i]);
 					val = clamp(val, 0.0f, 1.0f);
@@ -185,9 +185,9 @@ void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
 					// apply falloff above ceiling
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					zeroValue = lerp(0.0f, zeroValue, cfg.FalloffAboveCeiling);
-					val = lerp(val, zeroValue, GenUtil::GetAboveCeilAmount2(ctx, y));
+					val = lerp(val, zeroValue, MG::GetAboveCeilAmount2(ctx, y));
 					// apply tilt
-					float yPct = GenUtil::GetFloorToCeilAmount(ctx, y);
+					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerp(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerp(1.0f, 0.0f, yPct);
 					val = lerp(valTiltTop, val, clamp(cfg.Tilt, 0.0f, 1.0f));
@@ -201,24 +201,24 @@ void MeshGen::process_noise(GenUtil::Context ctx, float noiseSamples[]) {
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
-				int i = GenUtil::NoiseIndex(ctx, x, y, z);
+				int i = MG::NoiseIndex(ctx, x, y, z);
 				// apply bounds
-				if (GenUtil::IsAtBoundaryXZ(ctx, x, z) && cfg.ShowOuterWalls || GenUtil::IsAtBoundaryY(ctx, y)) {
+				if (MG::IsAtBoundaryXZ(ctx, x, z) && cfg.ShowOuterWalls || MG::IsAtBoundaryY(ctx, y)) {
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					continue;
 				}
 				// apply border
-				if (GenUtil::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || GenUtil::IsAtBorderEdge(ctx, x, y, z))) {
+				if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					if (GenUtil::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
+					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
 						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
 					}
 					continue;
 				}
 				// apply falloff to noise above ceil && close to border
-				if (!GenUtil::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
-					float dist = GenUtil::DistFromBorder(ctx, x, y, z);
-					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - GenUtil::GetAboveCeilAmount2(ctx, y));
+				if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
+					float dist = MG::DistFromBorder(ctx, x, y, z);
+					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount2(ctx, y));
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					noiseSamples[i] = lerp(zeroValue, noiseSamples[i], clamp(t, 0, 1));
 				}

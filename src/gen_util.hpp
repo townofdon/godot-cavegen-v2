@@ -32,7 +32,10 @@ inline float inverse_lerp(float a, float b, float p_value) {
 	}
 }
 
-namespace GenUtil {
+//
+// MeshGen Utilities
+//
+namespace MG {
 
 struct Context {
 	struct Config {
@@ -193,7 +196,7 @@ inline bool IsBelowCeiling(Context ctx, int y) {
 	return y <= GetCeiling(ctx);
 }
 
-} // namespace GenUtil
+} //namespace MG
 
 } //namespace godot
 

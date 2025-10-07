@@ -24,5 +24,5 @@ public:
 	static float *time_processNoise;
 
 private:
-	void process_noise(GenUtil::Context ctx, float noiseSamples[]);
+	void process_noise(MG::Context ctx, float noiseSamples[]);
 };
