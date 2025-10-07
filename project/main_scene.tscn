@@ -29,7 +29,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 12.5
+shader_parameter/y_ceil = -1.3000000000000007
 shader_parameter/y_min = 0.0
 
 [sub_resource type="Environment" id="Environment_nfk4m"]
