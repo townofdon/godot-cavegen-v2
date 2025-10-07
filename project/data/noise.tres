@@ -1,3 +1,9 @@
 [gd_resource type="FastNoiseLite" format=3 uid="uid://p3rfigim3d"]
 
 [resource]
+noise_type = 3
+frequency = 0.092
+offset = Vector3(118.6, -77.9, -77.1)
+fractal_gain = 0.53
+fractal_weighted_strength = 0.68
+cellular_jitter = 1.09

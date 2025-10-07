@@ -1,3 +1,7 @@
 [gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
+room_noise__iso_value = 0.68
+room_noise__curve = 1.71
+room_noise__tilt = 1.1
+room_noise__falloff_above_ceiling = 0.57

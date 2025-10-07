@@ -1,10 +1,11 @@
 #pragma once
 
+#include "godot_cpp/classes/immediate_mesh.hpp"
 #include "godot_cpp/classes/mesh_instance3d.hpp"
 #include "godot_cpp/classes/noise.hpp"
 
-#include "gen_util.hpp"
 #include "global_config.h"
+#include "mesh_gen_util.hpp"
 #include "room_config.h"
 
 using namespace godot;
@@ -22,7 +23,10 @@ public:
 	void generate(GlobalConfig *global_cfg, RoomConfig *room_cfg, Noise *noise, Noise *border_noise);
 
 	static float *time_processNoise;
+	static float *time_marchCubes;
 
 private:
 	void process_noise(MG::Context ctx, float noiseSamples[]);
+	void march_cubes(MG::Context ctx, float noiseSamples[]);
+	void add_triangle_to_mesh(MG::Context ctx, ImmediateMesh mesh, Vector3 points[], Vector2 uv);
 };

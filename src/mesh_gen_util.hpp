@@ -190,10 +190,79 @@ inline int DistFromBorder(Context ctx, int x, int y, int z) {
 }
 
 inline bool IsBelowCeiling(Context ctx, int y) {
-	if (ctx.cfg.Ceiling >= 1) {
-		return true;
+	return ctx.cfg.Ceiling >= 1 && y <= GetCeiling(ctx);
+}
+
+// TODO: replace with flood-fill from known border
+inline bool IsPointOrphan(Context ctx, float noiseSamples[], int x, int y, int z) {
+	if (!ctx.cfg.RemoveOrphans)
+		return false;
+	// // walk down from y to slightly below the ceiling, checking if any gaps
+	// for (int y2 = y - 1; y2 >= floor(ctx.numCells.y * ctx.cfg.Ceiling) - 2; y2--) {
+	// 	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
+	// 	auto active = val > ctx.cfg.IsoValue;
+	// 	if (!active)
+	// 		return true;
+	// }
+	return false;
+}
+
+inline bool IsPointActive(Context ctx, float noiseSamples[], int x, int y, int z) {
+	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
+	auto active = val >= ctx.cfg.IsoValue;
+	if (active && !IsBelowCeiling(ctx, y) && IsPointOrphan(ctx, noiseSamples, x, y, z)) {
+		active = false;
 	}
-	return y <= GetCeiling(ctx);
+	return active;
+}
+
+inline int GetTriangulation(Context ctx, float noiseSamples[], int x, int y, int z) {
+	int idx = 0;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 0, z + 0) ? 1 : 0) << 0;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 0, z + 1) ? 1 : 0) << 1;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 0, z + 1) ? 1 : 0) << 2;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 0, z + 0) ? 1 : 0) << 3;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 1, z + 0) ? 1 : 0) << 4;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 1, z + 1) ? 1 : 0) << 5;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 1, z + 1) ? 1 : 0) << 6;
+	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 1, z + 0) ? 1 : 0) << 7;
+	return idx;
+}
+
+// source: https://cs.stackexchange.com/a/71116
+inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i a, Vector3i b) {
+	// if one of the points is on a boundary plane, return that point so that our room meshes line up perfectly.
+	bool aBound = IsAtBoundaryXZ(ctx, a.x, a.z);
+	bool bBound = IsAtBoundaryXZ(ctx, b.x, b.z);
+	bool onSamePlane = a.x == b.x || a.z == b.z;
+	if (aBound && !(aBound && bBound && onSamePlane)) {
+		return Vector3(a);
+	}
+	if (bBound && !(aBound && bBound && onSamePlane)) {
+		return Vector3(b);
+	}
+	if (!ctx.cfg.Interpolate) {
+		return (Vector3(a) + Vector3(b)) * 0.5f;
+	}
+	float isovalue = ctx.cfg.IsoValue;
+	float noise_a = noiseSamples[NoiseIndex(ctx, a.x, a.y, a.z)];
+	float noise_b = noiseSamples[NoiseIndex(ctx, b.x, b.y, b.z)];
+	if (Math::is_zero_approx(absf(isovalue - noise_a))) {
+		return Vector3(a);
+	}
+	if (Math::is_zero_approx(absf(isovalue - noise_b))) {
+		return Vector3(b);
+	}
+	if (Math::is_zero_approx(absf(noise_a - noise_b))) {
+		return (Vector3(a) + Vector3(b)) * 0.5f;
+	}
+	float mu = (isovalue - noise_a) / (noise_b - noise_a);
+	mu = clamp(mu, 0.0f, 1.0f);
+	auto p = Vector3(0, 0, 0);
+	p.x = a.x + mu * (b.x - a.x);
+	p.y = a.y + mu * (b.y - a.y);
+	p.z = a.z + mu * (b.z - a.z);
+	return p;
 }
 
 } //namespace MG

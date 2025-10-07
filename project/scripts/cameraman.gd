@@ -11,8 +11,7 @@ var velocity:Vector3 = Vector3.ZERO
 var looking:bool = false
 
 func _ready() -> void:
-	# Note to future Don - x and y are swapped, because humans associate x with horizontal, and y with vertical.
-	# Thinking in terms of rotation, rotating around the x axis would produce "vertical" rotation, and rotating about the y axis produces "horizontal".
+	# x and y are swapped here bc they represent the axis being rotated around.
 	look.x = transform.basis.get_euler().y / -0.001
 	look.y = transform.basis.get_euler().x / -0.001
 

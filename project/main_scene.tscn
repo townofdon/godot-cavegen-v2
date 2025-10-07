@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=15 format=3 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -7,11 +7,12 @@
 [ext_resource type="GlobalConfig" uid="uid://5fjn4vb33rgv" path="res://data/global_config.tres" id="4_d5x1h"]
 [ext_resource type="FastNoiseLite" uid="uid://p3rfigim3d" path="res://data/noise.tres" id="4_nfk4m"]
 [ext_resource type="FastNoiseLite" uid="uid://cmirlmxyie640" path="res://data/border_noise.tres" id="5_66tet"]
+[ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
 shader = ExtResource("2_gyfs4")
-shader_parameter/light_direction = Vector3(0, 0, 1)
+shader_parameter/light_direction = Vector3(0, 1, 0)
 shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
@@ -29,12 +30,21 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 6.0
+shader_parameter/y_ceil = 10.94435
 shader_parameter/y_min = 0.0
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
+sky_top_color = Color(0.13209105, 0.45330042, 0.7789838, 1)
+sky_horizon_color = Color(0.8549343, 0.594071, 0.25741532, 1)
+ground_horizon_color = Color(0.73111016, 0.6327255, 0.51883036, 1)
+
+[sub_resource type="Sky" id="Sky_7ycvg"]
+sky_material = SubResource("ProceduralSkyMaterial_66tet")
+
 [sub_resource type="Environment" id="Environment_nfk4m"]
-background_mode = 1
+background_mode = 2
 background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
+sky = SubResource("Sky_7ycvg")
 
 [node name="MainScene" type="Node3D"]
 
@@ -59,8 +69,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 25, 25)
-size = Vector3(50, 50, 50)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.78, 17.1675, 17.5805)
+size = Vector3(41.56, 34.335, 35.161)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")
@@ -69,3 +79,4 @@ metadata/_custom_type_script = "uid://btxqynndstb2p"
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 15, 50, 15)
 environment = SubResource("Environment_nfk4m")
+script = ExtResource("8_66tet")

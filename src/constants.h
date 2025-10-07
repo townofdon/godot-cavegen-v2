@@ -3,7 +3,7 @@
 
 using namespace godot;
 
-inline constexpr const int MAX_NOISE_NODES = 200000;
+inline constexpr const int MAX_NOISE_NODES = 216000;
 
 // clang-format off
 inline constexpr const int POINTS[8 * 3] = {
@@ -36,6 +36,8 @@ inline constexpr const int EDGES[12 * 2] = {
 // clang-format on
 
 // clang-format off
+
+// marching cubes triangulations. 1-dimensional array in groups of 15 triangulation indices
 inline constexpr const int TRIANGULATIONS[256 * 15] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
      0,  8,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

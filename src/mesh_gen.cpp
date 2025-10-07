@@ -18,6 +18,14 @@ float *MeshGen::time_processNoise = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+float *MeshGen::time_marchCubes = new float[100]{
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
 	if (p_global_cfg == nullptr) {
 		UtilityFunctions::printerr("global_cfg cannot be null");
@@ -95,16 +103,17 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	// float noiseSamples[numCells.x * numCells.y * numCells.z];
 	float *noiseSamples = new float[numCells.x * numCells.y * numCells.z];
 
-	auto t0 = std::chrono::high_resolution_clock::now();
-	process_noise(ctx, noiseSamples);
-	auto t1 = std::chrono::high_resolution_clock::now();
-
-	// benchmark process_noise()
+	//
+	// process noise
+	//
 	{
+		auto t0 = std::chrono::high_resolution_clock::now();
+		process_noise(ctx, noiseSamples);
+		auto t1 = std::chrono::high_resolution_clock::now();
+		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
 		auto dmillis = String(std::to_string(millis).c_str());
 		auto dnodes = String(std::to_string(numCells.x * numCells.y * numCells.z).c_str());
-		UtilityFunctions::print("process_noise() took " + dmillis + "ms for " + dnodes + " nodes");
 		float minv = INFINITY;
 		float maxv = -INFINITY;
 		float total = 0.0f;
@@ -131,7 +140,47 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 			auto dmin = String(std::to_string(minv).c_str());
 			auto dmax = String(std::to_string(maxv).c_str());
 			auto davg = String(std::to_string(avg).c_str());
-			UtilityFunctions::print("> avg=" + davg + ",min=" + dmin + ",max=" + dmax);
+			UtilityFunctions::print("process_noise() took " + dmillis + "ms for " + dnodes + " nodes, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
+		}
+	}
+
+	//
+	// march cubes
+	//
+	{
+		auto t0 = std::chrono::high_resolution_clock::now();
+		march_cubes(ctx, noiseSamples);
+		auto t1 = std::chrono::high_resolution_clock::now();
+		// benchmark
+		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
+		auto dmillis = String(std::to_string(millis).c_str());
+		float minv = INFINITY;
+		float maxv = -INFINITY;
+		float total = 0.0f;
+		int count = 0;
+		for (int i = 99; i >= 0; i--) {
+			if (i <= 0) {
+				time_marchCubes[0] = millis;
+			} else {
+				time_marchCubes[i] = time_marchCubes[i - 1];
+			}
+			if (time_marchCubes[i] > 0) {
+				total += time_marchCubes[i];
+				count++;
+				if (time_marchCubes[i] > maxv) {
+					maxv = time_marchCubes[i];
+				}
+				if (time_marchCubes[i] < minv) {
+					minv = time_marchCubes[i];
+				}
+			}
+		}
+		if (count > 0) {
+			float avg = total / (float)count;
+			auto dmin = String(std::to_string(minv).c_str());
+			auto dmax = String(std::to_string(maxv).c_str());
+			auto davg = String(std::to_string(avg).c_str());
+			UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
 		}
 	}
 
@@ -185,7 +234,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					// apply falloff above ceiling
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					zeroValue = lerp(0.0f, zeroValue, cfg.FalloffAboveCeiling);
-					val = lerp(val, zeroValue, MG::GetAboveCeilAmount2(ctx, y));
+					val = lerp(val, zeroValue, MG::GetAboveCeilAmount(ctx, y));
 					// apply tilt
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerp(0.0f, 1.0f, yPct);
@@ -218,7 +267,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				// apply falloff to noise above ceil && close to border
 				if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
 					float dist = MG::DistFromBorder(ctx, x, y, z);
-					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount2(ctx, y));
+					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount(ctx, y));
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					noiseSamples[i] = lerp(zeroValue, noiseSamples[i], clamp(t, 0, 1));
 				}
@@ -227,4 +276,79 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	}
 
 	delete[] noiseBuffer;
+}
+
+void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
+	auto ref = get_mesh();
+	auto ptr = *(ref);
+	ImmediateMesh *meshPtr = Object::cast_to<ImmediateMesh>(ptr);
+	if (meshPtr == nullptr) {
+		UtilityFunctions::printerr("mesh cannot be null");
+		return;
+	}
+	ImmediateMesh mesh = *meshPtr;
+	mesh.clear_surfaces();
+	mesh.surface_begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+	Vector3 points[3];
+	auto numCells = ctx.numCells;
+
+	for (int z = 0; z < numCells.z - 1; z++) {
+		for (int y = 0; y < numCells.y - 1; y++) {
+			for (int x = 0; x < numCells.x - 1; x++) {
+				int pointIndex = 0;
+				int triIdx = MG::GetTriangulation(ctx, noiseSamples, x, y, z);
+				auto uv = Vector2(
+					(x + 1) / (float)numCells.x,
+					maxf(
+						(y + 1) / (float)numCells.y,
+						(z + 1) / (float)numCells.z));
+				// iterate over triangulations
+				for (size_t i = 0; i < 15; i++) {
+					// get triangulation by row_index + col_index
+					auto edgeIdx = TRIANGULATIONS[triIdx * 15 + i];
+					if (edgeIdx < 0) {
+						break;
+					}
+					// var (p0, p1) = Constants.EDGES[edgeIdx];
+					int p0 = EDGES[edgeIdx * 2 + 0];
+					int p1 = EDGES[edgeIdx * 2 + 1];
+					// var (x0, y0, z0) = Constants.POINTS[p0];
+					int x0 = POINTS[p0 * 3 + 0];
+					int y0 = POINTS[p0 * 3 + 1];
+					int z0 = POINTS[p0 * 3 + 2];
+					// var (x1, y1, z1) = Constants.POINTS[p1];
+					int x1 = POINTS[p1 * 3 + 0];
+					int y1 = POINTS[p1 * 3 + 1];
+					int z1 = POINTS[p1 * 3 + 2];
+					auto a = Vector3i(x + x0, y + y0, z + z0);
+					auto b = Vector3i(x + x1, y + y1, z + z1);
+					auto p = MG::InterpolateMeshPoints(ctx, noiseSamples, a, b);
+					points[pointIndex] = Vector3(p.x, p.y, p.z);
+					pointIndex++;
+					if (pointIndex == 3) {
+						add_triangle_to_mesh(ctx, mesh, points, uv);
+						pointIndex = 0;
+					}
+				}
+			}
+		}
+	}
+
+	mesh.surface_end();
+}
+
+void MeshGen::add_triangle_to_mesh(MG::Context ctx, ImmediateMesh mesh, Vector3 points[], Vector2 uv) {
+	auto p1 = points[0];
+	auto p2 = points[1];
+	auto p3 = points[2];
+	auto normal = -(p2 - p1).cross(p3 - p1).normalized();
+	for (size_t i = 0; i < 3; i++) {
+		auto point = points[i];
+		auto x = point.x * ctx.cfg.CellSize;
+		auto y = point.y * ctx.cfg.CellSize;
+		auto z = point.z * ctx.cfg.CellSize;
+		mesh.surface_set_uv(uv);
+		mesh.surface_set_normal(normal);
+		mesh.surface_add_vertex(get_global_position() + Vector3(x, y, z));
+	}
 }
