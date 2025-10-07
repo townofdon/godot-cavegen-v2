@@ -251,21 +251,17 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
-				// apply bounds
 				if (MG::IsAtBoundaryXZ(ctx, x, z) && cfg.ShowOuterWalls || MG::IsAtBoundaryY(ctx, y)) {
+					// apply bounds
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					continue;
-				}
-				// apply border
-				if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
+				} else if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
+					// apply border
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
 						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
 					}
-					continue;
-				}
-				// apply falloff to noise above ceil && close to border
-				if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
+				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
+					// apply falloff to noise above ceil && close to border
 					float dist = MG::DistFromBorder(ctx, x, y, z);
 					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount(ctx, y));
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
@@ -274,6 +270,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
+
+	// // apply border noise
+	// if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1){
+	// 	auto ceiling = GetCeiling(ctx);
+	// }
 
 	delete[] noiseBuffer;
 }

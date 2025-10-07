@@ -30,7 +30,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 10.94435
+shader_parameter/y_ceil = 18.004450000000002
 shader_parameter/y_min = 0.0
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]

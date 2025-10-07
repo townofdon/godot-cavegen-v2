@@ -190,7 +190,7 @@ inline int DistFromBorder(Context ctx, int x, int y, int z) {
 }
 
 inline bool IsBelowCeiling(Context ctx, int y) {
-	return ctx.cfg.Ceiling >= 1 && y <= GetCeiling(ctx);
+	return ctx.cfg.Ceiling >= 1 || y <= GetCeiling(ctx);
 }
 
 // TODO: replace with flood-fill from known border
