@@ -18,13 +18,13 @@ inline float minf(float a, float b) {
 inline float maxf(float a, float b) {
 	return std::max(a, b);
 }
-inline float clamp(float x, float minv, float maxv) {
+inline float clampf(float x, float minv, float maxv) {
 	return std::max(minv, std::min(x, maxv));
 }
-inline float lerp(float a, float b, float t) {
+inline float lerpf(float a, float b, float t) {
 	return a + t * (b - a);
 }
-inline float inverse_lerp(float a, float b, float p_value) {
+inline float inverse_lerpf(float a, float b, float p_value) {
 	if (a == b) [[unlikely]] {
 		return 0.0f;
 	} else [[likely]] {
@@ -90,7 +90,7 @@ inline int NoiseIndex(Context ctx, int x, int y, int z) {
 inline float GetCeiling(Context ctx) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
-	return clamp(cfg.Ceiling * (numCells.y - 1), 1.0f, (float)numCells.y - 2);
+	return clampf(cfg.Ceiling * (numCells.y - 1), 1.0f, (float)numCells.y - 2);
 }
 
 inline float GetFloorToCeilAmount(Context ctx, int y) {
@@ -119,7 +119,7 @@ inline float GetAboveCeilAmount(Context ctx, int y) {
 	if (ceiling >= maxY || Math::is_zero_approx(absf(ceiling - maxY))) {
 		return 1.0f;
 	}
-	return Math::clamp(Math::inverse_lerp(ceiling, maxY, y), 0.0f, 1.0f);
+	return clampf(inverse_lerpf(ceiling, maxY, y), 0.0f, 1.0f);
 }
 
 inline float GetAboveCeilAmount2(Context ctx, int y) {
@@ -131,7 +131,7 @@ inline float GetAboveCeilAmount2(Context ctx, int y) {
 	float maxY = numCells.y - 1 - cfg.BorderSize * 2;
 	// if (Math::is_zero_approx(absf(ceiling - maxY))) return 0.0f;
 	float zero_approx_mask = 1.0f - float(Math::is_zero_approx(absf(ceiling - maxY)));
-	maxY = lerp(ceiling, maxY, cfg.FalloffAboveCeiling);
+	maxY = lerpf(ceiling, maxY, cfg.FalloffAboveCeiling);
 	// if (y < ceiling) return 0.0f;
 	float below_ceiling_mask = 1.0f - float(y < ceiling);
 	// if (y >= maxY) return 1.0f;
@@ -141,7 +141,7 @@ inline float GetAboveCeilAmount2(Context ctx, int y) {
 	// if (ceiling >= maxY) return 1.0f;
 	float ceiling_above_max_t = float(ceiling >= maxY);
 	// clang-format off
-	return clamp(inverse_lerp(ceiling, maxY, y), 0.0f, 1.0f)
+	return clampf(inverse_lerpf(ceiling, maxY, y), 0.0f, 1.0f)
 		* high_ceiling_mask * zero_approx_mask * below_ceiling_mask
 		* (1.0f - y_above_max_t) * (1.0f - ceiling_above_max_t) * (1.0f - ceiling_at_max_y_t)
 		+ y_above_max_t * ceiling_above_max_t * ceiling_at_max_y_t;
@@ -257,7 +257,7 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 		return (Vector3(a) + Vector3(b)) * 0.5f;
 	}
 	float mu = (isovalue - noise_a) / (noise_b - noise_a);
-	mu = clamp(mu, 0.0f, 1.0f);
+	mu = clampf(mu, 0.0f, 1.0f);
 	auto p = Vector3(0, 0, 0);
 	p.x = a.x + mu * (b.x - a.x);
 	p.y = a.y + mu * (b.y - a.y);

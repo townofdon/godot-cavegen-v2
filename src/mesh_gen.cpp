@@ -224,23 +224,23 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					// normalize
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					float val;
-					val = inverse_lerp(minV, maxV, noiseSamples[i]);
-					val = clamp(val, 0.0f, 1.0f);
+					val = inverse_lerpf(minV, maxV, noiseSamples[i]);
+					val = clampf(val, 0.0f, 1.0f);
 					// apply noise curve
 					float valEaseIn = Easing::InCubic(val);
 					float valEaseOut = Easing::OutCubic(val);
-					val = lerp(valEaseIn, val, clamp(cfg.Curve, 0.0f, 1.0f));
-					val = lerp(val, valEaseOut, clamp(cfg.Curve - 1, 0.0f, 1.0f));
+					val = lerpf(valEaseIn, val, clampf(cfg.Curve, 0.0f, 1.0f));
+					val = lerpf(val, valEaseOut, clampf(cfg.Curve - 1, 0.0f, 1.0f));
 					// apply falloff above ceiling
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					zeroValue = lerp(0.0f, zeroValue, cfg.FalloffAboveCeiling);
-					val = lerp(val, zeroValue, MG::GetAboveCeilAmount(ctx, y));
+					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling);
+					val = lerpf(val, zeroValue, MG::GetAboveCeilAmount(ctx, y));
 					// apply tilt
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
-					float valTiltTop = val * lerp(0.0f, 1.0f, yPct);
-					float valTiltBottom = val * lerp(1.0f, 0.0f, yPct);
-					val = lerp(valTiltTop, val, clamp(cfg.Tilt, 0.0f, 1.0f));
-					val = lerp(val, valTiltBottom, clamp(cfg.Tilt - 1, 0.0f, 1.0f));
+					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
+					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
+					val = lerpf(valTiltTop, val, clampf(cfg.Tilt, 0.0f, 1.0f));
+					val = lerpf(val, valTiltBottom, clampf(cfg.Tilt - 1, 0.0f, 1.0f));
 					noiseSamples[i] = val;
 				}
 			}
@@ -263,9 +263,9 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
 					// apply falloff to noise above ceil && close to border
 					float dist = MG::DistFromBorder(ctx, x, y, z);
-					float t = inverse_lerp(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount(ctx, y));
+					float t = inverse_lerpf(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount(ctx, y));
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					noiseSamples[i] = lerp(zeroValue, noiseSamples[i], clamp(t, 0, 1));
+					noiseSamples[i] = lerpf(zeroValue, noiseSamples[i], clampf(t, 0, 1));
 				}
 			}
 		}
