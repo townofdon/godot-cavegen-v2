@@ -23,7 +23,7 @@ public:
 	float Curve;
 	float Tilt;
 	float FalloffAboveCeiling;
-	bool Interpolate;
+	float Interpolate;
 	bool RemoveOrphans;
 	// room border
 	bool UseBorderNoise;
@@ -39,7 +39,7 @@ public:
 	float GetCurve();
 	float GetTilt();
 	float GetFalloffAboveCeiling();
-	bool GetInterpolate();
+	float GetInterpolate();
 	bool GetRemoveOrphans();
 	bool GetUseBorderNoise();
 	int GetBorderSize();
@@ -54,7 +54,7 @@ public:
 	void SetCurve(float p_Curve);
 	void SetTilt(float p_Tilt);
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
-	void SetInterpolate(bool p_Interpolate);
+	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetUseBorderNoise(bool p_UseBorderNoise);
 	void SetBorderSize(int p_BorderSize);

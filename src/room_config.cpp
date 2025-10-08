@@ -35,7 +35,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_Interpolate"), &RoomConfig::GetInterpolate);
 	ClassDB::bind_method(D_METHOD("set_Interpolate", "p_Interpolate"), &RoomConfig::SetInterpolate);
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_noise__interpolate"), "set_Interpolate", "get_Interpolate");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__interpolate", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_Interpolate", "get_Interpolate");
 
 	ClassDB::bind_method(D_METHOD("get_RemoveOrphans"), &RoomConfig::GetRemoveOrphans);
 	ClassDB::bind_method(D_METHOD("set_RemoveOrphans", "p_RemoveOrphans"), &RoomConfig::SetRemoveOrphans);
@@ -75,7 +75,7 @@ RoomConfig::RoomConfig() {
 	Curve = 1.0f;
 	Tilt = 1.0f;
 	FalloffAboveCeiling = 0.5f;
-	Interpolate = true;
+	Interpolate = 1.0f;
 	RemoveOrphans = true;
 	UseBorderNoise = false;
 	BorderSize = 1;
@@ -109,7 +109,7 @@ float RoomConfig::GetTilt() {
 float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
 }
-bool RoomConfig::GetInterpolate() {
+float RoomConfig::GetInterpolate() {
 	return Interpolate;
 }
 bool RoomConfig::GetRemoveOrphans() {
@@ -159,7 +159,7 @@ void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
 	FalloffAboveCeiling = p_FalloffAboveCeiling;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetInterpolate(bool p_Interpolate) {
+void RoomConfig::SetInterpolate(float p_Interpolate) {
 	Interpolate = p_Interpolate;
 	emit_signal("on_changed");
 }

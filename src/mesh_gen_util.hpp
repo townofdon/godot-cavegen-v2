@@ -58,7 +58,7 @@ struct Context {
 		float Curve;
 		float Tilt;
 		float FalloffAboveCeiling;
-		bool Interpolate;
+		float Interpolate;
 		bool RemoveOrphans;
 		// room border
 		bool UseBorderNoise;
@@ -234,9 +234,6 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	if (bBound && !(aBound && bBound && onSamePlane)) {
 		return Vector3(b);
 	}
-	if (!ctx.cfg.Interpolate) {
-		return (Vector3(a) + Vector3(b)) * 0.5f;
-	}
 	float isovalue = ctx.cfg.IsoValue;
 	float noise_a = noiseSamples[NoiseIndex(ctx, a.x, a.y, a.z)];
 	float noise_b = noiseSamples[NoiseIndex(ctx, b.x, b.y, b.z)];
@@ -255,7 +252,8 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	p.x = a.x + mu * (b.x - a.x);
 	p.y = a.y + mu * (b.y - a.y);
 	p.z = a.z + mu * (b.z - a.z);
-	return p;
+	auto avg = (Vector3(a) + Vector3(b)) * 0.5f;
+	return avg.lerp(p, clamp01(ctx.cfg.Interpolate));
 }
 
 } //namespace MG
