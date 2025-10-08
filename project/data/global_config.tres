@@ -2,7 +2,6 @@
 
 [resource]
 room_width = 41.56
-room_height = 34.335
+room_height = 50.0
 room_depth = 35.161
-ceiling = 0.67
-active_plane_offset = 5.0
+ceiling = 0.5

@@ -26,6 +26,9 @@ float *MeshGen::time_marchCubes = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+static inline float *noiseSamples = new float[MAX_NOISE_NODES];
+static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
+
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
 	if (p_global_cfg == nullptr) {
 		UtilityFunctions::printerr("global_cfg cannot be null");
@@ -98,10 +101,6 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		*p_border_noise,
 		numCells,
 	};
-
-	// initialize noiseSamples
-	// float noiseSamples[numCells.x * numCells.y * numCells.z];
-	float *noiseSamples = new float[numCells.x * numCells.y * numCells.z];
 
 	//
 	// process noise
@@ -180,11 +179,9 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 			auto dmin = String(std::to_string(minv).c_str());
 			auto dmax = String(std::to_string(maxv).c_str());
 			auto davg = String(std::to_string(avg).c_str());
-			UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
+			// UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
 		}
 	}
-
-	delete[] noiseSamples;
 }
 
 // note - this mutates noiseSamples
@@ -192,7 +189,6 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	auto noise = ctx.noise;
-	float *noiseBuffer = new float[numCells.x * numCells.y * numCells.z];
 	float minV = INFINITY;
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
@@ -225,22 +221,22 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					float val;
 					val = inverse_lerpf(minV, maxV, noiseSamples[i]);
-					val = clampf(val, 0.0f, 1.0f);
+					val = clamp01(val);
 					// apply noise curve
 					float valEaseIn = Easing::InCubic(val);
 					float valEaseOut = Easing::OutCubic(val);
-					val = lerpf(valEaseIn, val, clampf(cfg.Curve, 0.0f, 1.0f));
-					val = lerpf(val, valEaseOut, clampf(cfg.Curve - 1, 0.0f, 1.0f));
+					val = lerpf(valEaseIn, val, clamp01(cfg.Curve));
+					val = lerpf(val, valEaseOut, clamp01(cfg.Curve - 1));
 					// apply falloff above ceiling
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling);
-					val = lerpf(val, zeroValue, MG::GetAboveCeilAmount(ctx, y));
+					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
+					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, cfg.FalloffAboveCeiling)));
 					// apply tilt
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
-					val = lerpf(valTiltTop, val, clampf(cfg.Tilt, 0.0f, 1.0f));
-					val = lerpf(val, valTiltBottom, clampf(cfg.Tilt - 1, 0.0f, 1.0f));
+					val = lerpf(valTiltTop, val, clamp01(cfg.Tilt));
+					val = lerpf(val, valTiltBottom, clamp01(cfg.Tilt - 1));
 					noiseSamples[i] = val;
 				}
 			}
@@ -251,9 +247,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
-				if (MG::IsAtBoundaryXZ(ctx, x, z) && cfg.ShowOuterWalls || MG::IsAtBoundaryY(ctx, y)) {
+				if (MG::IsAtBoundaryXZ(ctx, x, z)) {
 					// apply bounds
-					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					if (cfg.ShowOuterWalls || MG::IsAtBoundaryY(ctx, y)) {
+						noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					}
 				} else if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
 					// apply border
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
@@ -261,11 +259,13 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
 					}
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
-					// apply falloff to noise above ceil && close to border
+					// apply falloff to noise above ceil && near border
 					float dist = MG::DistFromBorder(ctx, x, y, z);
-					float t = inverse_lerpf(0.0f, (float)cfg.FalloffNearBorder, dist - 1) * (1 - MG::GetAboveCeilAmount(ctx, y));
+					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
+					float yScale = dist / maxf(1, size * cfg.FalloffNearBorder);
+					float t = MG::GetAboveCeilAmount(ctx, y, yScale);
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					noiseSamples[i] = lerpf(zeroValue, noiseSamples[i], clampf(t, 0, 1));
+					noiseSamples[i] = lerpf(noiseSamples[i], zeroValue, t);
 				}
 			}
 		}
@@ -301,7 +301,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 						}
 					} else {
 						int i = NoiseIndex(ctx, x, y, z);
-						float val = clampf(inverse_lerpf(minV, maxV, noiseBuffer[i]), 0.0f, 1.0f);
+						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
 						noiseBuffer[i] = val;
 					}
 				}
@@ -334,7 +334,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 						}
 					} else {
 						int i = NoiseIndex(ctx, x, y, z);
-						float val = clampf(inverse_lerpf(minV, maxV, noiseBuffer[i]), 0.0f, 1.0f);
+						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
 						noiseBuffer[i] = val;
 					}
 				}
@@ -436,8 +436,6 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
-
-	delete[] noiseBuffer;
 }
 
 void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {

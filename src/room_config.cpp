@@ -57,7 +57,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_FalloffNearBorder"), &RoomConfig::GetFalloffNearBorder);
 	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,10,"), "set_FalloffNearBorder", "get_FalloffNearBorder");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
 }
@@ -76,7 +76,7 @@ RoomConfig::RoomConfig() {
 	UseBorderNoise = false;
 	BorderSize = 1;
 	SmoothBorderNoise = 0.5f;
-	FalloffNearBorder = 2.0f;
+	FalloffNearBorder = 0.2f;
 }
 
 RoomConfig::~RoomConfig() {
@@ -119,7 +119,7 @@ int RoomConfig::GetBorderSize() {
 float RoomConfig::GetSmoothBorderNoise() {
 	return SmoothBorderNoise;
 }
-int RoomConfig::GetFalloffNearBorder() {
+float RoomConfig::GetFalloffNearBorder() {
 	return FalloffNearBorder;
 }
 
@@ -171,7 +171,7 @@ void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 	SmoothBorderNoise = p_SmoothBorderNoise;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetFalloffNearBorder(int p_FalloffNearBorder) {
+void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 	FalloffNearBorder = p_FalloffNearBorder;
 	emit_signal("on_changed");
 }

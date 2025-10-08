@@ -8,7 +8,11 @@ from methods import print_error
 libname = "cavegen2"
 projectdir = "project"
 
-localEnv = Environment(tools=["default"], PLATFORM="")
+CCFLAGS=[
+    # '-Wall', # enable all warnings
+    # '-pedantic' # tells the compiler to stricly adhere to ANSI standard
+]
+localEnv = Environment(tools=["default"], PLATFORM="", CCFLAGS=CCFLAGS)
 
 # Build profiles can be used to decrease compile times.
 # You can either specify "disabled_classes", OR

@@ -29,7 +29,7 @@ public:
 	bool UseBorderNoise;
 	int BorderSize;
 	float SmoothBorderNoise;
-	int FalloffNearBorder;
+	float FalloffNearBorder;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -43,7 +43,7 @@ public:
 	bool GetUseBorderNoise();
 	int GetBorderSize();
 	float GetSmoothBorderNoise();
-	int GetFalloffNearBorder();
+	float GetFalloffNearBorder();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -57,5 +57,5 @@ public:
 	void SetUseBorderNoise(bool p_UseBorderNoise);
 	void SetBorderSize(int p_BorderSize);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
-	void SetFalloffNearBorder(int p_FalloffNearBorder);
+	void SetFalloffNearBorder(float p_FalloffNearBorder);
 };

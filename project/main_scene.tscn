@@ -30,7 +30,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 18.004450000000002
+shader_parameter/y_ceil = 15.0
 shader_parameter/y_min = 0.0
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
@@ -69,8 +69,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.78, 17.1675, 17.5805)
-size = Vector3(41.56, 34.335, 35.161)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.78, 25, 17.5805)
+size = Vector3(41.56, 50, 35.161)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")

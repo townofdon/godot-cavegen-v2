@@ -1,11 +1,7 @@
 [gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
-debug__show_noise = false
-room_noise__iso_value = 0.68
-room_noise__curve = 1.71
-room_noise__tilt = 1.1
-room_noise__falloff_above_ceiling = 0.57
-room_border__use_border_noise = true
-room_border__border_size = 6
-room_border__smooth_border_noise = 0.77
+room_noise__iso_value = 0.4
+room_noise__falloff_above_ceiling = 0.71
+room_border__smooth_border_noise = 0.55
+room_border__falloff_near_border = 0.16

@@ -21,6 +21,9 @@ inline float maxf(float a, float b) {
 inline float clampf(float x, float minv, float maxv) {
 	return std::max(minv, std::min(x, maxv));
 }
+inline float clamp01(float x) {
+	return std::max(0.0f, std::min(x, 1.0f));
+}
 inline float lerpf(float a, float b, float t) {
 	return a + t * (b - a);
 }
@@ -61,7 +64,7 @@ struct Context {
 		bool UseBorderNoise;
 		int BorderSize;
 		float SmoothBorderNoise;
-		int FalloffNearBorder;
+		float FalloffNearBorder;
 	};
 	Config cfg;
 	Noise noise;
@@ -90,7 +93,8 @@ inline int NoiseIndex(Context ctx, int x, int y, int z) {
 inline float GetCeiling(Context ctx) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
-	return clampf(cfg.Ceiling * (numCells.y - 1), 1.0f, (float)numCells.y - 2);
+	return maxf(1.0f, minf(cfg.Ceiling * (float)(numCells.y - 1), (float)(numCells.y - 2)));
+	// return clampf(cfg.Ceiling * (float)(numCells.y - 1), 1.0f, (float)(numCells.y - 2));
 }
 
 inline float GetFloorToCeilAmount(Context ctx, int y) {
@@ -98,7 +102,7 @@ inline float GetFloorToCeilAmount(Context ctx, int y) {
 	return (float)y / ceiling;
 }
 
-inline float GetAboveCeilAmount(Context ctx, int y) {
+inline float GetAboveCeilAmount(Context ctx, int y, float scale) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	if (cfg.Ceiling >= 1) {
@@ -109,7 +113,7 @@ inline float GetAboveCeilAmount(Context ctx, int y) {
 	if (Math::is_zero_approx(absf(ceiling - maxY))) {
 		return 0.0f;
 	}
-	maxY = Math::lerp(ceiling, maxY, cfg.FalloffAboveCeiling);
+	maxY = lerpf(ceiling, maxY, clamp01(scale));
 	if (y < ceiling) {
 		return 0.0f;
 	}
@@ -119,10 +123,10 @@ inline float GetAboveCeilAmount(Context ctx, int y) {
 	if (ceiling >= maxY || Math::is_zero_approx(absf(ceiling - maxY))) {
 		return 1.0f;
 	}
-	return clampf(inverse_lerpf(ceiling, maxY, y), 0.0f, 1.0f);
+	return clamp01(inverse_lerpf(ceiling, maxY, y));
 }
 
-inline float GetAboveCeilAmount2(Context ctx, int y) {
+inline float GetAboveCeilAmount2(Context ctx, int y, float scale) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	// if (cfg.Ceiling >= 1) return 0.0f;
@@ -131,7 +135,7 @@ inline float GetAboveCeilAmount2(Context ctx, int y) {
 	float maxY = numCells.y - 1 - cfg.BorderSize * 2;
 	// if (Math::is_zero_approx(absf(ceiling - maxY))) return 0.0f;
 	float zero_approx_mask = 1.0f - float(Math::is_zero_approx(absf(ceiling - maxY)));
-	maxY = lerpf(ceiling, maxY, cfg.FalloffAboveCeiling);
+	maxY = lerpf(ceiling, maxY, scale);
 	// if (y < ceiling) return 0.0f;
 	float below_ceiling_mask = 1.0f - float(y < ceiling);
 	// if (y >= maxY) return 1.0f;
@@ -141,11 +145,18 @@ inline float GetAboveCeilAmount2(Context ctx, int y) {
 	// if (ceiling >= maxY) return 1.0f;
 	float ceiling_above_max_t = float(ceiling >= maxY);
 	// clang-format off
-	return clampf(inverse_lerpf(ceiling, maxY, y), 0.0f, 1.0f)
+	return clamp01(inverse_lerpf(ceiling, maxY, y))
 		* high_ceiling_mask * zero_approx_mask * below_ceiling_mask
 		* (1.0f - y_above_max_t) * (1.0f - ceiling_above_max_t) * (1.0f - ceiling_at_max_y_t)
 		+ y_above_max_t * ceiling_above_max_t * ceiling_at_max_y_t;
 	// clang-format on
+}
+
+inline int GetAboveCeilCount(Context ctx, int y) {
+	auto cfg = ctx.cfg;
+	auto numCells = ctx.numCells;
+	float ceiling = GetCeiling(ctx);
+	return (int)maxf(y - ceiling, 0);
 }
 
 inline bool IsAtBoundaryXZ(Context ctx, int x, int z) {
@@ -257,7 +268,7 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 		return (Vector3(a) + Vector3(b)) * 0.5f;
 	}
 	float mu = (isovalue - noise_a) / (noise_b - noise_a);
-	mu = clampf(mu, 0.0f, 1.0f);
+	mu = clamp01(mu);
 	auto p = Vector3(0, 0, 0);
 	p.x = a.x + mu * (b.x - a.x);
 	p.y = a.y + mu * (b.y - a.y);
