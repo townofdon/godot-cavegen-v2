@@ -63,6 +63,7 @@ struct Context {
 		// room border
 		bool UseBorderNoise;
 		int BorderSize;
+		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float FalloffNearBorder;
 	};
@@ -190,8 +191,7 @@ inline bool IsAtBorderEdge(Context ctx, int x, int y, int z) {
 		z == ctx.numCells.z - 2);
 }
 
-inline int DistFromBorder(Context ctx, int x, int y, int z) {
-	auto BorderSize = ctx.cfg.BorderSize;
+inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
 	auto numCells = ctx.numCells;
 	int distX = minf(absf(x - BorderSize), absf(numCells.x - 1 - BorderSize - x));
 	int distY = absf(y - BorderSize);

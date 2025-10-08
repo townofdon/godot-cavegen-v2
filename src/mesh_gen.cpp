@@ -92,6 +92,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		// border
 		room.UseBorderNoise,
 		room.BorderSize,
+		room.BorderNoiseIsoValue,
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
 	};
@@ -260,7 +261,8 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					}
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
 					// apply falloff to noise above ceil && near border
-					float dist = MG::DistFromBorder(ctx, x, y, z);
+					int borderSize = cfg.UseBorderNoise ? 1 : cfg.BorderSize;
+					float dist = MG::DistFromBorder(ctx, x, y, z, borderSize);
 					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
 					float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
 					float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
@@ -360,7 +362,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
 					int i = NoiseIndex(ctx, x, y, z);
 					float t = (x - 1) / (float)cfg.BorderSize;
-					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					float strength = lerpf(1.0f, cfg.BorderNoiseIsoValue + 0.001f, t);
 					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
 				}
 			}
@@ -384,7 +386,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
 					int i = NoiseIndex(ctx, x, y, z);
 					float t = (numCells.z - 2 - z) / (float)(cfg.BorderSize - 1);
-					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					float strength = lerpf(1.0f, cfg.BorderNoiseIsoValue + 0.001f, t);
 					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
 				}
 			}
@@ -408,7 +410,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
 					int i = NoiseIndex(ctx, x, y, z);
 					float t = (numCells.x - 2 - x) / (float)(cfg.BorderSize - 1);
-					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					float strength = lerpf(1.0f, cfg.BorderNoiseIsoValue + 0.001f, t);
 					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
 				}
 			}
@@ -430,7 +432,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float val = n0 * lerpf(1.0f, 0.1f, cfg.SmoothBorderNoise) + kernel * lerpf(0.0f, 0.9f, cfg.SmoothBorderNoise);
 					int i = NoiseIndex(ctx, x, y, z);
 					float t = (z - 1) / (float)cfg.BorderSize;
-					float strength = lerpf(1.0f, cfg.IsoValue + 0.001f, t);
+					float strength = lerpf(1.0f, cfg.BorderNoiseIsoValue + 0.001f, t);
 					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
 				}
 			}

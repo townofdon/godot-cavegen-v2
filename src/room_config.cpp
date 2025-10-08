@@ -51,6 +51,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_BorderSize", "p_BorderSize"), &RoomConfig::SetBorderSize);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "room_border__border_size", PROPERTY_HINT_RANGE, "0,10,"), "set_BorderSize", "get_BorderSize");
 
+	ClassDB::bind_method(D_METHOD("get_BorderNoiseIsoValue"), &RoomConfig::GetBorderNoiseIsoValue);
+	ClassDB::bind_method(D_METHOD("set_BorderNoiseIsoValue", "p_BorderNoiseIsoValue"), &RoomConfig::SetBorderNoiseIsoValue);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__border_noise_strength", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_BorderNoiseIsoValue", "get_BorderNoiseIsoValue");
+
 	ClassDB::bind_method(D_METHOD("get_SmoothBorderNoise"), &RoomConfig::GetSmoothBorderNoise);
 	ClassDB::bind_method(D_METHOD("set_SmoothBorderNoise", "p_SmoothBorderNoise"), &RoomConfig::SetSmoothBorderNoise);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__smooth_border_noise", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_SmoothBorderNoise", "get_SmoothBorderNoise");
@@ -75,6 +79,7 @@ RoomConfig::RoomConfig() {
 	RemoveOrphans = true;
 	UseBorderNoise = false;
 	BorderSize = 1;
+	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
 }
@@ -115,6 +120,9 @@ bool RoomConfig::GetUseBorderNoise() {
 }
 int RoomConfig::GetBorderSize() {
 	return BorderSize;
+}
+float RoomConfig::GetBorderNoiseIsoValue() {
+	return BorderNoiseIsoValue;
 }
 float RoomConfig::GetSmoothBorderNoise() {
 	return SmoothBorderNoise;
@@ -165,6 +173,10 @@ void RoomConfig::SetUseBorderNoise(bool p_UseBorderNoise) {
 }
 void RoomConfig::SetBorderSize(int p_BorderSize) {
 	BorderSize = p_BorderSize;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue) {
+	BorderNoiseIsoValue = p_BorderNoiseIsoValue;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {

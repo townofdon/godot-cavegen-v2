@@ -28,6 +28,7 @@ public:
 	// room border
 	bool UseBorderNoise;
 	int BorderSize;
+	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float FalloffNearBorder;
 
@@ -42,6 +43,7 @@ public:
 	bool GetRemoveOrphans();
 	bool GetUseBorderNoise();
 	int GetBorderSize();
+	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
 	float GetFalloffNearBorder();
 
@@ -56,6 +58,7 @@ public:
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetUseBorderNoise(bool p_UseBorderNoise);
 	void SetBorderSize(int p_BorderSize);
+	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
 };
