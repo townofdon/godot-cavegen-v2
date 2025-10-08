@@ -2,6 +2,6 @@
 
 [resource]
 room_noise__iso_value = 0.4
-room_noise__falloff_above_ceiling = 0.71
+room_noise__falloff_above_ceiling = 0.89
 room_border__smooth_border_noise = 0.55
-room_border__falloff_near_border = 0.16
+room_border__falloff_near_border = 0.01

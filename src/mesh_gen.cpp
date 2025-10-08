@@ -262,8 +262,8 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					// apply falloff to noise above ceil && near border
 					float dist = MG::DistFromBorder(ctx, x, y, z);
 					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
-					float yScale = dist / maxf(1, size * cfg.FalloffNearBorder);
-					float t = MG::GetAboveCeilAmount(ctx, y, yScale);
+					float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
+					float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
 					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					noiseSamples[i] = lerpf(noiseSamples[i], zeroValue, t);
 				}

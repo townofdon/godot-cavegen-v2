@@ -93,8 +93,7 @@ inline int NoiseIndex(Context ctx, int x, int y, int z) {
 inline float GetCeiling(Context ctx) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
-	return maxf(1.0f, minf(cfg.Ceiling * (float)(numCells.y - 1), (float)(numCells.y - 2)));
-	// return clampf(cfg.Ceiling * (float)(numCells.y - 1), 1.0f, (float)(numCells.y - 2));
+	return clampf(cfg.Ceiling * (float)(numCells.y - 1), 1.0f, (float)(numCells.y - 2));
 }
 
 inline float GetFloorToCeilAmount(Context ctx, int y) {
