@@ -203,26 +203,9 @@ inline bool IsBelowCeiling(Context ctx, int y) {
 	return ctx.cfg.Ceiling >= 1 || y <= GetCeiling(ctx);
 }
 
-// TODO: replace with flood-fill from known border
-inline bool IsPointOrphan(Context ctx, float noiseSamples[], int x, int y, int z) {
-	if (!ctx.cfg.RemoveOrphans)
-		return false;
-	// // walk down from y to slightly below the ceiling, checking if any gaps
-	// for (int y2 = y - 1; y2 >= floor(ctx.numCells.y * ctx.cfg.Ceiling) - 2; y2--) {
-	// 	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
-	// 	auto active = val > ctx.cfg.IsoValue;
-	// 	if (!active)
-	// 		return true;
-	// }
-	return false;
-}
-
 inline bool IsPointActive(Context ctx, float noiseSamples[], int x, int y, int z) {
 	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
 	auto active = val >= ctx.cfg.IsoValue;
-	if (active && !IsBelowCeiling(ctx, y) && IsPointOrphan(ctx, noiseSamples, x, y, z)) {
-		active = false;
-	}
 	return active;
 }
 

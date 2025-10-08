@@ -1,5 +1,6 @@
 #include "mesh_gen.h"
 #include "easing.hpp"
+#include "flood_fill_3d.hpp"
 
 #include "constants.h"
 #include <chrono>
@@ -28,6 +29,7 @@ float *MeshGen::time_marchCubes = new float[100]{
 
 static inline float *noiseSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
+static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
 
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
 	if (p_global_cfg == nullptr) {
@@ -273,7 +275,9 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 	}
 
+	//
 	// apply border noise
+	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
 		auto ceiling = GetCeiling(ctx);
 		// first pass - sample and normalize border noise on x plane
@@ -434,6 +438,40 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float t = (z - 1) / (float)cfg.BorderSize;
 					float strength = lerpf(1.0f, cfg.BorderNoiseIsoValue + 0.001f, t);
 					noiseSamples[i] = maxf(noiseSamples[i], val * strength);
+				}
+			}
+		}
+	}
+
+	//
+	// remove orphans / islands - flood fill
+	//
+	if (cfg.RemoveOrphans) {
+		// pick likely start point candidate, at the middle of the grid - this will always be ON when a border is present
+		Vector3i floodStart = Vector3i((numCells.x - 1) / 2, 1, (numCells.z - 1) / 2);
+		bool foundCandidate = MG::IsPointActive(ctx, noiseSamples, floodStart.x, floodStart.y, floodStart.z);
+		// initialize flood screen and set floodStart if not yet found
+		for (int z = 0; z < numCells.z - 1; z++) {
+			for (int y = 0; y < numCells.y - 1; y++) {
+				for (int x = 0; x < numCells.x - 1; x++) {
+					if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
+						floodStart = Vector3i(x, y, z);
+						foundCandidate = true;
+					}
+					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = MG::IsPointActive(ctx, noiseSamples, x, y, z);
+				}
+			}
+		}
+		// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
+		flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
+		for (int z = 0; z < numCells.z - 1; z++) {
+			for (int y = 0; y < numCells.y - 1; y++) {
+				for (int x = 0; x < numCells.x - 1; x++) {
+					int i = MG::NoiseIndex(ctx, x, y, z);
+					if (floodFillScreen[i]) {
+						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+						noiseSamples[i] = zeroValue;
+					}
 				}
 			}
 		}

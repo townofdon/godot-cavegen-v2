@@ -1,3 +1,5 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
 #include "godot_cpp/classes/global_constants.hpp"
 
@@ -297,3 +299,5 @@ inline constexpr const int TRIANGULATIONS[256 * 15] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
 // clang-format on
+
+#endif // CONSTANTS_H
