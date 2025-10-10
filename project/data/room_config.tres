@@ -1,10 +1,13 @@
 [gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
-room_noise__iso_value = 0.52
-room_noise__falloff_above_ceiling = 0.27
-room_border__use_border_noise = true
-room_border__border_size = 6
-room_border__border_noise_strength = 0.51
-room_border__smooth_border_noise = 0.45
-room_border__falloff_near_border = 0.29
+debug__show_outer_walls = false
+room_noise__iso_value = 0.51
+room_noise__curve = 0.88
+room_noise__tilt = 1.47
+room_noise__falloff_above_ceiling = 0.0
+room_noise__interpolate = 0.59
+room_noise__remove_orphans = false
+room_border__border_noise_strength = 0.52
+room_border__smooth_border_noise = 0.47
+room_border__falloff_near_border = 0.75

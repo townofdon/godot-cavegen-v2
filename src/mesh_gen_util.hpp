@@ -184,11 +184,11 @@ inline bool IsAtBorder(Context ctx, int x, int y, int z) {
 
 inline bool IsAtBorderEdge(Context ctx, int x, int y, int z) {
 	return (
-		x == 1 ||
-		y == 1 ||
-		z == 1 ||
-		x == ctx.numCells.x - 2 ||
-		z == ctx.numCells.z - 2);
+		x <= 1 ||
+		y <= 1 ||
+		z <= 1 ||
+		x >= ctx.numCells.x - 2 ||
+		z >= ctx.numCells.z - 2);
 }
 
 inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
