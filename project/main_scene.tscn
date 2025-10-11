@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=16 format=3 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -8,6 +8,7 @@
 [ext_resource type="FastNoiseLite" uid="uid://p3rfigim3d" path="res://data/noise.tres" id="4_nfk4m"]
 [ext_resource type="FastNoiseLite" uid="uid://cmirlmxyie640" path="res://data/border_noise.tres" id="5_66tet"]
 [ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
+[ext_resource type="PackedScene" uid="uid://brpl7w0wyihj8" path="res://tile_scene.tscn" id="9_7ycvg"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
@@ -30,7 +31,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 14.109840000000002
+shader_parameter/y_ceil = 12.90279
 shader_parameter/y_min = 0.0
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
@@ -69,8 +70,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.271, 23.628, 22.6565)
-size = Vector3(38.542, 47.256, 45.313)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 8.611395, 15)
+size = Vector3(30, 17.22279, 30)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")
@@ -80,3 +81,30 @@ metadata/_custom_type_script = "uid://btxqynndstb2p"
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 15, 50, 15)
 environment = SubResource("Environment_nfk4m")
 script = ExtResource("8_66tet")
+
+[node name="UI" type="Node3D" parent="."]
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="UI"]
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -1020.0
+offset_top = -480.0
+offset_right = -60.0
+offset_bottom = 480.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="TilemapSubViewport" type="SubViewport" parent="UI/SubViewportContainer"]
+unique_name_in_owner = true
+transparent_bg = true
+handle_input_locally = false
+canvas_item_default_texture_filter = 0
+gui_embed_subwindows = true
+size = Vector2i(960, 960)
+render_target_clear_mode = 2
+render_target_update_mode = 4
+
+[node name="TileMapLayer" parent="UI/SubViewportContainer/TilemapSubViewport" instance=ExtResource("9_7ycvg")]

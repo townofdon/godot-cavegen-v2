@@ -2,9 +2,8 @@
 
 [resource]
 noise_type = 3
-frequency = 0.0257
+frequency = 0.1432
 offset = Vector3(488, -79.7, -139.34)
-fractal_type = 0
-fractal_gain = 0.53
+fractal_gain = 0.24
 fractal_weighted_strength = 0.68
 cellular_jitter = 1.09

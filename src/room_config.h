@@ -14,6 +14,12 @@ public:
 	RoomConfig();
 	~RoomConfig();
 
+	// enum TileState {
+	// 	TILE_UNSET, // unset - will honor noise value at node
+	// 	TILE_EMPTY,
+	// 	TILE_FILLED,
+	// };
+
 	// debug
 	bool ShowNoise;
 	bool ShowBorder;

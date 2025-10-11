@@ -13,9 +13,9 @@ func _process(_delta: float) -> void:
 func update_test_cube():
 	if !cfg: return
 	size.x = cfg.room_width
-	size.y = cfg.room_height
+	size.y = cfg.room_height * cfg.ceiling
 	size.z = cfg.room_depth
-	global_position = Vector3(cfg.room_width/2,cfg.room_height/2,cfg.room_depth/2)
+	global_position = Vector3(size.x/2,size.y/2,size.z/2)
 	if material && material is ShaderMaterial:
 		var y_ceil := cfg.room_height * cfg.ceiling - cfg.active_plane_offset
 		material.set_shader_parameter("y_ceil", y_ceil)
