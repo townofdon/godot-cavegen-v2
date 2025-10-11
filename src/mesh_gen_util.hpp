@@ -87,7 +87,7 @@ inline int NoiseIndex(Context ctx, int x, int y, int z) {
 	// 	UtilityFunctions::printerr("noise index out of bounds: (" + ax + "," + ay + "," + az + "), numCells((" + bx + "," + by + "," + bz + ")");
 	// 	return -1;
 	// }
-	ERR_FAIL_INDEX_V_MSG(i, (numCells.x * numCells.y * numCells.z), 0, "noise index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(i, (numCells.x * numCells.y * numCells.z), 0, "noise index out of bounds");
 	return i;
 }
 

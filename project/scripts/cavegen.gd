@@ -9,6 +9,7 @@ class_name CaveGen
 @onready var meshGen:MeshGen = %MeshGen
 @onready var notifTimer:Timer = %Timer
 @onready var testCube:CSGBox3D = %TestCube
+@onready var tilemapEditor:TileMapEditor = $"../UI/SubViewportContainer/TilemapSubViewport/TilemapUI/TileMapEditor"
 
 var noiseB:FastNoiseLite
 var borderNoiseB:FastNoiseLite
@@ -27,6 +28,9 @@ func _ready() -> void:
 	notifTimer.one_shot = true
 	notifTimer.timeout.connect(regenerate)
 	notifTimer.stop()
+
+	# setup tilemap
+	tilemapEditor.initialize(cfg, room)
 
 	# setup meshgen
 	regenerate()
@@ -60,6 +64,7 @@ func _process(_delta: float) -> void:
 		borderNoiseB = borderNoise.duplicate()
 
 func _notify_change():
+	tilemapEditor.handle_room_size_change()
 	if notifTimer.is_stopped(): notifTimer.start()
 
 func _did_noise_change(a: FastNoiseLite, b: FastNoiseLite) -> bool:

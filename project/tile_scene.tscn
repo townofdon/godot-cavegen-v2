@@ -3,10 +3,11 @@
 [ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="2_exm5h"]
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="3_exm5h"]
 
-[node name="Node2D" type="Node2D"]
+[node name="TilemapUI" type="Node2D"]
 texture_filter = 1
 
-[node name="TileMapLayer" type="TileMapLayer" parent="."]
+[node name="TileMapEditor" type="TileMapLayer" parent="."]
+unique_name_in_owner = true
 show_behind_parent = true
 light_mask = 0
 texture_filter = 1

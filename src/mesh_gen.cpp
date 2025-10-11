@@ -3,6 +3,7 @@
 #include "flood_fill_3d.hpp"
 
 #include "constants.h"
+#include "sizing_data.hpp"
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -32,22 +33,10 @@ static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
 static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
 
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
-	if (p_global_cfg == nullptr) {
-		UtilityFunctions::printerr("global_cfg cannot be null");
-		return;
-	}
-	if (p_room_cfg == nullptr) {
-		UtilityFunctions::printerr("room_cfg cannot be null");
-		return;
-	}
-	if (p_noise == nullptr) {
-		UtilityFunctions::printerr("noise cannot be null");
-		return;
-	}
-	if (p_border_noise == nullptr) {
-		UtilityFunctions::printerr("border_noise cannot be null");
-		return;
-	}
+	ERR_FAIL_NULL_EDMSG(p_global_cfg, "null p_global_cfg");
+	ERR_FAIL_NULL_EDMSG(p_room_cfg, "null p_room_cfg");
+	ERR_FAIL_NULL_EDMSG(p_noise, "null p_noise");
+	ERR_FAIL_NULL_EDMSG(p_border_noise, "null p_border_noise");
 	if (p_global_cfg->CellSize <= 0) {
 		UtilityFunctions::printerr("cell_size must be greater than zero");
 		return;
@@ -60,24 +49,18 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		return;
 	}
 
+	// setup context
+	struct Vector3i numCells;
 	GlobalConfig cfg = *p_global_cfg;
 	RoomConfig room = *p_room_cfg;
-	struct Vector3i numCells;
-	float cellSize = cfg.CellSize - 0.5f;
-	do {
-		cellSize = cellSize + 0.5f;
-		numCells.x = (int)floor(cfg.RoomWidth / cellSize);
-		numCells.y = (int)floor(cfg.RoomHeight / cellSize);
-		numCells.z = (int)floor(cfg.RoomDepth / cellSize);
-	} while (numCells.x * numCells.y * numCells.z > MAX_NOISE_NODES);
-
-	// setup context
+	SizingData sizing = cfg.GetSizingData();
+	numCells = sizing.numCells;
 	struct MG::Context::Config ctxCfg = {
 		// global
 		cfg.RoomWidth,
 		cfg.RoomHeight,
 		cfg.RoomDepth,
-		cellSize, // actual cell-size might not reflect value from config
+		sizing.cellSize, // actual cell-size might not reflect value from config
 		cfg.Ceiling,
 		cfg.ActivePlaneOffset,
 		// debug
@@ -102,7 +85,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		ctxCfg,
 		*p_noise,
 		*p_border_noise,
-		numCells,
+		sizing.numCells,
 	};
 
 	//

@@ -1,4 +1,5 @@
 #include "global_config.h"
+#include "constants.h"
 
 void GlobalConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_RoomWidth"), &GlobalConfig::GetRoomWidth);
@@ -28,6 +29,8 @@ void GlobalConfig::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("on_changed"));
 	// ADD_SIGNAL(MethodInfo("position_changed", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos")));
 	// ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
+
+	ClassDB::bind_method(D_METHOD("get_num_cells"), &GlobalConfig::GetNumCells);
 }
 
 GlobalConfig::GlobalConfig() {
@@ -96,4 +99,24 @@ float GlobalConfig::GetActivePlaneOffset() {
 void GlobalConfig::SetActivePlaneOffset(float p_ActivePlaneOffset) {
 	ActivePlaneOffset = p_ActivePlaneOffset;
 	emit_signal("on_changed");
+}
+
+SizingData GlobalConfig::GetSizingData() {
+	struct Vector3i numCells;
+	float cellSize = CellSize - 0.5f;
+	do {
+		cellSize = cellSize + 0.5f;
+		numCells.x = (int)floor(RoomWidth / cellSize);
+		numCells.y = (int)floor(RoomHeight / cellSize);
+		numCells.z = (int)floor(RoomDepth / cellSize);
+	} while (numCells.x * numCells.y * numCells.z > MAX_NOISE_NODES);
+	struct SizingData sizing = {
+		numCells,
+		cellSize,
+	};
+	return sizing;
+}
+
+Vector3i GlobalConfig::GetNumCells() {
+	return GlobalConfig::GetSizingData().numCells;
 }

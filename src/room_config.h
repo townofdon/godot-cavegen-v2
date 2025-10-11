@@ -1,5 +1,6 @@
 #pragma once
 
+#include "constants.h"
 #include "godot_cpp/classes/resource.hpp"
 
 using namespace godot;
@@ -13,12 +14,6 @@ protected:
 public:
 	RoomConfig();
 	~RoomConfig();
-
-	// enum TileState {
-	// 	TILE_UNSET, // unset - will honor noise value at node
-	// 	TILE_EMPTY,
-	// 	TILE_FILLED,
-	// };
 
 	// debug
 	bool ShowNoise;
@@ -67,4 +62,18 @@ public:
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
+
+	//
+	// Tilemap Data
+	//
+	enum TileState {
+		TILE_STATE_UNSET, // unset - will honor noise value at node
+		TILE_STATE_EMPTY,
+		TILE_STATE_FILLED,
+	};
+	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
+	// void SetTiles(PackedInt32Array tiles);
+
+protected:
+	int tiles[MAX_NOISE_NODES_2D];
 };

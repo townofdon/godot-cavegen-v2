@@ -1,5 +1,9 @@
 #include "room_config.h"
 
+#include "godot_cpp/core/error_macros.hpp"
+
+VARIANT_ENUM_CAST(RoomConfig::TileState);
+
 void RoomConfig::_bind_methods() {
 	ADD_GROUP("Debug", "debug__");
 
@@ -64,6 +68,14 @@ void RoomConfig::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
+
+	//
+	// Tilemap Data
+	//
+	ClassDB::bind_method(D_METHOD("set_tile", "num_cells", "coords", "tile"), &RoomConfig::SetTile);
+	BIND_ENUM_CONSTANT(TILE_STATE_UNSET);
+	BIND_ENUM_CONSTANT(TILE_STATE_FILLED);
+	BIND_ENUM_CONSTANT(TILE_STATE_EMPTY);
 }
 
 RoomConfig::RoomConfig() {
@@ -82,10 +94,14 @@ RoomConfig::RoomConfig() {
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
+	// initialize tiles
+	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
+		tiles[i] = 0;
+	}
 }
 
 RoomConfig::~RoomConfig() {
-	// Add your cleanup here.
+	// Add your cleanup here, however, the destructor is called quite often (??), so be wary.
 }
 
 bool RoomConfig::GetShowNoise() {
@@ -186,4 +202,38 @@ void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 	FalloffNearBorder = p_FalloffNearBorder;
 	emit_signal("on_changed");
+}
+
+//
+// Tilemap Data
+//
+void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
+	int x = coords.x;
+	int y = coords.y;
+	int i = x + y * numCells2d.x;
+
+	// // debug
+	// if (i < 0 || i >= (MAX_NOISE_NODES_2D)) {
+	// 	auto ax = String(std::to_string(x).c_str());
+	// 	auto ay = String(std::to_string(y).c_str());
+	// 	auto bx = String(std::to_string(numCells2d.x).c_str());
+	// 	auto by = String(std::to_string(numCells2d.y).c_str());
+	// 	UtilityFunctions::printerr("tile index out of bounds: (" + ax + "," + ay + "), numCells2d((" + bx + "," + by + ")");
+	// 	return;
+	// }
+	// if (tile < 0 || tile > RoomConfig::TileState::TILE_STATE_FILLED) {
+	// 	auto d_tile = String(std::to_string(tile).c_str());
+	// 	UtilityFunctions::printerr("invalid tile: " + d_tile);
+	// 	return;
+	// }
+	// auto dtile = String(std::to_string(tile).c_str());
+	// auto di = String(std::to_string(i).c_str());
+	// auto dx = String(std::to_string(x).c_str());
+	// auto dy = String(std::to_string(y).c_str());
+	// UtilityFunctions::print("set tile " + dtile + " at index " + di + "(" + dx + "," + dy + ")");
+
+	ERR_FAIL_INDEX_EDMSG(i, MAX_NOISE_NODES_2D, "tile index out of bounds");
+	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::TILE_STATE_FILLED + 1, "invalid tile");
+
+	tiles[i] = tile;
 }

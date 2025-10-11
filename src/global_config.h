@@ -1,6 +1,7 @@
 #pragma once
 
 #include "godot_cpp/classes/resource.hpp"
+#include "sizing_data.hpp"
 
 using namespace godot;
 
@@ -33,4 +34,7 @@ public:
 	void SetCeiling(float p_Ceiling);
 	float GetActivePlaneOffset();
 	void SetActivePlaneOffset(float p_ActivePlaneOffset);
+
+	SizingData GetSizingData();
+	Vector3i GetNumCells();
 };
