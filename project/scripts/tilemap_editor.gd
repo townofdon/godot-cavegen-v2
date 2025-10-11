@@ -16,7 +16,7 @@ enum NodeTileMapping {
 
 const TILEMAP_SOURCE_ID := 2
 
-var prevTileSet := Vector2i(-1,-1)
+var lastTileUpdated := Vector2i(-1,-1)
 var prevNumCells := Vector2i(-1,-1)
 
 func _process(_delta: float) -> void:
@@ -24,12 +24,12 @@ func _process(_delta: float) -> void:
 	var pos := local_to_map(get_local_mouse_position())
 	selectionLayer.set_cell(pos, 3, Vector2i(1, 0))
 	var atlasCoords = get_cell_atlas_coords(pos)
-	if(Input.is_action_pressed("mouse_btn_left")):
-		_user_fill_cell_at(pos, atlasCoords)
-	elif(Input.is_action_pressed("mouse_btn_right")):
+	if(Input.is_action_pressed("mouse_btn_right")):
 		_user_clear_cell_at(pos, atlasCoords)
+	elif(Input.is_action_pressed("mouse_btn_left")):
+		_user_fill_cell_at(pos, atlasCoords)
 	else:
-		prevTileSet = Vector2i(-1,-1)
+		lastTileUpdated = Vector2i(-1,-1)
 
 func _user_fill_cell_at(coords: Vector2i, atlasCoords: Vector2i) -> void:
 	var tileData := get_cell_tile_data(coords)
@@ -54,11 +54,11 @@ func _user_clear_cell_at(coords: Vector2i, atlasCoords: Vector2i) -> void:
 		_user_set_cell_at(coords, NodeTileMapping.WallEmpty)
 
 func _user_set_cell_at(coords: Vector2i, tile: NodeTileMapping) -> void:
-	if coords == prevTileSet:
+	if coords == lastTileUpdated:
 		return
 	var numCells := _get_num_cells()
 	_set_cell_at(coords, tile, numCells)
-	prevTileSet = coords
+	lastTileUpdated = coords
 
 func _set_cell_at(coords: Vector2i, tile: NodeTileMapping, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
@@ -118,9 +118,11 @@ func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 				_set_cell_at(Vector2i(x, y), NodeTileMapping.InheritNoise, numCells)
 	prevNumCells = numCells
 
+var processing:bool
 func handle_room_size_change() -> void:
 	if !cfg: return
 	if !room: return
+	if processing: return
 	var numCells := _get_num_cells();
 	if numCells == prevNumCells:
 		return
@@ -129,7 +131,8 @@ func handle_room_size_change() -> void:
 	if prevNumCells.x < 0 || prevNumCells.y < 0:
 		printerr("invalid prevNumCells (", prevNumCells.x, ",", prevNumCells.y, ") - did you forget to call initialize()?")
 		return
-	# unset previous border cells, and copy data to new border cells
+	processing = true
+	# unset previous border tile, and copy tile to new border tile
 	if numCells.x != prevNumCells.x:
 		for y in range(numCells.y):
 			var prevCoords := Vector2i(prevNumCells.x - 1, y)
@@ -184,4 +187,6 @@ func handle_room_size_change() -> void:
 		for y in range(numCells.y, prevNumCells.y):
 			for x in range(numCells.x):
 				erase_cell(Vector2i(x, y))
+	update_internals()
 	prevNumCells = numCells
+	processing = false
