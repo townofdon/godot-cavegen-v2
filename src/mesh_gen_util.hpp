@@ -81,7 +81,11 @@ struct Context {
 		float FalloffNearBorder;
 		// tiles
 		float TileStrength;
-		float TileFalloff;
+		float TileSmoothing;
+		float TileFloor;
+		float TileFloorFalloff;
+		float TileCeiling;
+		float TileCeilingFalloff;
 	};
 	Config cfg;
 	Noise noise;

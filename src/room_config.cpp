@@ -73,9 +73,25 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TileStrength", "p_TileStrength"), &RoomConfig::SetTileStrength);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_strength", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TileStrength", "get_TileStrength");
 
-	ClassDB::bind_method(D_METHOD("get_TileFalloff"), &RoomConfig::GetTileFalloff);
-	ClassDB::bind_method(D_METHOD("set_TileFalloff", "p_TileFalloff"), &RoomConfig::SetTileFalloff);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_y_spread", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFalloff", "get_TileFalloff");
+	ClassDB::bind_method(D_METHOD("get_TileSmoothing"), &RoomConfig::GetTileSmoothing);
+	ClassDB::bind_method(D_METHOD("set_TileSmoothing", "p_TileSmoothing"), &RoomConfig::SetTileSmoothing);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_smoothing", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileSmoothing", "get_TileSmoothing");
+
+	ClassDB::bind_method(D_METHOD("get_TileFloor"), &RoomConfig::GetTileFloor);
+	ClassDB::bind_method(D_METHOD("set_TileFloor", "p_TileFloor"), &RoomConfig::SetTileFloor);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloor", "get_TileFloor");
+
+	ClassDB::bind_method(D_METHOD("get_TileFloorFalloff"), &RoomConfig::GetTileFloorFalloff);
+	ClassDB::bind_method(D_METHOD("set_TileFloorFalloff", "p_TileFloorFalloff"), &RoomConfig::SetTileFloorFalloff);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloorFalloff", "get_TileFloorFalloff");
+
+	ClassDB::bind_method(D_METHOD("get_TileCeiling"), &RoomConfig::GetTileCeiling);
+	ClassDB::bind_method(D_METHOD("set_TileCeiling", "p_TileCeiling"), &RoomConfig::SetTileCeiling);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceiling", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeiling", "get_TileCeiling");
+
+	ClassDB::bind_method(D_METHOD("get_TileCeilingFalloff"), &RoomConfig::GetTileCeilingFalloff);
+	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
@@ -105,7 +121,11 @@ RoomConfig::RoomConfig() {
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
 	TileStrength = 1.0f;
-	TileFalloff = 0.5f;
+	TileSmoothing = 0.0f;
+	TileFloor = 0.4f;
+	TileCeiling = 0.6f;
+	TileFloorFalloff = 0.2f;
+	TileCeilingFalloff = 0.2f;
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
@@ -161,8 +181,20 @@ float RoomConfig::GetFalloffNearBorder() {
 float RoomConfig::GetTileStrength() {
 	return TileStrength;
 }
-float RoomConfig::GetTileFalloff() {
-	return TileFalloff;
+float RoomConfig::GetTileSmoothing() {
+	return TileSmoothing;
+}
+float RoomConfig::GetTileFloor() {
+	return TileFloor;
+}
+float RoomConfig::GetTileFloorFalloff() {
+	return TileFloorFalloff;
+}
+float RoomConfig::GetTileCeiling() {
+	return TileCeiling;
+}
+float RoomConfig::GetTileCeilingFalloff() {
+	return TileCeilingFalloff;
 }
 
 void RoomConfig::SetShowNoise(bool p_ShowNoise) {
@@ -225,8 +257,24 @@ void RoomConfig::SetTileStrength(float p_TileStrength) {
 	TileStrength = p_TileStrength;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetTileFalloff(float p_TileFalloff) {
-	TileFalloff = p_TileFalloff;
+void RoomConfig::SetTileSmoothing(float p_TileSmoothing) {
+	TileSmoothing = p_TileSmoothing;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileFloor(float p_TileFloor) {
+	TileFloor = p_TileFloor;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileFloorFalloff(float p_TileFloorFalloff) {
+	TileFloorFalloff = p_TileFloorFalloff;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileCeiling(float p_TileCeiling) {
+	TileCeiling = p_TileCeiling;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileCeilingFalloff(float p_TileCeilingFalloff) {
+	TileCeilingFalloff = p_TileCeilingFalloff;
 	emit_signal("on_changed");
 }
 

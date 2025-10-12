@@ -83,7 +83,11 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.FalloffNearBorder,
 		// tiles
 		room.TileStrength,
-		room.TileFalloff,
+		room.TileSmoothing,
+		room.TileFloor,
+		room.TileFloorFalloff,
+		room.TileCeiling,
+		room.TileCeilingFalloff,
 	};
 	struct MG::Context ctx = {
 		ctxCfg,
@@ -440,29 +444,50 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	//
 	int activeY = MG::GetActivePlaneY(ctx);
 	int ceiling = round(MG::GetCeiling(ctx));
+	float vfloor = cfg.TileFloor; // range [0,1]
+	float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
+	float vceil = cfg.TileCeiling; // range [0,1]
+	float vceilFalloff = lerpf(vceil - CMP_EPSILON, 0, cfg.TileCeilingFalloff);
 	for (int z = 1; z < numCells.z - 1; z++) {
-		for (int y = 1; y < numCells.y - 1; y++) {
+		for (int y = 2; y < numCells.y - 1; y++) {
 			for (int x = 1; x < numCells.x - 1; x++) {
 				int tile = MG::GetTile(ctx, x, z);
 				if (tile == RoomConfig::TileState::TILE_STATE_UNSET) {
 					continue;
 				}
 				int i = MG::NoiseIndex(ctx, x, y, z);
-				int dist = absi(y - activeY);
-				int size = ceiling - 2;
-				float distPct = dist / maxf(1, size * cfg.TileFalloff);
+				// calculate y thresholds
+				// 0   => 0
+				// 0.5 => activeY
+				// 1   => ceiling
+				float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
+				float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
+				float t = clamp01(t0 + t1);
+				float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
+				float t_ceil = clamp01(inverse_lerpf(vceil, vceilFalloff, t));
+
+				// // ceiling t value: 0 => no effect, 1 => full effect
+				// float t_ceil = clamp01(inverse_lerpf(lerpf(0, 0.5f - CMP_EPSILON, cfg.TileCeilingFalloff), 0.5f, t));
+				// // float t value: 0 => no effect, 1 => full effect
+				// float t_floor = 1 - clamp01(inverse_lerpf(0.5f, lerpf(0.5f, 1, cfg.TileFloorFalloff), t));
 				float targ = 0.0f;
+
 				if (tile == RoomConfig::TileState::TILE_STATE_EMPTY) {
 					targ = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 					targ = lerpf(noiseSamples[i], targ, clamp01(cfg.TileStrength));
 					targ = lerpf(targ, 0.0f, clamp01(cfg.TileStrength - 1));
+					targ = lerpf(noiseSamples[i], targ, t_floor);
 				}
 				if (tile == RoomConfig::TileState::TILE_STATE_FILLED) {
+					float zero = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					// as tile strength approaches 2, reduce noise above ceil
+					float fallback = lerpf(noiseSamples[i], zero, clamp01(cfg.TileStrength - 1));
 					targ = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
 					targ = lerpf(noiseSamples[i], targ, clamp01(cfg.TileStrength));
 					targ = lerpf(targ, 1.0f, clamp01(cfg.TileStrength - 1));
+					targ = lerpf(fallback, targ, t_ceil);
 				}
-				noiseSamples[i] = lerpf(targ, noiseSamples[i], clamp01(distPct));
+				noiseSamples[i] = targ;
 			}
 		}
 	}

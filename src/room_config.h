@@ -34,7 +34,11 @@ public:
 	float FalloffNearBorder;
 	// tiles
 	float TileStrength;
-	float TileFalloff;
+	float TileSmoothing;
+	float TileFloor;
+	float TileFloorFalloff;
+	float TileCeiling;
+	float TileCeilingFalloff;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -51,7 +55,11 @@ public:
 	float GetSmoothBorderNoise();
 	float GetFalloffNearBorder();
 	float GetTileStrength();
-	float GetTileFalloff();
+	float GetTileSmoothing();
+	float GetTileFloor();
+	float GetTileFloorFalloff();
+	float GetTileCeiling();
+	float GetTileCeilingFalloff();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -68,7 +76,11 @@ public:
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
 	void SetTileStrength(float p_TileStrength);
-	void SetTileFalloff(float p_TileFalloff);
+	void SetTileSmoothing(float p_TileSmoothing);
+	void SetTileFloor(float p_TileFloor);
+	void SetTileFloorFalloff(float p_TileFloorFalloff);
+	void SetTileCeiling(float p_TileCeiling);
+	void SetTileCeilingFalloff(float p_TileCeilingFalloff);
 
 	//
 	// Tilemap Data
