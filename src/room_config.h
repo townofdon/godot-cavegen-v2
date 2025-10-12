@@ -32,6 +32,9 @@ public:
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float FalloffNearBorder;
+	// tiles
+	float TileStrength;
+	float TileFalloff;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -47,6 +50,8 @@ public:
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
 	float GetFalloffNearBorder();
+	float GetTileStrength();
+	float GetTileFalloff();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -62,6 +67,8 @@ public:
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
+	void SetTileStrength(float p_TileStrength);
+	void SetTileFalloff(float p_TileFalloff);
 
 	//
 	// Tilemap Data
@@ -70,9 +77,10 @@ public:
 		TILE_STATE_UNSET, // unset - will honor noise value at node
 		TILE_STATE_EMPTY,
 		TILE_STATE_FILLED,
+		_TILE_STATE_MAX_,
 	};
 	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
-	// void SetTiles(PackedInt32Array tiles);
+	int *GetTiles();
 
 protected:
 	int tiles[MAX_NOISE_NODES_2D];

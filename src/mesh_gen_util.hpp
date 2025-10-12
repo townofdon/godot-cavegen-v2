@@ -3,6 +3,7 @@
 
 #include "godot_cpp/classes/noise.hpp"
 #include "godot_cpp/core/math.hpp"
+#include "room_config.h"
 
 namespace godot {
 
@@ -12,13 +13,25 @@ namespace godot {
 inline float absf(float x) {
 	return std::abs(x);
 }
+inline int absi(int x) {
+	return std::abs(x);
+}
 inline float minf(float a, float b) {
+	return std::min(a, b);
+}
+inline int mini(int a, int b) {
 	return std::min(a, b);
 }
 inline float maxf(float a, float b) {
 	return std::max(a, b);
 }
+inline int maxi(int a, int b) {
+	return std::max(a, b);
+}
 inline float clampf(float x, float minv, float maxv) {
+	return std::max(minv, std::min(x, maxv));
+}
+inline int clampi(int x, int minv, int maxv) {
 	return std::max(minv, std::min(x, maxv));
 }
 inline float clamp01(float x) {
@@ -66,11 +79,15 @@ struct Context {
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float FalloffNearBorder;
+		// tiles
+		float TileStrength;
+		float TileFalloff;
 	};
 	Config cfg;
 	Noise noise;
 	Noise borderNoise;
 	Vector3i numCells;
+	int *tiles;
 };
 
 inline int NoiseIndex(Context ctx, int x, int y, int z) {
@@ -254,6 +271,30 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	p.z = a.z + mu * (b.z - a.z);
 	auto avg = (Vector3(a) + Vector3(b)) * 0.5f;
 	return avg.lerp(p, clamp01(ctx.cfg.Interpolate));
+}
+
+inline RoomConfig::TileState GetTile(Context ctx, int x, int z) {
+	// tiles exclude room bounds, which is empty space
+	int sx = ctx.numCells.x - 2;
+	int sz = ctx.numCells.z - 2;
+	int i = x - 1 + (z - 1) * sx;
+	if (x - 1 < 0 || x - 1 >= sx ||
+		z - 1 < 0 || z - 1 >= sz ||
+		i < 0 || i >= sx * sz ||
+		i > MAX_NOISE_NODES_2D) {
+		return RoomConfig::TileState::TILE_STATE_UNSET;
+	}
+	int tile = ctx.tiles[i];
+	if (tile < 0 || tile >= RoomConfig::TileState::_TILE_STATE_MAX_) {
+		return RoomConfig::TileState::TILE_STATE_UNSET;
+	}
+	return static_cast<RoomConfig::TileState>(tile);
+}
+
+inline int GetActivePlaneY(Context ctx) {
+	int ceiling = round(GetCeiling(ctx)) + 1;
+	int activeY = ceiling - ctx.cfg.ActivePlaneOffset;
+	return maxi(activeY, 2);
 }
 
 } //namespace MG

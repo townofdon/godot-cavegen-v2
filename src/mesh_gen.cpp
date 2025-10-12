@@ -55,6 +55,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	RoomConfig room = *p_room_cfg;
 	SizingData sizing = cfg.GetSizingData();
 	numCells = sizing.numCells;
+	int *tiles = room.GetTiles();
 	struct MG::Context::Config ctxCfg = {
 		// global
 		cfg.RoomWidth,
@@ -80,12 +81,16 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.BorderNoiseIsoValue,
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
+		// tiles
+		room.TileStrength,
+		room.TileFalloff,
 	};
 	struct MG::Context ctx = {
 		ctxCfg,
 		*p_noise,
 		*p_border_noise,
 		sizing.numCells,
+		tiles,
 	};
 
 	//
@@ -178,7 +183,10 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	float minV = INFINITY;
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
-	// first pass - initialize && sample all noise values in grid
+	//
+	// base noise
+	//
+	// - first pass - initialize && sample all noise values in grid
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
@@ -198,7 +206,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
-	// second pass - normalize noise values, apply mods
+	// - second pass - normalize noise values, apply mods
 	if (cfg.ShowNoise) {
 		for (size_t z = 0; z < numCells.z; z++) {
 			for (size_t y = 0; y < numCells.y; y++) {
@@ -228,7 +236,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 			}
 		}
 	}
-	// third pass - apply bounds, borders
+	// - third pass - apply bounds, borders
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
@@ -264,11 +272,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
 		auto ceiling = GetCeiling(ctx);
-		// first pass - sample and normalize border noise on x plane
-		// step 0 => sample noise at x=0
-		// step 1 => normalize at x=0
-		// step 2 => sample noise at x=max
-		// step 3 => normalize at x=max
+		// - first pass - sample and normalize border noise on x plane
+		//   step 0 => sample noise at x=0
+		//   step 1 => normalize at x=0
+		//   step 2 => sample noise at x=max
+		//   step 3 => normalize at x=max
 		for (int step = 0; step < 4; step++) {
 			if (step == 0 || step == 2) {
 				minV = INFINITY;
@@ -297,11 +305,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				}
 			}
 		}
-		// second pass - sample and normalize border noise on z plane
-		// step 0 => sample noise at z=0
-		// step 1 => normalize at z=0
-		// step 2 => sample noise at z=max
-		// step 3 => normalize at z=max
+		// - second pass - sample and normalize border noise on z plane
+		//   step 0 => sample noise at z=0
+		//   step 1 => normalize at z=0
+		//   step 2 => sample noise at z=max
+		//   step 3 => normalize at z=max
 		for (int step = 0; step < 4; step++) {
 			if (step == 0 || step == 2) {
 				minV = INFINITY;
@@ -330,7 +338,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				}
 			}
 		}
-		// third pass: apply noise to border points
+		// - third pass: apply noise to border points
 		// side: x=0
 		for (int z = 2; z < numCells.z - 2; z++) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
@@ -428,6 +436,38 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	}
 
 	//
+	// apply tile data
+	//
+	int activeY = MG::GetActivePlaneY(ctx);
+	int ceiling = round(MG::GetCeiling(ctx));
+	for (int z = 1; z < numCells.z - 1; z++) {
+		for (int y = 1; y < numCells.y - 1; y++) {
+			for (int x = 1; x < numCells.x - 1; x++) {
+				int tile = MG::GetTile(ctx, x, z);
+				if (tile == RoomConfig::TileState::TILE_STATE_UNSET) {
+					continue;
+				}
+				int i = MG::NoiseIndex(ctx, x, y, z);
+				int dist = absi(y - activeY);
+				int size = ceiling - 2;
+				float distPct = dist / maxf(1, size * cfg.TileFalloff);
+				float targ = 0.0f;
+				if (tile == RoomConfig::TileState::TILE_STATE_EMPTY) {
+					targ = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					targ = lerpf(noiseSamples[i], targ, clamp01(cfg.TileStrength));
+					targ = lerpf(targ, 0.0f, clamp01(cfg.TileStrength - 1));
+				}
+				if (tile == RoomConfig::TileState::TILE_STATE_FILLED) {
+					targ = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
+					targ = lerpf(noiseSamples[i], targ, clamp01(cfg.TileStrength));
+					targ = lerpf(targ, 1.0f, clamp01(cfg.TileStrength - 1));
+				}
+				noiseSamples[i] = lerpf(targ, noiseSamples[i], clamp01(distPct));
+			}
+		}
+	}
+
+	//
 	// remove orphans / islands - flood fill
 	//
 	if (cfg.RemoveOrphans) {
@@ -435,9 +475,9 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		Vector3i floodStart = Vector3i((numCells.x - 1) / 2, 1, (numCells.z - 1) / 2);
 		bool foundCandidate = MG::IsPointActive(ctx, noiseSamples, floodStart.x, floodStart.y, floodStart.z);
 		// initialize flood screen and set floodStart if not yet found
-		for (int z = 0; z < numCells.z - 1; z++) {
-			for (int y = 0; y < numCells.y - 1; y++) {
-				for (int x = 0; x < numCells.x - 1; x++) {
+		for (int z = 1; z < numCells.z - 1; z++) {
+			for (int y = 1; y < numCells.y - 1; y++) {
+				for (int x = 1; x < numCells.x - 1; x++) {
 					if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
 						floodStart = Vector3i(x, y, z);
 						foundCandidate = true;
@@ -448,9 +488,9 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 		// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
 		flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
-		for (int z = 0; z < numCells.z - 1; z++) {
-			for (int y = 0; y < numCells.y - 1; y++) {
-				for (int x = 0; x < numCells.x - 1; x++) {
+		for (int z = 1; z < numCells.z - 1; z++) {
+			for (int y = 1; y < numCells.y - 1; y++) {
+				for (int x = 1; x < numCells.x - 1; x++) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					if (floodFillScreen[i]) {
 						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);

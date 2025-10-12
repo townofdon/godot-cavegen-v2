@@ -11,3 +11,5 @@ room_border__border_size = 4
 room_border__border_noise_strength = 0.38
 room_border__smooth_border_noise = 0.47
 room_border__falloff_near_border = 0.75
+tile_apply__tile_strength = 2.0
+tile_apply__tile_y_spread = 0.56

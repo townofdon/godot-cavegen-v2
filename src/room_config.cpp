@@ -67,6 +67,16 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
 
+	ADD_GROUP("Tile Apply", "tile_apply__");
+
+	ClassDB::bind_method(D_METHOD("get_TileStrength"), &RoomConfig::GetTileStrength);
+	ClassDB::bind_method(D_METHOD("set_TileStrength", "p_TileStrength"), &RoomConfig::SetTileStrength);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_strength", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TileStrength", "get_TileStrength");
+
+	ClassDB::bind_method(D_METHOD("get_TileFalloff"), &RoomConfig::GetTileFalloff);
+	ClassDB::bind_method(D_METHOD("set_TileFalloff", "p_TileFalloff"), &RoomConfig::SetTileFalloff);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_y_spread", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFalloff", "get_TileFalloff");
+
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
 	//
@@ -94,6 +104,8 @@ RoomConfig::RoomConfig() {
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
+	TileStrength = 1.0f;
+	TileFalloff = 0.5f;
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
@@ -145,6 +157,12 @@ float RoomConfig::GetSmoothBorderNoise() {
 }
 float RoomConfig::GetFalloffNearBorder() {
 	return FalloffNearBorder;
+}
+float RoomConfig::GetTileStrength() {
+	return TileStrength;
+}
+float RoomConfig::GetTileFalloff() {
+	return TileFalloff;
 }
 
 void RoomConfig::SetShowNoise(bool p_ShowNoise) {
@@ -203,6 +221,14 @@ void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 	FalloffNearBorder = p_FalloffNearBorder;
 	emit_signal("on_changed");
 }
+void RoomConfig::SetTileStrength(float p_TileStrength) {
+	TileStrength = p_TileStrength;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileFalloff(float p_TileFalloff) {
+	TileFalloff = p_TileFalloff;
+	emit_signal("on_changed");
+}
 
 //
 // Tilemap Data
@@ -233,7 +259,11 @@ void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 	// UtilityFunctions::print("set tile " + dtile + " at index " + di + "(" + dx + "," + dy + ")");
 
 	ERR_FAIL_INDEX_EDMSG(i, MAX_NOISE_NODES_2D, "tile index out of bounds");
-	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::TILE_STATE_FILLED + 1, "invalid tile");
+	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
 
 	tiles[i] = tile;
+	emit_signal("on_changed");
+}
+int *RoomConfig::GetTiles() {
+	return tiles;
 }
