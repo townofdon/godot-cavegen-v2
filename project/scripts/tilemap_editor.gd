@@ -3,10 +3,13 @@ class_name TileMapEditor
 
 @onready var selectionLayer:TileMapLayer = %SelectionLayer
 
+signal on_mode_changed(mode: EditorMode)
+
 var cfg:GlobalConfig
 var room:RoomConfig
 
 enum NodeTileMapping {
+	Null = -1,
 	InheritNoise = 0,
 	InnerFilled = 3,
 	InnerEmpty = 4,
@@ -14,56 +17,81 @@ enum NodeTileMapping {
 	WallEmpty = 6,
 }
 
+enum EditorMode {
+	Draw,
+	Line,
+	Fill,
+}
+
 const TILEMAP_SOURCE_ID := 2
 
-var lastTileUpdated := Vector2i(-1,-1)
 var prevNumCells := Vector2i(-1,-1)
+var lastTileDrawnCoords := Vector2i(-1,-1)
+var drawTile := NodeTileMapping.Null
+
+var mode := EditorMode.Draw
+
+func set_editor_mode(p_mode: EditorMode) -> void:
+	mode = p_mode
+	on_mode_changed.emit(mode)
 
 func _process(_delta: float) -> void:
-	selectionLayer.clear()
-	var pos := local_to_map(get_local_mouse_position())
-	selectionLayer.set_cell(pos, 3, Vector2i(1, 0))
-	var atlasCoords = get_cell_atlas_coords(pos)
-	if(Input.is_action_pressed("mouse_btn_right")):
-		_user_clear_cell_at(pos, atlasCoords)
-	elif(Input.is_action_pressed("mouse_btn_left")):
-		_user_fill_cell_at(pos, atlasCoords)
+	var coords := local_to_map(get_local_mouse_position())
+	# draw mode
+	if mode == EditorMode.Draw:
+		selectionLayer.clear()
+		selectionLayer.set_cell(coords, 3, Vector2i(1, 0))
+		var atlasCoords := get_cell_atlas_coords(coords)
+		if(Input.is_action_pressed("mouse_btn_right")):
+			drawTile = _get_next_tile_to_lay(atlasCoords, false);
+			_user_set_cell_at(coords, drawTile)
+		elif(Input.is_action_pressed("mouse_btn_left")):
+			drawTile = _get_next_tile_to_lay(atlasCoords, true);
+			_user_set_cell_at(coords, drawTile)
+		else:
+			lastTileDrawnCoords = Vector2i(-1,-1)
+			drawTile = NodeTileMapping.Null
+	elif mode == EditorMode.Line:
+		# TODO: ADD LINE MODE
+		pass
+	elif mode == EditorMode.Fill:
+		# TODO: ADD FILL MODE
+		pass
+
+func _get_next_tile_to_lay(atlasCoords: Vector2i, fill: bool) -> NodeTileMapping:
+	if drawTile != NodeTileMapping.Null:
+		return drawTile
+	if fill:
+		if atlasCoords.x == NodeTileMapping.InnerFilled:
+			return NodeTileMapping.InnerFilled
+		if atlasCoords.x == NodeTileMapping.InheritNoise:
+			return NodeTileMapping.InnerFilled
+		elif atlasCoords.x == NodeTileMapping.InnerEmpty:
+			return NodeTileMapping.InheritNoise
+		elif atlasCoords.x == NodeTileMapping.WallEmpty:
+			return NodeTileMapping.WallFilled
 	else:
-		lastTileUpdated = Vector2i(-1,-1)
-
-func _user_fill_cell_at(coords: Vector2i, atlasCoords: Vector2i) -> void:
-	var tileData := get_cell_tile_data(coords)
-	if !tileData:
-		return
-	if atlasCoords.x == NodeTileMapping.InheritNoise:
-		_user_set_cell_at(coords, NodeTileMapping.InnerFilled)
-	elif atlasCoords.x == NodeTileMapping.InnerEmpty:
-		_user_set_cell_at(coords, NodeTileMapping.InheritNoise)
-	elif atlasCoords.x == NodeTileMapping.WallEmpty:
-		_user_set_cell_at(coords, NodeTileMapping.WallFilled)
-
-func _user_clear_cell_at(coords: Vector2i, atlasCoords: Vector2i) -> void:
-	var tileData := get_cell_tile_data(coords)
-	if !tileData:
-		return
-	if atlasCoords.x == NodeTileMapping.InheritNoise:
-		_user_set_cell_at(coords, NodeTileMapping.InnerEmpty)
-	elif atlasCoords.x == NodeTileMapping.InnerFilled:
-		_user_set_cell_at(coords, NodeTileMapping.InheritNoise)
-	elif atlasCoords.x == NodeTileMapping.WallFilled:
-		_user_set_cell_at(coords, NodeTileMapping.WallEmpty)
+		if atlasCoords.x == NodeTileMapping.InnerEmpty:
+			return NodeTileMapping.InnerEmpty
+		if atlasCoords.x == NodeTileMapping.InheritNoise:
+			return NodeTileMapping.InnerEmpty
+		elif atlasCoords.x == NodeTileMapping.InnerFilled:
+			return NodeTileMapping.InheritNoise
+		elif atlasCoords.x == NodeTileMapping.WallFilled:
+			return NodeTileMapping.WallEmpty
+	return NodeTileMapping.Null
 
 func _user_set_cell_at(coords: Vector2i, tile: NodeTileMapping) -> void:
-	if coords == lastTileUpdated:
-		return
+	if coords == lastTileDrawnCoords: return
+	if tile == NodeTileMapping.Null: return
 	var numCells := _get_num_cells()
 	_set_cell_at(coords, tile, numCells)
-	lastTileUpdated = coords
+	lastTileDrawnCoords = coords
 
 func _set_cell_at(coords: Vector2i, tile: NodeTileMapping, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
 	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
-	tile = _maybe_convert_to_wall(tile, isWall)
+	tile = _maybe_convert_tile(tile, isWall)
 	set_cell(coords, TILEMAP_SOURCE_ID, Vector2i(tile, 0))
 	if room: room.set_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
 
@@ -72,13 +100,17 @@ func _erase_cell_at(coords: Vector2i, numCells: Vector2i) -> void:
 	erase_cell(coords)
 	if room: room.set_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
 
-func _maybe_convert_to_wall(atlasX:NodeTileMapping, isWall:bool) -> NodeTileMapping:
+func _maybe_convert_tile(atlasX:NodeTileMapping, isWall:bool) -> NodeTileMapping:
 	if atlasX == NodeTileMapping.InheritNoise && isWall:
 		return NodeTileMapping.WallFilled
 	if atlasX == NodeTileMapping.InnerFilled && isWall:
 		return NodeTileMapping.WallFilled
 	if atlasX == NodeTileMapping.InnerEmpty && isWall:
 		return NodeTileMapping.WallEmpty
+	if atlasX == NodeTileMapping.WallFilled && !isWall:
+		return NodeTileMapping.InnerFilled
+	if atlasX == NodeTileMapping.WallEmpty && !isWall:
+		return NodeTileMapping.InnerEmpty
 	return atlasX
 
 func _get_tile_state_from_atlas_x(atlasX:int) -> int:

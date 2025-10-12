@@ -1,5 +1,7 @@
 [gd_resource type="GlobalConfig" format=3 uid="uid://5fjn4vb33rgv"]
 
 [resource]
+room_width = 30.73
+room_depth = 29.027
 ceiling = 0.39
 active_plane_offset = 4.32
