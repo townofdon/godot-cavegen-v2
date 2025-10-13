@@ -197,7 +197,7 @@ inline bool IsAtBoundaryY(Context ctx, int y) {
 inline bool IsAtBorder(Context ctx, int x, int y, int z) {
 	return (
 		x <= ctx.cfg.BorderSize ||
-		y <= ctx.cfg.BorderSize ||
+		y <= 1 ||
 		z <= ctx.cfg.BorderSize ||
 		x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize ||
 		z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize);
@@ -215,9 +215,8 @@ inline bool IsAtBorderEdge(Context ctx, int x, int y, int z) {
 inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
 	auto numCells = ctx.numCells;
 	int distX = minf(absf(x - BorderSize), absf(numCells.x - 1 - BorderSize - x));
-	int distY = absf(y - BorderSize);
 	int distZ = minf(absf(z - BorderSize), absf(numCells.z - 1 - BorderSize - z));
-	return minf(minf(distX, distY), distZ);
+	return minf(distX, distZ);
 }
 
 inline bool IsBelowCeiling(Context ctx, int y) {
@@ -277,6 +276,7 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	return avg.lerp(p, clamp01(ctx.cfg.Interpolate));
 }
 
+// given (x, z) in 3d noise space, return the corresponding tile from 2d tile space
 inline RoomConfig::TileState GetTile(Context ctx, int x, int z, RoomConfig::TileState defaultVal = RoomConfig::TileState::TILE_STATE_UNSET) {
 	// tiles exclude room bounds, which is empty space
 	int sx = ctx.numCells.x - 2;
@@ -293,6 +293,21 @@ inline RoomConfig::TileState GetTile(Context ctx, int x, int z, RoomConfig::Tile
 		return defaultVal;
 	}
 	return static_cast<RoomConfig::TileState>(tile);
+}
+
+// given (x, z) in 3d noise space, return the corresponding border tile (if present) from 2d tile space
+inline RoomConfig::TileState GetBorderTile(Context ctx, int x, int z) {
+	if (x <= ctx.cfg.BorderSize) {
+		x = 1;
+	} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
+		x = ctx.numCells.x - 2;
+	}
+	if (z <= ctx.cfg.BorderSize) {
+		z = 1;
+	} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
+		z = ctx.numCells.z - 2;
+	}
+	return GetTile(ctx, x, z);
 }
 
 inline int GetActivePlaneY(Context ctx) {

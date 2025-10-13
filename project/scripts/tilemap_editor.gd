@@ -121,7 +121,8 @@ func _get_tile_state_from_atlas_x(atlasX:int) -> int:
 	if atlasX == NodeTileMapping.InnerEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
 	if atlasX == NodeTileMapping.WallFilled:
-		return RoomConfig.TILE_STATE_FILLED
+		# walls are filled by default in MeshGen
+		return RoomConfig.TILE_STATE_UNSET
 	if atlasX == NodeTileMapping.WallEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
 	return RoomConfig.TILE_STATE_UNSET
@@ -135,6 +136,7 @@ func _get_num_cells() -> Vector2i:
 	var numCells := Vector2i(numCells3dAdjusted.x, numCells3dAdjusted.z);
 	return numCells
 
+var initialized:bool = false;
 func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 	if !p_cfg: return
 	if !p_room: return
@@ -153,11 +155,13 @@ func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 	update_internals()
 	prevNumCells = numCells
 	processing = false
+	initialized = true
 
 var processing:bool
 func handle_room_size_change() -> void:
 	if !cfg: return
 	if !room: return
+	if !initialized: return
 	if processing: return
 	var numCells := _get_num_cells();
 	if numCells == prevNumCells:

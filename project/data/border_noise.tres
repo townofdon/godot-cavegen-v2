@@ -3,7 +3,7 @@
 [resource]
 noise_type = 3
 frequency = 0.0011
-offset = Vector3(-19, 20.6, -75.1)
+offset = Vector3(-13.9, 20.6, -85.9)
 fractal_octaves = 6
 fractal_lacunarity = 3.62
 fractal_gain = 0.53

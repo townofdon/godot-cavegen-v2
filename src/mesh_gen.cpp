@@ -254,7 +254,8 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				} else if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
 					// apply border
 					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
+					bool isEmptyTile = y > 1 && MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY;
+					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder && !isEmptyTile) {
 						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
 					}
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
@@ -276,7 +277,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
 		auto ceiling = GetCeiling(ctx);
-		// - first pass - sample and normalize border noise on x plane
+		// - first pass - sample and normalize border noise on x walls
 		//   step 0 => sample noise at x=0
 		//   step 1 => normalize at x=0
 		//   step 2 => sample noise at x=max
@@ -287,14 +288,15 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				maxV = -INFINITY;
 			}
 			for (int z = 0; z < numCells.z; z++) {
-				for (int y = 0; y < numCells.y && y <= ceiling; y++) {
+				for (int y = 1; y < numCells.y && y <= ceiling; y++) {
 					int x = 0;
 					if (step >= 2) {
 						x = numCells.x - 1;
 					}
+					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
-						noiseBuffer[NoiseIndex(ctx, x, y, z)] = val;
+						noiseBuffer[i] = val;
 						if (val < minV) {
 							minV = val;
 						}
@@ -302,14 +304,16 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 							maxV = val;
 						}
 					} else {
-						int i = NoiseIndex(ctx, x, y, z);
 						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
+						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
+							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+						}
 						noiseBuffer[i] = val;
 					}
 				}
 			}
 		}
-		// - second pass - sample and normalize border noise on z plane
+		// - second pass - sample and normalize border noise on z walls
 		//   step 0 => sample noise at z=0
 		//   step 1 => normalize at z=0
 		//   step 2 => sample noise at z=max
@@ -319,15 +323,16 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				minV = INFINITY;
 				maxV = -INFINITY;
 			}
-			for (int y = 0; y < numCells.y && y <= ceiling; y++) {
+			for (int y = 1; y < numCells.y && y <= ceiling; y++) {
 				for (int x = 0; x < numCells.x; x++) {
 					int z = 0;
 					if (step >= 2) {
 						z = numCells.z - 1;
 					}
+					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
-						noiseBuffer[NoiseIndex(ctx, x, y, z)] = val;
+						noiseBuffer[i] = val;
 						if (val < minV) {
 							minV = val;
 						}
@@ -335,8 +340,10 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 							maxV = val;
 						}
 					} else {
-						int i = NoiseIndex(ctx, x, y, z);
 						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
+						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
+							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+						}
 						noiseBuffer[i] = val;
 					}
 				}
