@@ -138,6 +138,8 @@ func _get_num_cells() -> Vector2i:
 func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 	if !p_cfg: return
 	if !p_room: return
+	if processing: return
+	processing = true
 	cfg = p_cfg
 	room = p_room
 	var numCells := _get_num_cells()
@@ -148,7 +150,9 @@ func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 				_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
 			else:
 				_set_cell_at(Vector2i(x, y), NodeTileMapping.InheritNoise, numCells)
+	update_internals()
 	prevNumCells = numCells
+	processing = false
 
 var processing:bool
 func handle_room_size_change() -> void:

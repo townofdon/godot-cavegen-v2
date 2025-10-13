@@ -277,7 +277,7 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	return avg.lerp(p, clamp01(ctx.cfg.Interpolate));
 }
 
-inline RoomConfig::TileState GetTile(Context ctx, int x, int z) {
+inline RoomConfig::TileState GetTile(Context ctx, int x, int z, RoomConfig::TileState defaultVal = RoomConfig::TileState::TILE_STATE_UNSET) {
 	// tiles exclude room bounds, which is empty space
 	int sx = ctx.numCells.x - 2;
 	int sz = ctx.numCells.z - 2;
@@ -286,11 +286,11 @@ inline RoomConfig::TileState GetTile(Context ctx, int x, int z) {
 		z - 1 < 0 || z - 1 >= sz ||
 		i < 0 || i >= sx * sz ||
 		i > MAX_NOISE_NODES_2D) {
-		return RoomConfig::TileState::TILE_STATE_UNSET;
+		return defaultVal;
 	}
 	int tile = ctx.tiles[i];
 	if (tile < 0 || tile >= RoomConfig::TileState::_TILE_STATE_MAX_) {
-		return RoomConfig::TileState::TILE_STATE_UNSET;
+		return defaultVal;
 	}
 	return static_cast<RoomConfig::TileState>(tile);
 }
