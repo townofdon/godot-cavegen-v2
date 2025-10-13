@@ -67,6 +67,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
 
+	ClassDB::bind_method(D_METHOD("get_BorderTileSpread"), &RoomConfig::GetBorderTileSpread);
+	ClassDB::bind_method(D_METHOD("set_BorderTileSpread", "p_BorderTileSpread"), &RoomConfig::SetBorderTileSpread);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "room_border__border_tile_spread", PROPERTY_HINT_RANGE, "0,10,"), "set_BorderTileSpread", "get_BorderTileSpread");
+
 	ADD_GROUP("Tile Apply", "tile_apply__");
 
 	ClassDB::bind_method(D_METHOD("get_TileStrength"), &RoomConfig::GetTileStrength);
@@ -120,6 +124,7 @@ RoomConfig::RoomConfig() {
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
+	BorderTileSpread = 2;
 	TileStrength = 1.0f;
 	TileSmoothing = 0.0f;
 	TileFloor = 0.4f;
@@ -177,6 +182,9 @@ float RoomConfig::GetSmoothBorderNoise() {
 }
 float RoomConfig::GetFalloffNearBorder() {
 	return FalloffNearBorder;
+}
+float RoomConfig::GetBorderTileSpread() {
+	return BorderTileSpread;
 }
 float RoomConfig::GetTileStrength() {
 	return TileStrength;
@@ -251,6 +259,10 @@ void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 }
 void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 	FalloffNearBorder = p_FalloffNearBorder;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetBorderTileSpread(float p_BorderTileSpread) {
+	BorderTileSpread = p_BorderTileSpread;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetTileStrength(float p_TileStrength) {

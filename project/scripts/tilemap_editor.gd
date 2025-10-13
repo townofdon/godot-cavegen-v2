@@ -20,6 +20,7 @@ enum NodeTileMapping {
 enum EditorMode {
 	Draw,
 	Line,
+	Rect,
 	Fill,
 }
 

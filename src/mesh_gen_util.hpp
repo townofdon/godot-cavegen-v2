@@ -79,6 +79,7 @@ struct Context {
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float FalloffNearBorder;
+		int BorderTileSpread;
 		// tiles
 		float TileStrength;
 		float TileSmoothing;
@@ -308,6 +309,49 @@ inline RoomConfig::TileState GetBorderTile(Context ctx, int x, int z) {
 		z = ctx.numCells.z - 2;
 	}
 	return GetTile(ctx, x, z);
+}
+
+inline bool IsBorderTile(Context ctx, int x, int z) {
+	if (x <= ctx.cfg.BorderSize) {
+		x = 1;
+	} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
+		x = ctx.numCells.x - 2;
+	}
+	if (z <= ctx.cfg.BorderSize) {
+		z = 1;
+	} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
+		z = ctx.numCells.z - 2;
+	}
+	return (
+		x == 1 || x == ctx.numCells.x - 2 ||
+		z == 1 || z == ctx.numCells.z - 2);
+}
+
+inline int GetDistanceToEmptyBorderTile(Context ctx, int x, int z, int spread) {
+	if (x <= ctx.cfg.BorderSize) {
+		x = 1;
+	} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
+		x = ctx.numCells.x - 2;
+	}
+	if (z <= ctx.cfg.BorderSize) {
+		z = 1;
+	} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
+		z = ctx.numCells.z - 2;
+	}
+	if (GetTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) {
+		return 0;
+	}
+	bool isXBorder = x == 1 || x == ctx.numCells.x - 2;
+	bool isZBorder = z == 1 || z == ctx.numCells.z - 2;
+	for (size_t i = 1; i <= spread; i++) {
+		if ((isZBorder && GetTile(ctx, x + i, z) == RoomConfig::TILE_STATE_EMPTY) ||
+			(isZBorder && GetTile(ctx, x - i, z) == RoomConfig::TILE_STATE_EMPTY) ||
+			(isXBorder && GetTile(ctx, x, z + i) == RoomConfig::TILE_STATE_EMPTY) ||
+			(isXBorder && GetTile(ctx, x, z - i) == RoomConfig::TILE_STATE_EMPTY)) {
+			return i;
+		}
+	}
+	return INT_MAX;
 }
 
 inline int GetActivePlaneY(Context ctx) {

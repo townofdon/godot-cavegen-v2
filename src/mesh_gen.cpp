@@ -81,6 +81,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.BorderNoiseIsoValue,
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
+		room.BorderTileSpread,
 		// tiles
 		room.TileStrength,
 		room.TileSmoothing,
@@ -245,18 +246,27 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
+				float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+				float val = noiseSamples[i];
 				if (MG::IsAtBoundaryY(ctx, y)) {
 					// apply y bounds
-					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					val = zeroValue;
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
-					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					val = zeroValue;
 				} else if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
 					// apply border
-					noiseSamples[i] = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					bool isEmptyTile = y > 1 && MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY;
-					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder && !isEmptyTile) {
-						noiseSamples[i] = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
+					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
+						val = maxf(val, cfg.IsoValue + 0.1f);
+						// subtract from border if close to an empty border tile
+						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderTileSpread);
+						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderTileSpread));
+						float activeY = MG::GetActivePlaneY(ctx) - 6;
+						float ceiling = MG::GetCeiling(ctx);
+						float yPct = clamp01(inverse_lerpf(lerpf(activeY, ceiling - CMP_EPSILON, distPct), ceiling, y));
+						val = lerpf(val, zeroValue, yPct);
+					} else {
+						val = zeroValue;
 					}
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
 					// apply falloff to noise above ceil && near border
@@ -265,9 +275,9 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
 					float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
 					float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
-					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-					noiseSamples[i] = lerpf(noiseSamples[i], zeroValue, t);
+					val = lerpf(val, zeroValue, t);
 				}
+				noiseSamples[i] = val;
 			}
 		}
 	}
@@ -456,9 +466,10 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
 	float vceil = cfg.TileCeiling; // range [0,1]
 	float vceilFalloff = lerpf(vceil - CMP_EPSILON, 0, cfg.TileCeilingFalloff);
-	for (int z = 1; z < numCells.z - 1; z++) {
-		for (int y = 2; y < numCells.y - 1; y++) {
-			for (int x = 1; x < numCells.x - 1; x++) {
+	// border tiles are already accounted for
+	for (int z = 2; z < numCells.z - 2; z++) {
+		for (int y = 2; y < numCells.y - 2; y++) {
+			for (int x = 2; x < numCells.x - 2; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
 				auto defaultTile = MG::GetTile(ctx, x, z);
 				// calculate tile kernel, where 0 => empty, 1 => unset, 2 => filled
