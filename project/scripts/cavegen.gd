@@ -38,6 +38,10 @@ func _ready() -> void:
 	#setup noise
 	noiseB = noise.duplicate()
 	borderNoiseB = borderNoise.duplicate()
+	
+	# setup meshsaver
+	OBJExporter.export_progress_updated.connect(_on_export_progress_updated)
+	OBJExporter.export_completed.connect(_on_export_completed)
 
 func regenerate():
 	if Engine.is_editor_hint(): return
@@ -92,3 +96,37 @@ func _did_noise_change(a: FastNoiseLite, b: FastNoiseLite) -> bool:
 	if a.cellular_jitter != b.cellular_jitter: return true
 	if a.cellular_return_type != b.cellular_return_type: return true
 	return false
+
+var timeStarted:float = 0
+var saving:bool = false
+func _save_mesh() -> void:
+	if saving:
+		return
+	if !meshGen:
+		printerr("[TestSaver] MeshGen is null")
+		return
+	if !meshGen.mesh:
+		printerr("[TestSaver] mesh is null")
+		return
+	var mesh := meshGen.mesh
+	
+	var dir = DirAccess.open("user://")
+	if !dir.dir_exists("model"):
+		dir.make_dir("model")
+	print("saving mesh... 0% completed")
+	timeStarted = Time.get_unix_time_from_system();
+	OBJExporter.save_mesh_to_files(mesh, "user://model/", "cave")
+	saving = true
+
+func _on_button_pressed() -> void:
+	_save_mesh()
+
+func _on_export_progress_updated(_surf_idx:int, progress_value:float):
+	print("saving mesh... ", progress_value * 100, "% completed")
+
+func _on_export_completed(object_file, material_file):
+	print("save complete. files=", object_file, "," , material_file)
+	var timeEnded := Time.get_unix_time_from_system()
+	var duration := timeEnded - timeStarted
+	print ("took ", duration, "s")
+	saving = false

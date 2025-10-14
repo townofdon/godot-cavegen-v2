@@ -14,11 +14,19 @@ config/name="CaveGenV2"
 run/main_scene="uid://dldu5uhu5swo2"
 config/features=PackedStringArray("4.5", "Forward Plus")
 
+[autoload]
+
+OBJExporter="*res://addons/obj_exporter/OBJExporter.tscn"
+
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="viewport"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg")
 
 [input]
 

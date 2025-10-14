@@ -175,7 +175,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 			auto dmin = String(std::to_string(minv).c_str());
 			auto dmax = String(std::to_string(maxv).c_str());
 			auto davg = String(std::to_string(avg).c_str());
-			// UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
+			UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
 		}
 	}
 }
@@ -560,16 +560,25 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	auto ref = get_mesh();
 	auto ptr = *(ref);
-	ImmediateMesh *meshPtr = Object::cast_to<ImmediateMesh>(ptr);
+	ArrayMesh *meshPtr = Object::cast_to<ArrayMesh>(ptr);
 	if (meshPtr == nullptr) {
-		UtilityFunctions::printerr("mesh cannot be null");
+		UtilityFunctions::push_warning("mesh cannot be null");
 		return;
 	}
-	ImmediateMesh mesh = *meshPtr;
+	ArrayMesh mesh = *meshPtr;
 	mesh.clear_surfaces();
-	mesh.surface_begin(Mesh::PrimitiveType::PRIMITIVE_TRIANGLES);
+
+	auto surface_array = godot::Array();
+	surface_array.resize(Mesh::ARRAY_MAX);
+
+	auto verts = PackedVector3Array();
+	auto uvs = PackedVector2Array();
+	auto normals = PackedVector3Array();
+	auto indices = PackedInt32Array(); // vertex indices, in groups of 3 to form triangles
+
 	Vector3 points[3];
 	auto numCells = ctx.numCells;
+	int vertexIndex = 0;
 
 	for (int z = 0; z < numCells.z - 1; z++) {
 		for (int y = 0; y < numCells.y - 1; y++) {
@@ -605,29 +614,32 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 					points[pointIndex] = Vector3(p.x, p.y, p.z);
 					pointIndex++;
 					if (pointIndex == 3) {
-						add_triangle_to_mesh(ctx, mesh, points, uv);
 						pointIndex = 0;
+						auto p1 = points[0];
+						auto p2 = points[1];
+						auto p3 = points[2];
+						auto normal = -(p2 - p1).cross(p3 - p1).normalized();
+						for (size_t i = 0; i < 3; i++) {
+							auto point = points[i];
+							auto x = point.x * ctx.cfg.CellSize;
+							auto y = point.y * ctx.cfg.CellSize;
+							auto z = point.z * ctx.cfg.CellSize;
+							auto vert = get_global_position() + Vector3(x, y, z);
+							verts.append(vert);
+							uvs.append(uv);
+							normals.append(normal);
+							indices.append(vertexIndex);
+							vertexIndex++;
+						}
 					}
 				}
 			}
 		}
 	}
 
-	mesh.surface_end();
-}
-
-void MeshGen::add_triangle_to_mesh(MG::Context ctx, ImmediateMesh mesh, Vector3 points[], Vector2 uv) {
-	auto p1 = points[0];
-	auto p2 = points[1];
-	auto p3 = points[2];
-	auto normal = -(p2 - p1).cross(p3 - p1).normalized();
-	for (size_t i = 0; i < 3; i++) {
-		auto point = points[i];
-		auto x = point.x * ctx.cfg.CellSize;
-		auto y = point.y * ctx.cfg.CellSize;
-		auto z = point.z * ctx.cfg.CellSize;
-		mesh.surface_set_uv(uv);
-		mesh.surface_set_normal(normal);
-		mesh.surface_add_vertex(get_global_position() + Vector3(x, y, z));
-	}
+	surface_array[Mesh::ARRAY_VERTEX] = verts;
+	surface_array[Mesh::ARRAY_TEX_UV] = uvs;
+	surface_array[Mesh::ARRAY_NORMAL] = normals;
+	surface_array[Mesh::ARRAY_INDEX] = indices;
+	mesh.add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
 }

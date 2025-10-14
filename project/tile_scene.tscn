@@ -27,3 +27,8 @@ tile_map_data = PackedByteArray("AAAKABcAAwABAAAAAAA=")
 tile_set = ExtResource("2_exm5h")
 collision_enabled = false
 navigation_enabled = false
+
+[node name="Button" type="Button" parent="."]
+offset_right = 196.0
+offset_bottom = 73.0
+text = "SAVE"

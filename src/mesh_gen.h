@@ -28,5 +28,4 @@ public:
 private:
 	void process_noise(MG::Context ctx, float noiseSamples[]);
 	void march_cubes(MG::Context ctx, float noiseSamples[]);
-	void add_triangle_to_mesh(MG::Context ctx, ImmediateMesh mesh, Vector3 points[], Vector2 uv);
 };

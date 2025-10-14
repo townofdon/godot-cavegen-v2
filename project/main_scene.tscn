@@ -21,7 +21,7 @@ shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/y_ceil = 0.24
 shader_parameter/y_min = -0.35
 
-[sub_resource type="ImmediateMesh" id="ImmediateMesh_8mm7a"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_7ycvg"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
 render_priority = 0
@@ -31,7 +31,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 33.18
+shader_parameter/y_ceil = 18.68
 shader_parameter/y_min = 0.0
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
@@ -60,7 +60,7 @@ metadata/_custom_type_script = "uid://djfffelu7xi37"
 [node name="MeshGen" type="MeshGen" parent="CaveGen"]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_d5x1h")
-mesh = SubResource("ImmediateMesh_8mm7a")
+mesh = SubResource("ArrayMesh_7ycvg")
 skeleton = NodePath("../..")
 
 [node name="Timer" type="Timer" parent="CaveGen"]
@@ -70,8 +70,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 18.75, 15)
-size = Vector3(30, 37.5, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 11.5, 15)
+size = Vector3(30, 23, 30)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")
@@ -109,5 +109,7 @@ render_target_update_mode = 4
 
 [node name="TilemapUI" parent="UI/SubViewportContainer/TilemapSubViewport" instance=ExtResource("9_7ycvg")]
 unique_name_in_owner = true
+
+[connection signal="pressed" from="UI/SubViewportContainer/TilemapSubViewport/TilemapUI/Button" to="CaveGen" method="_on_button_pressed"]
 
 [editable path="UI/SubViewportContainer/TilemapSubViewport/TilemapUI"]
