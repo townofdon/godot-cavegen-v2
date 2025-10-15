@@ -52,12 +52,14 @@ func regenerate():
 	if !borderNoise: return
 	meshGen.generate(cfg, room, noise, borderNoise)
 
-	if meshGen.mesh is ImmediateMesh:
+	if meshGen.mesh is ArrayMesh:
 		var mat:ShaderMaterial = meshGen.material_override
 		if mat && mat is ShaderMaterial:
 			var y_ceil := cfg.room_height * cfg.ceiling - cfg.active_plane_offset
 			mat.set_shader_parameter("y_ceil", y_ceil)
 			mat.set_shader_parameter("y_min", 0.0)
+		# OBJExporter does not support shader material
+		#meshGen.mesh.surface_set_material(0, meshGen.material_override)
 
 func _process(_delta: float) -> void:
 	if _did_noise_change(noise, noiseB):

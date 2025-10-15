@@ -254,7 +254,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
-				} else if (MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z))) {
+				} else if (
+					MG::IsAtBorder(ctx, x, y, z) &&
+					(!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z)) &&
+					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET &&
+					MG::GetTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
 					// apply border
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
 						val = maxf(val, cfg.IsoValue + 0.1f);
@@ -361,9 +365,12 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 		// - third pass: apply noise to border points
 		// side: x=0
-		for (int z = 2; z < numCells.z - 2; z++) {
+		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
 				for (int x = 2; x < cfg.BorderSize + 1; x++) {
+					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+						continue;
+					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, 0, y, z)];
 					// use surrounding cells for avg smoothing
 					float kernel = 0.0f;
@@ -387,7 +394,10 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		// side: z=max
 		for (int z = numCells.z - 3; z > numCells.z - cfg.BorderSize - 2; z--) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
-				for (int x = 2; x < numCells.x - 2; x++) {
+				for (int x = 1; x < numCells.x - 1; x++) {
+					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+						continue;
+					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, numCells.z - 1)];
 					// use surrounding cells for avg smoothing
 					float kernel = 0.0f;
@@ -409,9 +419,12 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 			}
 		}
 		// side: x=max
-		for (int z = 2; z < numCells.z - 2; z++) {
+		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
 				for (int x = numCells.x - 3; x > numCells.x - cfg.BorderSize - 2; x--) {
+					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+						continue;
+					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, numCells.x - 1, y, z)];
 					// use surrounding cells for avg smoothing
 					float kernel = 0.0f;
@@ -434,8 +447,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 		// side: z=0
 		for (int z = 2; z < cfg.BorderSize + 1; z++) {
-			for (int x = 2; x < numCells.x - 2; x++) {
+			for (int x = 1; x < numCells.x - 1; x++) {
 				for (int y = 2; y < numCells.y && y <= ceiling; y++) {
+					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+						continue;
+					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, 0)];
 					// use surrounding cells for avg smoothing
 					float kernel = 0.0f;
@@ -476,9 +492,10 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				float kernel = 0.0f;
 				for (int j = -1; j <= 1; j++) {
 					for (int k = -1; k <= 1; k++) {
+						bool isBorderTile = MG::IsBorderTile(ctx, x + j, z + k);
 						int tile = MG::GetTile(ctx, x + j, z + k, defaultTile);
 						float val = 0;
-						if (tile == RoomConfig::TILE_STATE_UNSET) {
+						if (tile == RoomConfig::TILE_STATE_UNSET || isBorderTile) {
 							val = 1;
 						}
 						if (tile == RoomConfig::TILE_STATE_FILLED) {

@@ -10,11 +10,12 @@ var room:RoomConfig
 
 enum NodeTileMapping {
 	Null = -1,
-	InheritNoise = 0,
-	InnerFilled = 3,
-	InnerEmpty = 4,
+	InnerEmpty = 0,
+	InnerNoise = 1,
+	InnerFilled = 2,
+	WallEmpty = 3,
+	WallNoise = 4,
 	WallFilled = 5,
-	WallEmpty = 6,
 }
 
 enum EditorMode {
@@ -65,20 +66,28 @@ func _get_next_tile_to_lay(atlasCoords: Vector2i, fill: bool) -> NodeTileMapping
 	if fill:
 		if atlasCoords.x == NodeTileMapping.InnerFilled:
 			return NodeTileMapping.InnerFilled
-		if atlasCoords.x == NodeTileMapping.InheritNoise:
+		if atlasCoords.x == NodeTileMapping.InnerNoise:
 			return NodeTileMapping.InnerFilled
 		elif atlasCoords.x == NodeTileMapping.InnerEmpty:
-			return NodeTileMapping.InheritNoise
+			return NodeTileMapping.InnerNoise
 		elif atlasCoords.x == NodeTileMapping.WallEmpty:
+			return NodeTileMapping.WallNoise
+		elif atlasCoords.x == NodeTileMapping.WallNoise:
+			return NodeTileMapping.WallFilled
+		elif atlasCoords.x == NodeTileMapping.WallFilled:
 			return NodeTileMapping.WallFilled
 	else:
 		if atlasCoords.x == NodeTileMapping.InnerEmpty:
 			return NodeTileMapping.InnerEmpty
-		if atlasCoords.x == NodeTileMapping.InheritNoise:
+		if atlasCoords.x == NodeTileMapping.InnerNoise:
 			return NodeTileMapping.InnerEmpty
 		elif atlasCoords.x == NodeTileMapping.InnerFilled:
-			return NodeTileMapping.InheritNoise
+			return NodeTileMapping.InnerNoise
 		elif atlasCoords.x == NodeTileMapping.WallFilled:
+			return NodeTileMapping.WallNoise
+		elif atlasCoords.x == NodeTileMapping.WallNoise:
+			return NodeTileMapping.WallEmpty
+		elif atlasCoords.x == NodeTileMapping.WallEmpty:
 			return NodeTileMapping.WallEmpty
 	return NodeTileMapping.Null
 
@@ -88,9 +97,12 @@ func _user_set_cell_at(coords: Vector2i, tile: NodeTileMapping) -> void:
 	var numCells := _get_num_cells()
 	_set_cell_at(coords, tile, numCells)
 	lastTileDrawnCoords = coords
+	if room: room.notify_changed()
 
 func _set_cell_at(coords: Vector2i, tile: NodeTileMapping, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
+	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+		return
 	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
 	tile = _maybe_convert_tile(tile, isWall)
 	set_cell(coords, TILEMAP_SOURCE_ID, Vector2i(tile, 0))
@@ -98,11 +110,13 @@ func _set_cell_at(coords: Vector2i, tile: NodeTileMapping, numCells: Vector2i) -
 
 func _erase_cell_at(coords: Vector2i, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
+	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+		return
 	erase_cell(coords)
 	if room: room.set_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
 
 func _maybe_convert_tile(atlasX:NodeTileMapping, isWall:bool) -> NodeTileMapping:
-	if atlasX == NodeTileMapping.InheritNoise && isWall:
+	if atlasX == NodeTileMapping.InnerNoise && isWall:
 		return NodeTileMapping.WallFilled
 	if atlasX == NodeTileMapping.InnerFilled && isWall:
 		return NodeTileMapping.WallFilled
@@ -110,19 +124,22 @@ func _maybe_convert_tile(atlasX:NodeTileMapping, isWall:bool) -> NodeTileMapping
 		return NodeTileMapping.WallEmpty
 	if atlasX == NodeTileMapping.WallFilled && !isWall:
 		return NodeTileMapping.InnerFilled
+	if atlasX == NodeTileMapping.WallNoise && !isWall:
+		return NodeTileMapping.InnerNoise
 	if atlasX == NodeTileMapping.WallEmpty && !isWall:
 		return NodeTileMapping.InnerEmpty
 	return atlasX
 
 func _get_tile_state_from_atlas_x(atlasX:int) -> int:
-	if atlasX == NodeTileMapping.InheritNoise:
+	if atlasX == NodeTileMapping.InnerNoise:
 		return RoomConfig.TILE_STATE_UNSET
 	if atlasX == NodeTileMapping.InnerFilled:
 		return RoomConfig.TILE_STATE_FILLED
 	if atlasX == NodeTileMapping.InnerEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
 	if atlasX == NodeTileMapping.WallFilled:
-		# walls are filled by default in MeshGen
+		return RoomConfig.TILE_STATE_FILLED
+	if atlasX == NodeTileMapping.WallNoise:
 		return RoomConfig.TILE_STATE_UNSET
 	if atlasX == NodeTileMapping.WallEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
@@ -152,7 +169,7 @@ func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 			if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
 				_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
 			else:
-				_set_cell_at(Vector2i(x, y), NodeTileMapping.InheritNoise, numCells)
+				_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise, numCells)
 	update_internals()
 	prevNumCells = numCells
 	processing = false
@@ -184,7 +201,7 @@ func handle_room_size_change() -> void:
 				else NodeTileMapping.WallFilled
 			# unset previous border
 			if numCells.x > prevNumCells.x:
-				_set_cell_at(prevCoords, NodeTileMapping.InheritNoise, numCells)
+				_set_cell_at(prevCoords, NodeTileMapping.InnerNoise, numCells)
 			else:
 				_erase_cell_at(prevCoords, numCells)
 			# copy result to new border
@@ -199,7 +216,7 @@ func handle_room_size_change() -> void:
 				else NodeTileMapping.WallFilled
 			# unset previous border
 			if numCells.y > prevNumCells.y:
-				_set_cell_at(prevCoords, NodeTileMapping.InheritNoise, numCells)
+				_set_cell_at(prevCoords, NodeTileMapping.InnerNoise, numCells)
 			else:
 				_erase_cell_at(prevCoords, numCells)
 			# copy result to new border
@@ -211,14 +228,14 @@ func handle_room_size_change() -> void:
 				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
 					_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
 				else:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.InheritNoise, numCells)
+					_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise, numCells)
 	if numCells.y > prevNumCells.y:
 		for y in range(prevNumCells.y, numCells.y-1):
 			for x in range(numCells.x):
 				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
 					_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
 				else:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.InheritNoise,numCells)
+					_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise,numCells)
 	# clear prev outer cells
 	if numCells.x < prevNumCells.x:
 		for y in range(numCells.y):
@@ -228,6 +245,7 @@ func handle_room_size_change() -> void:
 		for y in range(numCells.y, prevNumCells.y):
 			for x in range(numCells.x):
 				erase_cell(Vector2i(x, y))
+	if room: room.notify_changed()
 	update_internals()
 	prevNumCells = numCells
 	processing = false

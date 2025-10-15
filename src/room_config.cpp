@@ -99,6 +99,8 @@ void RoomConfig::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
+	ClassDB::bind_method(D_METHOD("notify_changed"), &RoomConfig::NotifyChanged);
+
 	//
 	// Tilemap Data
 	//
@@ -290,6 +292,10 @@ void RoomConfig::SetTileCeilingFalloff(float p_TileCeilingFalloff) {
 	emit_signal("on_changed");
 }
 
+void RoomConfig::NotifyChanged() {
+	emit_signal("on_changed");
+}
+
 //
 // Tilemap Data
 //
@@ -322,7 +328,6 @@ void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
 
 	tiles[i] = tile;
-	emit_signal("on_changed");
 }
 int *RoomConfig::GetTiles() {
 	return tiles;

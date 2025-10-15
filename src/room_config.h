@@ -85,6 +85,8 @@ public:
 	void SetTileCeiling(float p_TileCeiling);
 	void SetTileCeilingFalloff(float p_TileCeilingFalloff);
 
+	void NotifyChanged();
+
 	//
 	// Tilemap Data
 	//
