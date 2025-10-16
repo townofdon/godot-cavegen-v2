@@ -32,7 +32,7 @@ public:
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float FalloffNearBorder;
-	int BorderTileSpread;
+	int BorderGapSpread;
 	// tiles
 	float TileStrength;
 	float TileSmoothing;
@@ -55,7 +55,7 @@ public:
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
 	float GetFalloffNearBorder();
-	float GetBorderTileSpread();
+	float GetBorderGapSpread();
 	float GetTileStrength();
 	float GetTileSmoothing();
 	float GetTileFloor();
@@ -77,7 +77,7 @@ public:
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
-	void SetBorderTileSpread(float p_BorderTileSpread);
+	void SetBorderGapSpread(float p_BorderGapSpread);
 	void SetTileStrength(float p_TileStrength);
 	void SetTileSmoothing(float p_TileSmoothing);
 	void SetTileFloor(float p_TileFloor);

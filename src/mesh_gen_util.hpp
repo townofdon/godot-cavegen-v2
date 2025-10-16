@@ -79,7 +79,7 @@ struct Context {
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float FalloffNearBorder;
-		int BorderTileSpread;
+		int BorderGapSpread;
 		// tiles
 		float TileStrength;
 		float TileSmoothing;
@@ -246,15 +246,18 @@ inline int GetTriangulation(Context ctx, float noiseSamples[], int x, int y, int
 // source: https://cs.stackexchange.com/a/71116
 inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i a, Vector3i b) {
 	// if one of the points is on a boundary plane, return that point so that our room meshes line up perfectly.
-	bool aBound = IsAtBoundaryXZ(ctx, a.x, a.z);
-	bool bBound = IsAtBoundaryXZ(ctx, b.x, b.z);
-	bool onSamePlane = a.x == b.x || a.z == b.z;
-	if (aBound && !(aBound && bBound && onSamePlane)) {
-		return Vector3(a);
-	}
-	if (bBound && !(aBound && bBound && onSamePlane)) {
-		return Vector3(b);
-	}
+	// note that a and b here are corners of the cube.
+	// bool aBound = IsAtBoundaryXZ(ctx, a.x, a.z);
+	// bool bBound = IsAtBoundaryXZ(ctx, b.x, b.z);
+	// bool onSamePlane = a.x == b.x || a.z == b.z;
+	// if (aBound && !(aBound && bBound && onSamePlane)) {
+	// 	return (Vector3(a) + Vector3(b)) * 0.5f;
+	// 	return Vector3(a);
+	// }
+	// if (bBound && !(aBound && bBound && onSamePlane)) {
+	// 	return (Vector3(a) + Vector3(b)) * 0.5f;
+	// 	return Vector3(b);
+	// }
 	float isovalue = ctx.cfg.IsoValue;
 	float noise_a = noiseSamples[NoiseIndex(ctx, a.x, a.y, a.z)];
 	float noise_b = noiseSamples[NoiseIndex(ctx, b.x, b.y, b.z)];
@@ -275,6 +278,26 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	p.z = a.z + mu * (b.z - a.z);
 	auto avg = (Vector3(a) + Vector3(b)) * 0.5f;
 	return avg.lerp(p, clamp01(ctx.cfg.Interpolate));
+}
+
+inline Vector3 ClampMeshBorderPoint(Context ctx, Vector3 point) {
+	Vector3 min = Vector3(
+		1,
+		1,
+		1);
+	Vector3 max = Vector3(
+		ctx.numCells.x - 2,
+		ctx.numCells.y - 2,
+		ctx.numCells.z - 2);
+	// clang-format off
+	if (point.x < min.x) point.x = min.x;
+	if (point.y < min.y) point.y = min.y;
+	if (point.z < min.z) point.z = min.z;
+	if (point.x > max.x) point.x = max.x;
+	if (point.y > max.y) point.y = max.y;
+	if (point.z > max.z) point.z = max.z;
+	// clang-format on
+	return point;
 }
 
 // given (x, z) in 3d noise space, return the corresponding tile from 2d tile space

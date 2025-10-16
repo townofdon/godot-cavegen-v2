@@ -81,7 +81,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.BorderNoiseIsoValue,
 		room.SmoothBorderNoise,
 		room.FalloffNearBorder,
-		room.BorderTileSpread,
+		room.BorderGapSpread,
 		// tiles
 		room.TileStrength,
 		room.TileSmoothing,
@@ -263,8 +263,8 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
 						val = maxf(val, cfg.IsoValue + 0.1f);
 						// subtract from border if close to an empty border tile
-						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderTileSpread);
-						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderTileSpread));
+						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderGapSpread);
+						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderGapSpread));
 						float activeY = MG::GetActivePlaneY(ctx) - 6;
 						float ceiling = MG::GetCeiling(ctx);
 						float yPct = clamp01(inverse_lerpf(lerpf(activeY, ceiling - CMP_EPSILON, distPct), ceiling, y));
@@ -628,6 +628,7 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 					auto a = Vector3i(x + x0, y + y0, z + z0);
 					auto b = Vector3i(x + x1, y + y1, z + z1);
 					auto p = MG::InterpolateMeshPoints(ctx, noiseSamples, a, b);
+					p = MG::ClampMeshBorderPoint(ctx, p);
 					points[pointIndex] = Vector3(p.x, p.y, p.z);
 					pointIndex++;
 					if (pointIndex == 3) {
