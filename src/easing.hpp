@@ -20,10 +20,12 @@ inline constexpr float OutQuad(float x) {
 	return 1.0 - (1.0 - x) * (1.0 - x);
 }
 
-inline float InOutQuad(float x) {
+inline constexpr float InOutQuad(float x) {
+	auto x0 = -2.0f * x + 2.0f;
 	return x < 0.5
-		? 2.0 * x * x
-		: 1.0 - std::pow(-2.0 * x + 2.0, 2.0) / 2.0;
+		? 2.0f * x * x
+		: 1.0f - x0 * x0 / 2.0f;
+	// : 1.0 - std::pow(-2.0 * x + 2.0, 2.0) / 2.0;
 }
 
 inline constexpr float InCubic(float x) {
@@ -36,38 +38,48 @@ inline constexpr float OutCubic(float x) {
 	// return 1.0 - std::pow(1.0 - x, 3.0);
 }
 
-inline float InOutCubic(float x) {
+inline constexpr float InOutCubic(float x) {
+	auto x0 = -2.0f * x + 2.0f;
 	return x < 0.5
 		? 4.0 * x * x * x
-		: 1.0 - std::pow(-2.0 * x + 2.0, 3.0) / 2.0;
+		: 1.0 - (x0 * x0 * x0) / 2.0;
+	// : 1.0 - std::pow(-2.0 * x + 2.0, 3.0) / 2.0;
 }
 
 inline constexpr float InQuart(float x) {
 	return x * x * x * x;
 }
 
-inline float OutQuart(float x) {
-	return 1.0 - std::pow(1.0 - x, 4.0);
+inline constexpr float OutQuart(float x) {
+	auto x0 = 1.0f - x;
+	return 1.0f - (x0 * x0 * x0 * x0);
+	// return 1.0 - std::pow(1.0 - x, 4.0);
 }
 
-inline float InOutQuart(float x) {
+inline constexpr float InOutQuart(float x) {
+	auto x0 = -2.0f * x + 2.0f;
 	return x < 0.5
-		? 8.0 * x * x * x * x
-		: 1.0 - std::pow(-2.0 * x + 2.0, 4.0) / 2.0;
+		? 8.0f * x * x * x * x
+		: 1.0f - (x0 * x0 * x0 * x0) / 2.0f;
+	// : 1.0 - std::pow(-2.0 * x + 2.0, 4.0) / 2.0;
 }
 
 inline constexpr float InQuint(float x) {
 	return x * x * x * x * x;
 }
 
-inline float OutQuint(float x) {
-	return 1.0 - std::pow(1.0 - x, 5.0);
+inline constexpr float OutQuint(float x) {
+	auto x0 = 1.0f - x;
+	return 1.0f - (x0 * x0 * x0 * x0 * x0);
+	// return 1.0 - std::pow(1.0 - x, 5.0);
 }
 
-inline float InOutQuint(float x) {
+inline constexpr float InOutQuint(float x) {
+	auto x0 = -2.0f * x + 2.0f;
 	return x < 0.5
-		? 16.0 * x * x * x * x * x
-		: 1.0 - std::pow(-2.0 * x + 2.0, 5.0) / 2.0;
+		? 16.0f * x * x * x * x * x
+		: 1.0f - (x0 * x0 * x0 * x0 * x0) / 2.0f;
+	// : 1.0 - std::pow(-2.0 * x + 2.0, 5.0) / 2.0;
 }
 
 inline constexpr float InExpo(float x) {

@@ -68,10 +68,13 @@ struct Context {
 		bool ShowOuterWalls;
 		// room noise
 		float IsoValue;
+		float NoiseFloor;
+		float NoiseCeil;
 		float Curve;
 		float Tilt;
 		float FalloffAboveCeiling;
 		float Interpolate;
+		float ActiveYSmoothing;
 		bool RemoveOrphans;
 		// room border
 		bool UseBorderNoise;

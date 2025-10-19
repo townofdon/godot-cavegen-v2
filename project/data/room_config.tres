@@ -1,18 +1,15 @@
 [gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
-room_noise__iso_value = 0.55
-room_noise__curve = 1.87
-room_noise__tilt = 1.58
 room_noise__falloff_above_ceiling = 0.0
+room_noise__interpolate = 0.52
+room_noise__active_y_smoothing = 0.0
 room_border__use_border_noise = true
 room_border__border_size = 4
-room_border__border_noise_strength = 0.26
-room_border__smooth_border_noise = 0.77
-room_border__falloff_near_border = 1.6
-tile_apply__tile_strength = 0.97
-tile_apply__tile_smoothing = 0.82
-tile_apply__tile_floor = 0.74
-tile_apply__tile_floor_falloff = 0.0
-tile_apply__tile_ceiling = 0.99
-tile_apply__tile_ceil_falloff = 0.3
+room_border__border_noise_strength = 0.84
+room_border__smooth_border_noise = 1.0
+room_border__falloff_near_border = 0.4
+room_border__border_gap_spread = 4
+tile_apply__tile_strength = 2.0
+tile_apply__tile_floor = 0.0
+tile_apply__tile_ceiling = 0.72

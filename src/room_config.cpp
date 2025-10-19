@@ -25,6 +25,14 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_IsoValue", "p_IsoValue"), &RoomConfig::SetIsoValue);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__iso_value", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_IsoValue", "get_IsoValue");
 
+	ClassDB::bind_method(D_METHOD("get_NoiseFloor"), &RoomConfig::GetNoiseFloor);
+	ClassDB::bind_method(D_METHOD("set_NoiseFloor", "p_NoiseFloor"), &RoomConfig::SetNoiseFloor);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_floor", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NoiseFloor", "get_NoiseFloor");
+
+	ClassDB::bind_method(D_METHOD("get_NoiseCeil"), &RoomConfig::GetNoiseCeil);
+	ClassDB::bind_method(D_METHOD("set_NoiseCeil", "p_NoiseCeil"), &RoomConfig::SetNoiseCeil);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_ceil", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NoiseCeil", "get_NoiseCeil");
+
 	ClassDB::bind_method(D_METHOD("get_Curve"), &RoomConfig::GetCurve);
 	ClassDB::bind_method(D_METHOD("set_Curve", "p_Curve"), &RoomConfig::SetCurve);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__curve", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_Curve", "get_Curve");
@@ -40,6 +48,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_Interpolate"), &RoomConfig::GetInterpolate);
 	ClassDB::bind_method(D_METHOD("set_Interpolate", "p_Interpolate"), &RoomConfig::SetInterpolate);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__interpolate", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_Interpolate", "get_Interpolate");
+
+	ClassDB::bind_method(D_METHOD("get_ActiveYSmoothing"), &RoomConfig::GetActiveYSmoothing);
+	ClassDB::bind_method(D_METHOD("set_ActiveYSmoothing", "p_ActiveYSmoothing"), &RoomConfig::SetActiveYSmoothing);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__active_y_smoothing", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_ActiveYSmoothing", "get_ActiveYSmoothing");
 
 	ClassDB::bind_method(D_METHOD("get_RemoveOrphans"), &RoomConfig::GetRemoveOrphans);
 	ClassDB::bind_method(D_METHOD("set_RemoveOrphans", "p_RemoveOrphans"), &RoomConfig::SetRemoveOrphans);
@@ -116,10 +128,13 @@ RoomConfig::RoomConfig() {
 	ShowBorder = true;
 	ShowOuterWalls = true;
 	IsoValue = 0.5f;
+	NoiseFloor = 0;
+	NoiseCeil = 1;
 	Curve = 1.0f;
 	Tilt = 1.0f;
 	FalloffAboveCeiling = 0.5f;
 	Interpolate = 1.0f;
+	ActiveYSmoothing = 0.5f;
 	RemoveOrphans = true;
 	UseBorderNoise = false;
 	BorderSize = 1;
@@ -155,6 +170,12 @@ bool RoomConfig::GetShowOuterWalls() {
 float RoomConfig::GetIsoValue() {
 	return IsoValue;
 }
+float RoomConfig::GetNoiseFloor() {
+	return NoiseFloor;
+}
+float RoomConfig::GetNoiseCeil() {
+	return NoiseCeil;
+}
 float RoomConfig::GetCurve() {
 	return Curve;
 }
@@ -163,6 +184,9 @@ float RoomConfig::GetTilt() {
 }
 float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
+}
+float RoomConfig::GetActiveYSmoothing() {
+	return ActiveYSmoothing;
 }
 float RoomConfig::GetInterpolate() {
 	return Interpolate;
@@ -223,6 +247,14 @@ void RoomConfig::SetIsoValue(float p_IsoValue) {
 	IsoValue = p_IsoValue;
 	emit_signal("on_changed");
 }
+void RoomConfig::SetNoiseFloor(float p_NoiseFloor) {
+	NoiseFloor = p_NoiseFloor;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNoiseCeil(float p_NoiseCeil) {
+	NoiseCeil = p_NoiseCeil;
+	emit_signal("on_changed");
+}
 void RoomConfig::SetCurve(float p_Curve) {
 	Curve = p_Curve;
 	emit_signal("on_changed");
@@ -233,6 +265,10 @@ void RoomConfig::SetTilt(float p_Tilt) {
 }
 void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
 	FalloffAboveCeiling = p_FalloffAboveCeiling;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetActiveYSmoothing(float p_ActiveYSmoothing) {
+	ActiveYSmoothing = p_ActiveYSmoothing;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetInterpolate(float p_Interpolate) {

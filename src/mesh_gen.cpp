@@ -70,10 +70,13 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.ShowOuterWalls,
 		// noise
 		room.IsoValue,
+		room.NoiseFloor,
+		room.NoiseCeil,
 		room.Curve,
 		room.Tilt,
 		room.FalloffAboveCeiling,
 		room.Interpolate,
+		room.ActiveYSmoothing,
 		room.RemoveOrphans,
 		// border
 		room.UseBorderNoise,
@@ -175,12 +178,15 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 			auto dmin = String(std::to_string(minv).c_str());
 			auto dmax = String(std::to_string(maxv).c_str());
 			auto davg = String(std::to_string(avg).c_str());
-			UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
+			// UtilityFunctions::print("march_cubes() took " + dmillis + "ms, avg=" + davg + ",min=" + dmin + ",max=" + dmax);
 		}
 	}
 }
 
-// note - this mutates noiseSamples
+//
+// process noise
+//
+#pragma region process_noise
 void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
@@ -188,6 +194,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	float minV = INFINITY;
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
+
 	//
 	// base noise
 	//
@@ -199,6 +206,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				noiseBuffer[i] = 0.0f;
 				noiseSamples[i] = 0.0f;
 				if (cfg.ShowNoise) {
+					// typically, noise output is in range [-1,1]
 					float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
 					noiseSamples[i] = val;
 					if (val < minV) {
@@ -221,6 +229,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					float val;
 					val = inverse_lerpf(minV, maxV, noiseSamples[i]);
 					val = clamp01(val);
+					val = lerpf(cfg.NoiseFloor, cfg.NoiseCeil, val);
 					// apply noise curve
 					float valEaseIn = Easing::InCubic(val);
 					float valEaseOut = Easing::OutCubic(val);
@@ -231,7 +240,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
 					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, cfg.FalloffAboveCeiling)));
 					// apply tilt
-					float yPct = MG::GetFloorToCeilAmount(ctx, y);
+					float yPct = Easing::InOutQuad(MG::GetFloorToCeilAmount(ctx, y));
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
 					val = lerpf(valTiltTop, val, clamp01(cfg.Tilt));
@@ -254,21 +263,24 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
+				} else if (y <= 1) {
+					// apply floor
+					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
-					MG::IsAtBorder(ctx, x, y, z) &&
-					(!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, y, z)) &&
-					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET &&
-					MG::GetTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
+					MG::IsAtBorder(ctx, x, y, z) && (MG::IsAtBorderEdge(ctx, x, y, z) || !cfg.UseBorderNoise) &&
+					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
 					// apply border
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
 						val = maxf(val, cfg.IsoValue + 0.1f);
+						// un-comment the following to remove noise contribution to border:
+						// val = cfg.IsoValue + 0.1f;
 						// subtract from border if close to an empty border tile
+						float activeY = (float)MG::GetActivePlaneY(ctx) - 6;
+						float ceiling = (float)MG::GetCeiling(ctx);
 						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderGapSpread);
 						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderGapSpread));
-						float activeY = MG::GetActivePlaneY(ctx) - 6;
-						float ceiling = MG::GetCeiling(ctx);
 						float yPct = clamp01(inverse_lerpf(lerpf(activeY, ceiling - CMP_EPSILON, distPct), ceiling, y));
-						val = lerpf(val, zeroValue, yPct);
+						val = lerpf(val, 0, yPct);
 					} else {
 						val = zeroValue;
 					}
@@ -282,6 +294,43 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					val = lerpf(val, zeroValue, t);
 				}
 				noiseSamples[i] = val;
+			}
+		}
+	}
+	// - fourth pass - adjust areas around action y plane to improve readability
+	{
+		int activeY = MG::GetActivePlaneY(ctx);
+		float activeYSmoothing = cfg.ActiveYSmoothing;
+		if (activeY > 1 && activeY + 1 < numCells.y - 1) {
+			for (size_t z = 0; z < numCells.z; z++) {
+				for (size_t x = 0; x < numCells.x; x++) {
+					int y = activeY - 1;
+					// clang-format off
+					noiseBuffer[MG::NoiseIndex(ctx, x, y, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
+					);
+					noiseBuffer[MG::NoiseIndex(ctx, x, y + 1, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
+					);
+					noiseBuffer[MG::NoiseIndex(ctx, x, y + 2, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(1, 0.33333333f, activeYSmoothing)
+					);
+					// clang-format on
+				}
+			}
+			for (size_t z = 0; z < numCells.z; z++) {
+				for (size_t y = maxi(activeY - 1, 1); y <= activeY + 1 && y < numCells.y - 1; y++) {
+					for (size_t x = 0; x < numCells.x; x++) {
+						int i = MG::NoiseIndex(ctx, x, y, z);
+						noiseSamples[i] = noiseBuffer[i];
+					}
+				}
 			}
 		}
 	}
@@ -368,7 +417,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
 				for (int x = 2; x < cfg.BorderSize + 1; x++) {
-					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+					if (MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_FILLED) {
 						continue;
 					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, 0, y, z)];
@@ -395,7 +444,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (int z = numCells.z - 3; z > numCells.z - cfg.BorderSize - 2; z--) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
 				for (int x = 1; x < numCells.x - 1; x++) {
-					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+					if (MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_FILLED) {
 						continue;
 					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, numCells.z - 1)];
@@ -422,7 +471,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 2; y < numCells.y && y <= ceiling; y++) {
 				for (int x = numCells.x - 3; x > numCells.x - cfg.BorderSize - 2; x--) {
-					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+					if (MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_FILLED) {
 						continue;
 					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, numCells.x - 1, y, z)];
@@ -449,7 +498,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		for (int z = 2; z < cfg.BorderSize + 1; z++) {
 			for (int x = 1; x < numCells.x - 1; x++) {
 				for (int y = 2; y < numCells.y && y <= ceiling; y++) {
-					if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+					if (MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_FILLED) {
 						continue;
 					}
 					float n0 = noiseBuffer[NoiseIndex(ctx, x, y, 0)];
@@ -475,66 +524,67 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 	//
 	// apply tile data
 	//
-	int activeY = MG::GetActivePlaneY(ctx);
-	int ceiling = round(MG::GetCeiling(ctx));
-	float tSmooth = cfg.TileSmoothing; // range [0,1]
-	float vfloor = cfg.TileFloor; // range [0,1]
-	float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
-	float vceil = cfg.TileCeiling; // range [0,1]
-	float vceilFalloff = lerpf(vceil - CMP_EPSILON, 0, cfg.TileCeilingFalloff);
-	// border tiles are already accounted for
-	for (int z = 2; z < numCells.z - 2; z++) {
-		for (int y = 2; y < numCells.y - 2; y++) {
-			for (int x = 2; x < numCells.x - 2; x++) {
-				int i = MG::NoiseIndex(ctx, x, y, z);
-				auto defaultTile = MG::GetTile(ctx, x, z);
-				// calculate tile kernel, where 0 => empty, 1 => unset, 2 => filled
-				float kernel = 0.0f;
-				for (int j = -1; j <= 1; j++) {
-					for (int k = -1; k <= 1; k++) {
-						bool isBorderTile = MG::IsBorderTile(ctx, x + j, z + k);
-						int tile = MG::GetTile(ctx, x + j, z + k, defaultTile);
-						float val = 0;
-						if (tile == RoomConfig::TILE_STATE_UNSET || isBorderTile) {
-							val = 1;
+	{
+		int activeY = MG::GetActivePlaneY(ctx);
+		int ceiling = round(MG::GetCeiling(ctx));
+		float tSmooth = cfg.TileSmoothing; // range [0,1]
+		float vfloor = cfg.TileFloor; // range [0,1]
+		float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
+		float vceil = cfg.TileCeiling; // range [0,1]
+		float vceilFalloff = lerpf(vceil - CMP_EPSILON, 0, cfg.TileCeilingFalloff);
+		// border tiles are already accounted for
+		for (int z = 2; z < numCells.z - 2; z++) {
+			for (int y = 2; y < numCells.y - 2; y++) {
+				for (int x = 2; x < numCells.x - 2; x++) {
+					int i = MG::NoiseIndex(ctx, x, y, z);
+					auto defaultTile = MG::GetTile(ctx, x, z);
+					// calculate tile kernel, where 0 => empty, 1 => unset, 2 => filled
+					float kernel = 0.0f;
+					for (int j = -1; j <= 1; j++) {
+						for (int k = -1; k <= 1; k++) {
+							bool isBorderTile = MG::IsBorderTile(ctx, x + j, z + k);
+							int tile = isBorderTile ? defaultTile : MG::GetTile(ctx, x + j, z + k, defaultTile);
+							float val = 0;
+							if (tile == RoomConfig::TILE_STATE_UNSET) {
+								val = 1;
+							} else if (tile == RoomConfig::TILE_STATE_FILLED) {
+								val = 2;
+							}
+							// 1/9 = 0.1111111111
+							kernel += val * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
 						}
-						if (tile == RoomConfig::TILE_STATE_FILLED) {
-							val = 2;
-						}
-						// 1/9 = 0.1111111111
-						kernel += val * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
 					}
+					// calculate y thresholds
+					// 0   => 0
+					// 0.5 => activeY
+					// 1   => ceiling
+					float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
+					float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
+					float t = clamp01(t0 + t1);
+					float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
+					float t_ceil = clamp01(inverse_lerpf(vceil, vceilFalloff, t));
+					float targ_unset = noiseSamples[i];
+					// calc empty noise target
+					float targ_empty = 0.0f;
+					targ_empty = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					targ_empty = lerpf(noiseSamples[i], targ_empty, clamp01(cfg.TileStrength));
+					targ_empty = lerpf(targ_empty, 0.0f, clamp01(cfg.TileStrength - 1));
+					targ_empty = lerpf(noiseSamples[i], targ_empty, t_floor);
+					// calc filled noise target
+					float targ_filled = 0.0f;
+					float zero = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					// as tile strength approaches 2, reduce noise above ceil
+					float fallback = lerpf(noiseSamples[i], zero, clamp01(cfg.TileStrength - 1));
+					targ_filled = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
+					targ_filled = lerpf(noiseSamples[i], targ_filled, clamp01(cfg.TileStrength));
+					targ_filled = lerpf(targ_filled, 1.0f, clamp01(cfg.TileStrength - 1));
+					targ_filled = lerpf(fallback, targ_filled, t_ceil);
+					// aggregate targets based on kernel results
+					float targ;
+					targ = lerpf(targ_empty, targ_unset, clamp01(kernel));
+					targ = lerpf(targ, targ_filled, clamp01(kernel - 1));
+					noiseSamples[i] = targ;
 				}
-				// calculate y thresholds
-				// 0   => 0
-				// 0.5 => activeY
-				// 1   => ceiling
-				float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
-				float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
-				float t = clamp01(t0 + t1);
-				float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
-				float t_ceil = clamp01(inverse_lerpf(vceil, vceilFalloff, t));
-				float targ_unset = noiseSamples[i];
-				// calc empty noise target
-				float targ_empty = 0.0f;
-				targ_empty = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-				targ_empty = lerpf(noiseSamples[i], targ_empty, clamp01(cfg.TileStrength));
-				targ_empty = lerpf(targ_empty, 0.0f, clamp01(cfg.TileStrength - 1));
-				targ_empty = lerpf(noiseSamples[i], targ_empty, t_floor);
-				// calc filled noise target
-				float targ_filled = 0.0f;
-				float zero = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-				// as tile strength approaches 2, reduce noise above ceil
-				float fallback = lerpf(noiseSamples[i], zero, clamp01(cfg.TileStrength - 1));
-				targ_filled = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
-				targ_filled = lerpf(noiseSamples[i], targ_filled, clamp01(cfg.TileStrength));
-				targ_filled = lerpf(targ_filled, 1.0f, clamp01(cfg.TileStrength - 1));
-				targ_filled = lerpf(fallback, targ_filled, t_ceil);
-				// aggregate targets based on kernel results
-				float targ;
-				targ = lerpf(targ_empty, targ_unset, clamp01(kernel));
-				targ = lerpf(targ, targ_filled, clamp01(kernel - 1));
-				noiseSamples[i] = targ;
 			}
 		}
 	}
@@ -573,7 +623,12 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 		}
 	}
 }
+#pragma endregion // process_noise
 
+//
+// march cubes
+//
+#pragma region march_cubes
 void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	auto ref = get_mesh();
 	auto ptr = *(ref);
@@ -661,3 +716,4 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	surface_array[Mesh::ARRAY_INDEX] = indices;
 	mesh.add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
 }
+#pragma endregion // march_cubes

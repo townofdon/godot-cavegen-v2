@@ -21,10 +21,13 @@ public:
 	bool ShowOuterWalls;
 	// room noise
 	float IsoValue;
+	float NoiseFloor;
+	float NoiseCeil;
 	float Curve;
 	float Tilt;
 	float FalloffAboveCeiling;
 	float Interpolate;
+	float ActiveYSmoothing;
 	bool RemoveOrphans;
 	// room border
 	bool UseBorderNoise;
@@ -45,9 +48,12 @@ public:
 	bool GetShowBorder();
 	bool GetShowOuterWalls();
 	float GetIsoValue();
+	float GetNoiseFloor();
+	float GetNoiseCeil();
 	float GetCurve();
 	float GetTilt();
 	float GetFalloffAboveCeiling();
+	float GetActiveYSmoothing();
 	float GetInterpolate();
 	bool GetRemoveOrphans();
 	bool GetUseBorderNoise();
@@ -67,9 +73,12 @@ public:
 	void SetShowBorder(bool p_ShowBorder);
 	void SetShowOuterWalls(bool p_ShowOuterWalls);
 	void SetIsoValue(float p_IsoValue);
+	void SetNoiseFloor(float p_NoiseFloor);
+	void SetNoiseCeil(float p_NoiseCeil);
 	void SetCurve(float p_Curve);
 	void SetTilt(float p_Tilt);
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
+	void SetActiveYSmoothing(float p_ActiveYSmoothing);
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetUseBorderNoise(bool p_UseBorderNoise);
