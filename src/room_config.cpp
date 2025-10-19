@@ -21,6 +21,10 @@ void RoomConfig::_bind_methods() {
 
 	ADD_GROUP("Room Noise", "room_noise__");
 
+	ClassDB::bind_method(D_METHOD("get_Normalize"), &RoomConfig::GetNormalize);
+	ClassDB::bind_method(D_METHOD("set_Normalize", "p_Normalize"), &RoomConfig::SetNormalize);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_noise__normalize"), "set_Normalize", "get_Normalize");
+
 	ClassDB::bind_method(D_METHOD("get_IsoValue"), &RoomConfig::GetIsoValue);
 	ClassDB::bind_method(D_METHOD("set_IsoValue", "p_IsoValue"), &RoomConfig::SetIsoValue);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__iso_value", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_IsoValue", "get_IsoValue");
@@ -127,6 +131,7 @@ RoomConfig::RoomConfig() {
 	ShowNoise = true;
 	ShowBorder = true;
 	ShowOuterWalls = true;
+	Normalize = false;
 	IsoValue = 0.5f;
 	NoiseFloor = 0;
 	NoiseCeil = 1;
@@ -166,6 +171,9 @@ bool RoomConfig::GetShowBorder() {
 }
 bool RoomConfig::GetShowOuterWalls() {
 	return ShowOuterWalls;
+}
+bool RoomConfig::GetNormalize() {
+	return Normalize;
 }
 float RoomConfig::GetIsoValue() {
 	return IsoValue;
@@ -241,6 +249,10 @@ void RoomConfig::SetShowBorder(bool p_ShowBorder) {
 }
 void RoomConfig::SetShowOuterWalls(bool p_ShowOuterWalls) {
 	ShowOuterWalls = p_ShowOuterWalls;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNormalize(bool p_Normalize) {
+	Normalize = p_Normalize;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetIsoValue(float p_IsoValue) {
@@ -367,4 +379,8 @@ void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 }
 int *RoomConfig::GetTiles() {
 	return tiles;
+}
+
+float *RoomConfig::GetNoise() {
+	return noise;
 }

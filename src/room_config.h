@@ -20,6 +20,7 @@ public:
 	bool ShowBorder;
 	bool ShowOuterWalls;
 	// room noise
+	bool Normalize;
 	float IsoValue;
 	float NoiseFloor;
 	float NoiseCeil;
@@ -47,6 +48,7 @@ public:
 	bool GetShowNoise();
 	bool GetShowBorder();
 	bool GetShowOuterWalls();
+	bool GetNormalize();
 	float GetIsoValue();
 	float GetNoiseFloor();
 	float GetNoiseCeil();
@@ -72,6 +74,7 @@ public:
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
 	void SetShowOuterWalls(bool p_ShowOuterWalls);
+	void SetNormalize(bool p_Normalize);
 	void SetIsoValue(float p_IsoValue);
 	void SetNoiseFloor(float p_NoiseFloor);
 	void SetNoiseCeil(float p_NoiseCeil);
@@ -108,6 +111,12 @@ public:
 	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
 	int *GetTiles();
 
+	//
+	// Noise
+	//
+	float *GetNoise();
+
 protected:
 	int tiles[MAX_NOISE_NODES_2D];
+	float noise[MAX_NOISE_NODES];
 };

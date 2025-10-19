@@ -28,7 +28,6 @@ float *MeshGen::time_marchCubes = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static inline float *noiseSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
 static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
 
@@ -69,6 +68,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		room.ShowBorder,
 		room.ShowOuterWalls,
 		// noise
+		room.Normalize,
 		room.IsoValue,
 		room.NoiseFloor,
 		room.NoiseCeil,
@@ -106,7 +106,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		process_noise(ctx, noiseSamples);
+		process_noise(ctx, room.GetNoise());
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -147,7 +147,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		march_cubes(ctx, noiseSamples);
+		march_cubes(ctx, room.GetNoise());
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -227,7 +227,11 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					// normalize
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					float val;
-					val = inverse_lerpf(minV, maxV, noiseSamples[i]);
+					if (cfg.Normalize) {
+						val = inverse_lerpf(minV, maxV, noiseSamples[i]);
+					} else {
+						val = inverse_lerpf(-1, 1, noiseSamples[i]);
+					}
 					val = clamp01(val);
 					val = lerpf(cfg.NoiseFloor, cfg.NoiseCeil, val);
 					// apply noise curve
@@ -240,7 +244,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
 					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, cfg.FalloffAboveCeiling)));
 					// apply tilt
-					float yPct = Easing::InOutQuad(MG::GetFloorToCeilAmount(ctx, y));
+					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
 					val = lerpf(valTiltTop, val, clamp01(cfg.Tilt));

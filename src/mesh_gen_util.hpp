@@ -67,6 +67,7 @@ struct Context {
 		bool ShowBorder;
 		bool ShowOuterWalls;
 		// room noise
+		bool Normalize;
 		float IsoValue;
 		float NoiseFloor;
 		float NoiseCeil;
