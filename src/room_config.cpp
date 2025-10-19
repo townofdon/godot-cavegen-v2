@@ -15,6 +15,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ShowBorder", "p_ShowBorder"), &RoomConfig::SetShowBorder);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "debug__show_border"), "set_ShowBorder", "get_ShowBorder");
 
+	ClassDB::bind_method(D_METHOD("get_ShowFloor"), &RoomConfig::GetShowFloor);
+	ClassDB::bind_method(D_METHOD("set_ShowFloor", "p_ShowFloor"), &RoomConfig::SetShowFloor);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "debug__show_floor"), "set_ShowFloor", "get_ShowFloor");
+
 	ClassDB::bind_method(D_METHOD("get_ShowOuterWalls"), &RoomConfig::GetShowOuterWalls);
 	ClassDB::bind_method(D_METHOD("set_ShowOuterWalls", "p_ShowOuterWalls"), &RoomConfig::SetShowOuterWalls);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "debug__show_outer_walls"), "set_ShowOuterWalls", "get_ShowOuterWalls");
@@ -131,6 +135,7 @@ RoomConfig::RoomConfig() {
 	ShowNoise = true;
 	ShowBorder = true;
 	ShowOuterWalls = true;
+	ShowFloor = true;
 	Normalize = false;
 	IsoValue = 0.5f;
 	NoiseFloor = 0;
@@ -168,6 +173,9 @@ bool RoomConfig::GetShowNoise() {
 }
 bool RoomConfig::GetShowBorder() {
 	return ShowBorder;
+}
+bool RoomConfig::GetShowFloor() {
+	return ShowFloor;
 }
 bool RoomConfig::GetShowOuterWalls() {
 	return ShowOuterWalls;
@@ -245,6 +253,10 @@ void RoomConfig::SetShowNoise(bool p_ShowNoise) {
 }
 void RoomConfig::SetShowBorder(bool p_ShowBorder) {
 	ShowBorder = p_ShowBorder;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetShowFloor(bool p_ShowFloor) {
+	ShowFloor = p_ShowFloor;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetShowOuterWalls(bool p_ShowOuterWalls) {

@@ -18,6 +18,7 @@ public:
 	// debug
 	bool ShowNoise;
 	bool ShowBorder;
+	bool ShowFloor;
 	bool ShowOuterWalls;
 	// room noise
 	bool Normalize;
@@ -47,6 +48,7 @@ public:
 
 	bool GetShowNoise();
 	bool GetShowBorder();
+	bool GetShowFloor();
 	bool GetShowOuterWalls();
 	bool GetNormalize();
 	float GetIsoValue();
@@ -73,6 +75,7 @@ public:
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
+	void SetShowFloor(bool p_ShowFloor);
 	void SetShowOuterWalls(bool p_ShowOuterWalls);
 	void SetNormalize(bool p_Normalize);
 	void SetIsoValue(float p_IsoValue);

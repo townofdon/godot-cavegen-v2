@@ -66,6 +66,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 		// debug
 		room.ShowNoise,
 		room.ShowBorder,
+		room.ShowFloor,
 		room.ShowOuterWalls,
 		// noise
 		room.Normalize,
@@ -267,7 +268,7 @@ void MeshGen::process_noise(MG::Context ctx, float noiseSamples[]) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
-				} else if (y <= 1) {
+				} else if (y <= 1 && cfg.ShowFloor) {
 					// apply floor
 					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
