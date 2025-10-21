@@ -29,12 +29,14 @@ float *MeshGen::time_marchCubes = new float[100]{
 };
 
 static inline float *neighborNoiseSamples = new float[MAX_NOISE_NODES * 4];
+static inline float *noiseSamples = new float[MAX_NOISE_NODES];
+static inline float *rawSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
 static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
 
-void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise *p_noise, Noise *p_border_noise) {
+void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_noise, Noise *p_border_noise) {
 	ERR_FAIL_NULL_EDMSG(p_global_cfg, "null p_global_cfg");
-	ERR_FAIL_NULL_EDMSG(p_room_cfg, "null p_room_cfg");
+	ERR_FAIL_NULL_EDMSG(p_room, "null p_room_cfg");
 	ERR_FAIL_NULL_EDMSG(p_noise, "null p_noise");
 	ERR_FAIL_NULL_EDMSG(p_border_noise, "null p_border_noise");
 	if (p_global_cfg->CellSize <= 0) {
@@ -51,51 +53,51 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 
 	// setup context
 	struct Vector3i numCells;
-	GlobalConfig cfg = *p_global_cfg;
-	RoomConfig room = *p_room_cfg;
-	SizingData sizing = cfg.GetSizingData();
+	auto cfg = p_global_cfg;
+	auto room = p_room;
+	SizingData sizing = cfg->GetSizingData();
 	numCells = sizing.numCells;
-	int *tiles = room.GetTiles();
+	int *tiles = p_room->GetTiles();
 	struct MG::Context::Config ctxCfg = {
 		// global
-		cfg.RoomWidth,
-		cfg.RoomHeight,
-		cfg.RoomDepth,
+		cfg->RoomWidth,
+		cfg->RoomHeight,
+		cfg->RoomDepth,
 		sizing.cellSize, // actual cell-size might not reflect value from config
-		cfg.Ceiling,
-		cfg.ActivePlaneOffset,
+		cfg->Ceiling,
+		cfg->ActivePlaneOffset,
 		// debug
-		room.ShowNoise,
-		room.ShowBorder,
-		room.ShowFloor,
-		room.ShowOuterWalls,
+		p_room->ShowNoise,
+		p_room->ShowBorder,
+		p_room->ShowFloor,
+		p_room->ShowOuterWalls,
 		// noise
-		room.Normalize,
-		room.IsoValue,
-		room.NoiseFloor,
-		room.NoiseCeil,
-		room.Curve,
-		room.Tilt,
-		room.FalloffAboveCeiling,
-		room.Interpolate,
-		room.ActiveYSmoothing,
-		room.RemoveOrphans,
+		p_room->Normalize,
+		p_room->IsoValue,
+		p_room->NoiseFloor,
+		p_room->NoiseCeil,
+		p_room->Curve,
+		p_room->Tilt,
+		p_room->FalloffAboveCeiling,
+		p_room->Interpolate,
+		p_room->ActiveYSmoothing,
+		p_room->RemoveOrphans,
 		// border
-		room.UseBorderNoise,
-		room.BorderSize,
-		room.BorderNoiseIsoValue,
-		room.SmoothBorderNoise,
-		room.FalloffNearBorder,
-		room.BorderGapSpread,
+		p_room->UseBorderNoise,
+		p_room->BorderSize,
+		p_room->BorderNoiseIsoValue,
+		p_room->SmoothBorderNoise,
+		p_room->FalloffNearBorder,
+		p_room->BorderGapSpread,
 		// tiles
-		room.TileStrength,
-		room.TileSmoothing,
-		room.TileFloor,
-		room.TileFloorFalloff,
-		room.TileCeiling,
-		room.TileCeilingFalloff,
+		p_room->TileStrength,
+		p_room->TileSmoothing,
+		p_room->TileFloor,
+		p_room->TileFloorFalloff,
+		p_room->TileCeiling,
+		p_room->TileCeilingFalloff,
 		// neighbors
-		room.NeighborBlend,
+		p_room->NeighborBlend,
 	};
 	struct MG::Context ctx = {
 		ctxCfg,
@@ -151,7 +153,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		march_cubes(ctx, room.noiseSamples);
+		march_cubes(ctx, noiseSamples);
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -191,42 +193,58 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room_cfg, Noise
 // process noise
 //
 #pragma region process_noise
-void MeshGen::process_noise(MG::Context ctx, RoomConfig &room) {
+void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	auto noise = ctx.noise;
 	float minV = INFINITY;
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
-	float *noiseSamples = room.noiseSamples;
-	float *rawSamples = room.rawSamples;
+
+	// setup noise
+	for (size_t i = 0; i < MAX_NOISE_NODES; i++) {
+		noiseSamples[i] = room->noiseSamples[i];
+		rawSamples[i] = room->rawSamples[i];
+	}
 
 	// setup neighbor rooms multiarray
 	// idx 0*max => UP
 	// idx 1*max => DOWN
 	// idx 2*max => LEFT
 	// idx 3*max => RIGHT
-	for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
-		neighborNoiseSamples[i] = MAXFLOAT;
-	}
-	if (room.nodes.up != nullptr && room.nodes.up->precedence < room.precedence) {
-		for (size_t i = MAX_NOISE_NODES * 0; i < MAX_NOISE_NODES * 1; i++) {
-			neighborNoiseSamples[i] = room.nodes.up->rawSamples[i % MAX_NOISE_NODES];
+	{
+		RoomConfig::RoomNodes nodes = {
+			room->nodes.up,
+			room->nodes.down,
+			room->nodes.left,
+			room->nodes.right,
+		};
+		for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
+			neighborNoiseSamples[i] = MAXFLOAT;
 		}
-	}
-	if (room.nodes.down != nullptr && room.nodes.down->precedence < room.precedence) {
-		for (size_t i = MAX_NOISE_NODES * 1; i < MAX_NOISE_NODES * 2 && room.nodes.down != nullptr; i++) {
-			neighborNoiseSamples[i] = room.nodes.down->rawSamples[i % MAX_NOISE_NODES];
+		if (nodes.up.is_valid() && nodes.up->precedence < room->precedence) {
+			auto raw = nodes.up->rawSamples;
+			for (size_t i = MAX_NOISE_NODES * 0; i < MAX_NOISE_NODES * 1; i++) {
+				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
+			}
 		}
-	}
-	if (room.nodes.left != nullptr && room.nodes.left->precedence < room.precedence) {
-		for (size_t i = MAX_NOISE_NODES * 2; i < MAX_NOISE_NODES * 3 && room.nodes.left != nullptr; i++) {
-			neighborNoiseSamples[i] = room.nodes.left->rawSamples[i % MAX_NOISE_NODES];
+		if (nodes.down.is_valid() && nodes.down->precedence < room->precedence) {
+			auto raw = nodes.down->rawSamples;
+			for (size_t i = MAX_NOISE_NODES * 1; i < MAX_NOISE_NODES * 2; i++) {
+				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
+			}
 		}
-	}
-	if (room.nodes.right != nullptr && room.nodes.right->precedence < room.precedence) {
-		for (size_t i = MAX_NOISE_NODES * 3; i < MAX_NOISE_NODES * 4 && room.nodes.right != nullptr; i++) {
-			neighborNoiseSamples[i] = room.nodes.right->rawSamples[i % MAX_NOISE_NODES];
+		if (nodes.left.is_valid() && nodes.left->precedence < room->precedence) {
+			auto raw = nodes.left->rawSamples;
+			for (size_t i = MAX_NOISE_NODES * 2; i < MAX_NOISE_NODES * 3; i++) {
+				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
+			}
+		}
+		if (nodes.right.is_valid() && nodes.right->precedence < room->precedence) {
+			auto raw = nodes.right->rawSamples;
+			for (size_t i = MAX_NOISE_NODES * 3; i < MAX_NOISE_NODES * 4; i++) {
+				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
+			}
 		}
 	}
 
@@ -235,7 +253,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig &room) {
 	//
 	// - first pass - initialize && sample all noise values in grid
 	{
-		float blend = ctx.cfg.NeighborBlend;
+		float blend = clamp01(ctx.cfg.NeighborBlend);
 		int numx = numCells.x;
 		int numy = numCells.y;
 		int numz = numCells.z;
@@ -249,23 +267,23 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig &room) {
 					if (cfg.ShowNoise) {
 						// typically, noise output is in range [-1,1]
 						float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
-						noiseSamples[i] = val;
-						rawSamples[i] = val;
 						// mix in neighbor noise
-						int xinv = numx - 1 - x;
-						int zinv = numz - 1 - z;
-						float px0 = clamp01(inverse_lerpf(numx * blend, 0, x));
-						float pz0 = clamp01(inverse_lerpf(numz * blend, 0, z));
-						float px1 = clamp01(inverse_lerpf(numx * blend, numx - 1, x));
-						float pz1 = clamp01(inverse_lerpf(numz * blend, numz - 1, z));
-						float nUp = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 0];
-						float nDn = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 1];
-						float nLf = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 2];
-						float nRt = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 3];
-						val = lerpf(val, nUp, pz0 * int(nUp != MAXFLOAT));
-						val = lerpf(val, nDn, pz1 * int(nDn != MAXFLOAT));
-						val = lerpf(val, nLf, pz1 * int(nLf != MAXFLOAT));
-						val = lerpf(val, nRt, pz1 * int(nRt != MAXFLOAT));
+						if (blend > 0) {
+							int xinv = numx - 1 - x;
+							int zinv = numz - 1 - z;
+							float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 0, x));
+							float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 0, z));
+							float px1 = clamp01(inverse_lerpf(numx - 1 - (numx - 1) * blend, numx - 1, x));
+							float pz1 = clamp01(inverse_lerpf(numz - 1 - (numz - 1) * blend, numz - 1, z));
+							float nUp = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 0];
+							float nDn = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 1];
+							float nLf = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 2];
+							float nRt = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 3];
+							val = lerpf(val, nUp, pz0 * int(nUp != MAXFLOAT));
+							val = lerpf(val, nDn, pz1 * int(nDn != MAXFLOAT));
+							val = lerpf(val, nLf, pz1 * int(nLf != MAXFLOAT));
+							val = lerpf(val, nRt, pz1 * int(nRt != MAXFLOAT));
+						}
 						// record min/max for normalization
 						if (val < minV) {
 							minV = val;
@@ -273,6 +291,8 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig &room) {
 						if (val > maxV) {
 							maxV = val;
 						}
+						noiseSamples[i] = val;
+						rawSamples[i] = val;
 					}
 				}
 			}
@@ -684,6 +704,12 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig &room) {
 				}
 			}
 		}
+	}
+
+	// copy noise back to room noise fields
+	for (size_t i = 0; i < MAX_NOISE_NODES; i++) {
+		room->noiseSamples[i] = noiseSamples[i];
+		room->rawSamples[i] = rawSamples[i];
 	}
 }
 #pragma endregion // process_noise

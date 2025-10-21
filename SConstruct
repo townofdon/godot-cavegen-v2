@@ -11,6 +11,7 @@ projectdir = "project"
 CCFLAGS=[
     # '-Wall', # enable all warnings
     # '-pedantic' # tells the compiler to stricly adhere to ANSI standard
+    # '-fsanitize=address' # Address Sanitizer (ASAN) - catch invalid memory access early
 ]
 localEnv = Environment(tools=["default"], PLATFORM="", CCFLAGS=CCFLAGS)
 

@@ -117,11 +117,33 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
 
+	ADD_GROUP("Neighbors", "neighbors__");
+
+	ClassDB::bind_method(D_METHOD("get_NeighborBlend"), &RoomConfig::GetNeighborBlend);
+	ClassDB::bind_method(D_METHOD("set_NeighborBlend", "p_NeighborBlend"), &RoomConfig::SetNeighborBlend);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlend", "get_NeighborBlend");
+
 	ADD_GROUP("Internal", "internal__");
 
 	ClassDB::bind_method(D_METHOD("get_Precedence"), &RoomConfig::GetPrecedence);
 	ClassDB::bind_method(D_METHOD("set_Precedence", "p_Precedence"), &RoomConfig::SetPrecedence);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "internal__precedence"), "set_Precedence", "get_Precedence");
+
+	ClassDB::bind_method(D_METHOD("get_NodeUp"), &RoomConfig::GetNodeUp);
+	ClassDB::bind_method(D_METHOD("set_NodeUp", "p_room"), &RoomConfig::SetNodeUp);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_up", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeUp", "get_NodeUp");
+
+	ClassDB::bind_method(D_METHOD("get_NodeDown"), &RoomConfig::GetNodeDown);
+	ClassDB::bind_method(D_METHOD("set_NodeDown", "p_room"), &RoomConfig::SetNodeDown);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_down", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeDown", "get_NodeDown");
+
+	ClassDB::bind_method(D_METHOD("get_NodeLeft"), &RoomConfig::GetNodeLeft);
+	ClassDB::bind_method(D_METHOD("set_NodeLeft", "p_room"), &RoomConfig::SetNodeLeft);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_left", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeLeft", "get_NodeLeft");
+
+	ClassDB::bind_method(D_METHOD("get_NodeRight"), &RoomConfig::GetNodeRight);
+	ClassDB::bind_method(D_METHOD("set_NodeRight", "p_room"), &RoomConfig::SetNodeRight);
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_right", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeRight", "get_NodeRight");
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
@@ -169,12 +191,8 @@ RoomConfig::RoomConfig() {
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
 	}
-	// initialize relationships
+	// initialize internal vars
 	precedence = 0;
-	nodes.up = nullptr;
-	nodes.down = nullptr;
-	nodes.left = nullptr;
-	nodes.right = nullptr;
 }
 
 RoomConfig::~RoomConfig() {
@@ -258,6 +276,9 @@ float RoomConfig::GetTileCeiling() {
 }
 float RoomConfig::GetTileCeilingFalloff() {
 	return TileCeilingFalloff;
+}
+float RoomConfig::GetNeighborBlend() {
+	return NeighborBlend;
 }
 
 void RoomConfig::SetShowNoise(bool p_ShowNoise) {
@@ -364,6 +385,10 @@ void RoomConfig::SetTileCeilingFalloff(float p_TileCeilingFalloff) {
 	TileCeilingFalloff = p_TileCeilingFalloff;
 	emit_signal("on_changed");
 }
+void RoomConfig::SetNeighborBlend(float p_NeighborBlend) {
+	NeighborBlend = p_NeighborBlend;
+	emit_signal("on_changed");
+}
 
 void RoomConfig::NotifyChanged() {
 	emit_signal("on_changed");
@@ -407,29 +432,73 @@ int *RoomConfig::GetTiles() {
 }
 
 //
-// Neighbors
+// INTERNAL
 //
-void RoomConfig::SetNeighbor(RoomConfig *room, NeighborDir dir) {
-	switch (dir) {
-		case NeighborDir::UP:
-			nodes.up = room;
-			break;
-		case NeighborDir::DOWN:
-			nodes.down = room;
-			break;
-		case NeighborDir::LEFT:
-			nodes.left = room;
-			break;
-		case NeighborDir::RIGHT:
-			nodes.right = room;
-			break;
-		default:
-			break;
-	}
-}
 int RoomConfig::GetPrecedence() {
 	return precedence;
 }
 void RoomConfig::SetPrecedence(int p_precedence) {
 	precedence = p_precedence;
+}
+bool RoomConfig::ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare) {
+	if (!p_room.is_valid()) {
+		return true;
+	}
+	if (!compare.is_valid()) {
+		return true;
+	}
+	String name = p_room->get_name();
+	if (name.is_empty()) {
+		name = p_room->get_path();
+	}
+	ERR_FAIL_COND_V_EDMSG(p_room->get_rid() == compare->get_rid(), false, "node already in use: " + name);
+	return true;
+}
+void RoomConfig::SetNodeUp(const Ref<RoomConfig> &p_room) {
+	if (
+		ValidateSetNode(p_room, nodes.up) &&
+		ValidateSetNode(p_room, nodes.down) &&
+		ValidateSetNode(p_room, nodes.left) &&
+		ValidateSetNode(p_room, nodes.right)) {
+		nodes.up = p_room;
+	}
+}
+void RoomConfig::SetNodeDown(const Ref<RoomConfig> &p_room) {
+	if (
+		ValidateSetNode(p_room, nodes.up) &&
+		ValidateSetNode(p_room, nodes.down) &&
+		ValidateSetNode(p_room, nodes.left) &&
+		ValidateSetNode(p_room, nodes.right)) {
+		nodes.down = p_room;
+	}
+}
+void RoomConfig::SetNodeLeft(const Ref<RoomConfig> &p_room) {
+	if (
+		ValidateSetNode(p_room, nodes.up) &&
+		ValidateSetNode(p_room, nodes.down) &&
+		ValidateSetNode(p_room, nodes.left) &&
+		ValidateSetNode(p_room, nodes.right)) {
+		nodes.left = p_room;
+	}
+}
+void RoomConfig::SetNodeRight(const Ref<RoomConfig> &p_room) {
+	if (
+		ValidateSetNode(p_room, nodes.up) &&
+		ValidateSetNode(p_room, nodes.down) &&
+		ValidateSetNode(p_room, nodes.left) &&
+		ValidateSetNode(p_room, nodes.right)) {
+		nodes.right = p_room;
+	}
+}
+Ref<RoomConfig> RoomConfig::GetNodeUp() {
+	return nodes.up;
+}
+Ref<RoomConfig> RoomConfig::GetNodeDown() {
+	return nodes.down;
+}
+Ref<RoomConfig> RoomConfig::GetNodeLeft() {
+	return nodes.left;
+}
+Ref<RoomConfig> RoomConfig::GetNodeRight() {
+	return nodes.right;
 }

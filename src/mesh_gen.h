@@ -26,6 +26,6 @@ public:
 	static float *time_marchCubes;
 
 private:
-	void process_noise(MG::Context ctx, RoomConfig &room);
+	void process_noise(MG::Context ctx, RoomConfig *room);
 	void march_cubes(MG::Context ctx, float noiseSamples[]);
 };

@@ -15,8 +15,8 @@ public:
 	RoomConfig();
 	~RoomConfig();
 
-	// internal
-	int precedence;
+	// delete the copy constructor to avoid accidental assignment by value
+	RoomConfig(const RoomConfig &) = delete;
 
 	// debug
 	bool ShowNoise;
@@ -49,7 +49,6 @@ public:
 	float TileCeiling;
 	float TileCeilingFalloff;
 	// neighbors
-	// TODO: ADD GETTER,SETTER
 	float NeighborBlend;
 
 	bool GetShowNoise();
@@ -78,6 +77,7 @@ public:
 	float GetTileFloorFalloff();
 	float GetTileCeiling();
 	float GetTileCeilingFalloff();
+	float GetNeighborBlend();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -105,6 +105,7 @@ public:
 	void SetTileFloorFalloff(float p_TileFloorFalloff);
 	void SetTileCeiling(float p_TileCeiling);
 	void SetTileCeilingFalloff(float p_TileCeilingFalloff);
+	void SetNeighborBlend(float p_NeighborBlend);
 
 	int GetPrecedence();
 	void SetPrecedence(int p_precedence);
@@ -112,22 +113,25 @@ public:
 	void NotifyChanged();
 
 	//
-	// Neighbors
+	// Internal
 	//
 	struct RoomNodes {
-		RoomConfig *up;
-		RoomConfig *down;
-		RoomConfig *left;
-		RoomConfig *right;
+		Ref<RoomConfig> up;
+		Ref<RoomConfig> down;
+		Ref<RoomConfig> left;
+		Ref<RoomConfig> right;
 	};
-	enum NeighborDir {
-		UP,
-		DOWN,
-		LEFT,
-		RIGHT,
-	};
-	void SetNeighbor(RoomConfig *room, NeighborDir dir);
+	int precedence;
 	RoomNodes nodes;
+	bool ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare);
+	void SetNodeUp(const Ref<RoomConfig> &p_room);
+	void SetNodeDown(const Ref<RoomConfig> &p_room);
+	void SetNodeLeft(const Ref<RoomConfig> &p_room);
+	void SetNodeRight(const Ref<RoomConfig> &p_room);
+	Ref<RoomConfig> GetNodeUp();
+	Ref<RoomConfig> GetNodeDown();
+	Ref<RoomConfig> GetNodeLeft();
+	Ref<RoomConfig> GetNodeRight();
 
 	//
 	// Tilemap Data

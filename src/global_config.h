@@ -15,6 +15,9 @@ public:
 	GlobalConfig();
 	~GlobalConfig();
 
+	// delete the copy constructor to avoid accidental assignment by value
+	GlobalConfig(const GlobalConfig &) = delete;
+
 	float RoomWidth;
 	float RoomHeight;
 	float RoomDepth;
