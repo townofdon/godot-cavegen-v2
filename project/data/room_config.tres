@@ -1,6 +1,6 @@
 [gd_resource type="RoomConfig" load_steps=2 format=3 uid="uid://b0amjm0lwfuce"]
 
-[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="1_rknpu"]
+[ext_resource type="RoomConfig" uid="uid://bdxnsdmut1pnp" path="res://data/room2test.tres" id="1_a1lhk"]
 
 [resource]
 room_noise__tilt = 1.22
@@ -17,5 +17,4 @@ tile_apply__tile_floor = 0.53
 tile_apply__tile_ceiling = 0.72
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
-internal__node_up = ExtResource("1_rknpu")
-internal__node_down = ExtResource("1_rknpu")
+internal__node_right = ExtResource("1_a1lhk")

@@ -455,40 +455,16 @@ bool RoomConfig::ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> 
 	return true;
 }
 void RoomConfig::SetNodeUp(const Ref<RoomConfig> &p_room) {
-	if (
-		ValidateSetNode(p_room, nodes.up) &&
-		ValidateSetNode(p_room, nodes.down) &&
-		ValidateSetNode(p_room, nodes.left) &&
-		ValidateSetNode(p_room, nodes.right)) {
-		nodes.up = p_room;
-	}
+	nodes.up = p_room;
 }
 void RoomConfig::SetNodeDown(const Ref<RoomConfig> &p_room) {
-	if (
-		ValidateSetNode(p_room, nodes.up) &&
-		ValidateSetNode(p_room, nodes.down) &&
-		ValidateSetNode(p_room, nodes.left) &&
-		ValidateSetNode(p_room, nodes.right)) {
-		nodes.down = p_room;
-	}
+	nodes.down = p_room;
 }
 void RoomConfig::SetNodeLeft(const Ref<RoomConfig> &p_room) {
-	if (
-		ValidateSetNode(p_room, nodes.up) &&
-		ValidateSetNode(p_room, nodes.down) &&
-		ValidateSetNode(p_room, nodes.left) &&
-		ValidateSetNode(p_room, nodes.right)) {
-		nodes.left = p_room;
-	}
+	nodes.left = p_room;
 }
 void RoomConfig::SetNodeRight(const Ref<RoomConfig> &p_room) {
-	if (
-		ValidateSetNode(p_room, nodes.up) &&
-		ValidateSetNode(p_room, nodes.down) &&
-		ValidateSetNode(p_room, nodes.left) &&
-		ValidateSetNode(p_room, nodes.right)) {
-		nodes.right = p_room;
-	}
+	nodes.right = p_room;
 }
 Ref<RoomConfig> RoomConfig::GetNodeUp() {
 	return nodes.up;

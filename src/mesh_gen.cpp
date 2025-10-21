@@ -281,8 +281,8 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							float nRt = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 3];
 							val = lerpf(val, nUp, pz0 * int(nUp != MAXFLOAT));
 							val = lerpf(val, nDn, pz1 * int(nDn != MAXFLOAT));
-							val = lerpf(val, nLf, pz1 * int(nLf != MAXFLOAT));
-							val = lerpf(val, nRt, pz1 * int(nRt != MAXFLOAT));
+							val = lerpf(val, nLf, px0 * int(nLf != MAXFLOAT));
+							val = lerpf(val, nRt, px1 * int(nRt != MAXFLOAT));
 						}
 						// record min/max for normalization
 						if (val < minV) {
