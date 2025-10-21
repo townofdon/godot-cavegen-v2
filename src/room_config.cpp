@@ -117,6 +117,12 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
 
+	ADD_GROUP("Internal", "internal__");
+
+	ClassDB::bind_method(D_METHOD("get_Precedence"), &RoomConfig::GetPrecedence);
+	ClassDB::bind_method(D_METHOD("set_Precedence", "p_Precedence"), &RoomConfig::SetPrecedence);
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "internal__precedence"), "set_Precedence", "get_Precedence");
+
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
 	ClassDB::bind_method(D_METHOD("notify_changed"), &RoomConfig::NotifyChanged);
@@ -158,10 +164,17 @@ RoomConfig::RoomConfig() {
 	TileCeiling = 0.6f;
 	TileFloorFalloff = 0.2f;
 	TileCeilingFalloff = 0.2f;
+	NeighborBlend = 0.25f;
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
 	}
+	// initialize relationships
+	precedence = 0;
+	nodes.up = nullptr;
+	nodes.down = nullptr;
+	nodes.left = nullptr;
+	nodes.right = nullptr;
 }
 
 RoomConfig::~RoomConfig() {
@@ -393,6 +406,30 @@ int *RoomConfig::GetTiles() {
 	return tiles;
 }
 
-float *RoomConfig::GetNoise() {
-	return noise;
+//
+// Neighbors
+//
+void RoomConfig::SetNeighbor(RoomConfig *room, NeighborDir dir) {
+	switch (dir) {
+		case NeighborDir::UP:
+			nodes.up = room;
+			break;
+		case NeighborDir::DOWN:
+			nodes.down = room;
+			break;
+		case NeighborDir::LEFT:
+			nodes.left = room;
+			break;
+		case NeighborDir::RIGHT:
+			nodes.right = room;
+			break;
+		default:
+			break;
+	}
+}
+int RoomConfig::GetPrecedence() {
+	return precedence;
+}
+void RoomConfig::SetPrecedence(int p_precedence) {
+	precedence = p_precedence;
 }

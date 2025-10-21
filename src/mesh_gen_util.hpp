@@ -92,6 +92,8 @@ struct Context {
 		float TileFloorFalloff;
 		float TileCeiling;
 		float TileCeilingFalloff;
+		// neighbors
+		float NeighborBlend;
 	};
 	Config cfg;
 	Noise noise;

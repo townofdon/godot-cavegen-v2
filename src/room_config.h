@@ -15,6 +15,9 @@ public:
 	RoomConfig();
 	~RoomConfig();
 
+	// internal
+	int precedence;
+
 	// debug
 	bool ShowNoise;
 	bool ShowBorder;
@@ -45,6 +48,9 @@ public:
 	float TileFloorFalloff;
 	float TileCeiling;
 	float TileCeilingFalloff;
+	// neighbors
+	// TODO: ADD GETTER,SETTER
+	float NeighborBlend;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -100,7 +106,28 @@ public:
 	void SetTileCeiling(float p_TileCeiling);
 	void SetTileCeilingFalloff(float p_TileCeilingFalloff);
 
+	int GetPrecedence();
+	void SetPrecedence(int p_precedence);
+
 	void NotifyChanged();
+
+	//
+	// Neighbors
+	//
+	struct RoomNodes {
+		RoomConfig *up;
+		RoomConfig *down;
+		RoomConfig *left;
+		RoomConfig *right;
+	};
+	enum NeighborDir {
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+	};
+	void SetNeighbor(RoomConfig *room, NeighborDir dir);
+	RoomNodes nodes;
 
 	//
 	// Tilemap Data
@@ -117,9 +144,9 @@ public:
 	//
 	// Noise
 	//
-	float *GetNoise();
+	float rawSamples[MAX_NOISE_NODES];
+	float noiseSamples[MAX_NOISE_NODES];
 
 protected:
 	int tiles[MAX_NOISE_NODES_2D];
-	float noise[MAX_NOISE_NODES];
 };
