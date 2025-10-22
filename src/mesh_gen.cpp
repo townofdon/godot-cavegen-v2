@@ -4,6 +4,7 @@
 
 #include "constants.h"
 #include "sizing_data.hpp"
+#include <cfloat>
 #include <chrono>
 #include <iostream>
 #include <string>
