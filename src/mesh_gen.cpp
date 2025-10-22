@@ -13,6 +13,8 @@ void MeshGen::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("generate", "global_cfg", "room_cfg", "noise", "border_noise"), &MeshGen::generate);
 }
 
+const float MAXVAL = FLT_MAX;
+
 float *MeshGen::time_processNoise = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -224,7 +226,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			room->nodes.right,
 		};
 		for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
-			neighborNoiseSamples[i] = MAXFLOAT;
+			neighborNoiseSamples[i] = MAXVAL;
 		}
 		if (nodes.up.is_valid() && nodes.up->precedence < room->precedence) {
 			auto raw = nodes.up->rawSamples;
@@ -283,10 +285,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							float nDn = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 1];
 							float nLf = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 2];
 							float nRt = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 3];
-							val = lerpf(val, nUp, pz0 * int(nUp != MAXFLOAT));
-							val = lerpf(val, nDn, pz1 * int(nDn != MAXFLOAT));
-							val = lerpf(val, nLf, px0 * int(nLf != MAXFLOAT));
-							val = lerpf(val, nRt, px1 * int(nRt != MAXFLOAT));
+							val = lerpf(val, nUp, pz0 * int(nUp != MAXVAL));
+							val = lerpf(val, nDn, pz1 * int(nDn != MAXVAL));
+							val = lerpf(val, nLf, px0 * int(nLf != MAXVAL));
+							val = lerpf(val, nRt, px1 * int(nRt != MAXVAL));
 						}
 						// record min/max for normalization
 						if (val < minV) {
