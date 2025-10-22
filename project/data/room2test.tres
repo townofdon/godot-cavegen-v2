@@ -5,7 +5,6 @@ room_noise__iso_value = 0.6
 room_noise__noise_floor = 0.16
 room_noise__noise_ceil = 0.7
 room_noise__curve = 1.21
-room_noise__tilt = 1.37
 room_noise__falloff_above_ceiling = 0.0
 room_noise__interpolate = 0.99
 room_noise__active_y_smoothing = 0.79

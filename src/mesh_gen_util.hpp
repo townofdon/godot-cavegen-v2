@@ -73,7 +73,9 @@ struct Context {
 		float NoiseFloor;
 		float NoiseCeil;
 		float Curve;
-		float Tilt;
+		float TiltY;
+		float TiltX;
+		float TiltZ;
 		float FalloffAboveCeiling;
 		float Interpolate;
 		float ActiveYSmoothing;
@@ -84,6 +86,7 @@ struct Context {
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float FalloffNearBorder;
+		float BorderTilt;
 		int BorderGapSpread;
 		// tiles
 		float TileStrength;
@@ -103,8 +106,10 @@ struct Context {
 };
 
 inline int NoiseIndex(Context ctx, int x, int y, int z) {
-	auto numCells = ctx.numCells;
-	int i = x + y * numCells.x + z * numCells.y * numCells.x;
+	int numx = ctx.numCells.x;
+	int numy = ctx.numCells.y;
+	int numz = ctx.numCells.z;
+	int i = x + y * numx + z * numy * numx;
 	// debug
 	// if (i >= (numCells.x * numCells.y * numCells.z)) {
 	// 	auto ax = String(std::to_string(x).c_str());
@@ -116,7 +121,22 @@ inline int NoiseIndex(Context ctx, int x, int y, int z) {
 	// 	UtilityFunctions::printerr("noise index out of bounds: (" + ax + "," + ay + "," + az + "), numCells((" + bx + "," + by + "," + bz + ")");
 	// 	return -1;
 	// }
-	ERR_FAIL_INDEX_V_EDMSG(i, (numCells.x * numCells.y * numCells.z), 0, "noise index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(i, (numx * numy * numz), 0, "noise index out of bounds");
+	return i;
+}
+
+inline int ClampedNoiseIndex(Context ctx, int x, int y, int z, int offset = 0) {
+	int numx = ctx.numCells.x;
+	int numy = ctx.numCells.y;
+	int numz = ctx.numCells.z;
+	x = maxi(x, offset);
+	y = maxi(y, offset);
+	z = maxi(z, offset);
+	x = mini(x, numx - 1 - offset);
+	y = mini(y, numy - 1 - offset);
+	z = mini(z, numz - 1 - offset);
+	int i = x + y * numx + z * numy * numx;
+	ERR_FAIL_INDEX_V_EDMSG(i, (numx * numy * numz), 0, "noise index out of bounds");
 	return i;
 }
 
@@ -203,12 +223,13 @@ inline bool IsAtBoundaryY(Context ctx, int y) {
 }
 
 inline bool IsAtBorder(Context ctx, int x, int y, int z) {
+	float size = ctx.cfg.BorderSize;
 	return (
-		x <= ctx.cfg.BorderSize ||
+		x <= size ||
 		y <= 1 ||
-		z <= ctx.cfg.BorderSize ||
-		x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize ||
-		z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize);
+		z <= size ||
+		x >= ctx.numCells.x - 1 - size ||
+		z >= ctx.numCells.z - 1 - size);
 }
 
 inline bool IsAtBorderEdge(Context ctx, int x, int y, int z) {
@@ -225,6 +246,26 @@ inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
 	int distX = minf(absf(x - BorderSize), absf(numCells.x - 1 - BorderSize - x));
 	int distZ = minf(absf(z - BorderSize), absf(numCells.z - 1 - BorderSize - z));
 	return minf(distX, distZ);
+}
+
+inline float SignedDistFromBorder(Context ctx, int x, int z, float BorderSize) {
+	int numx = ctx.numCells.x;
+	int numz = ctx.numCells.z;
+	float v0 = x - BorderSize;
+	float v1 = z - BorderSize;
+	float v2 = numx - 1 - BorderSize - x;
+	float v3 = numz - 1 - BorderSize - z;
+	float dist = v0;
+	if (absf(v1) < absf(dist)) {
+		dist = v1;
+	}
+	if (absf(v2) < absf(dist)) {
+		dist = v2;
+	}
+	if (absf(v3) < absf(dist)) {
+		dist = v3;
+	}
+	return dist;
 }
 
 inline bool IsBelowCeiling(Context ctx, int y) {
@@ -328,15 +369,21 @@ inline RoomConfig::TileState GetTile(Context ctx, int x, int z, RoomConfig::Tile
 
 // given (x, z) in 3d noise space, return the corresponding border tile (if present) from 2d tile space
 inline RoomConfig::TileState GetBorderTile(Context ctx, int x, int z) {
-	if (x <= ctx.cfg.BorderSize) {
-		x = 1;
-	} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
-		x = ctx.numCells.x - 2;
+	int distX = mini(absi(x - 1), absi(ctx.numCells.x - 2 - x));
+	int distZ = mini(absi(z - 1), absi(ctx.numCells.z - 2 - z));
+	if (distX <= distZ) {
+		if (x <= ctx.cfg.BorderSize) {
+			x = 1;
+		} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
+			x = ctx.numCells.x - 2;
+		}
 	}
-	if (z <= ctx.cfg.BorderSize) {
-		z = 1;
-	} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
-		z = ctx.numCells.z - 2;
+	if (distZ <= distX) {
+		if (z <= ctx.cfg.BorderSize) {
+			z = 1;
+		} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
+			z = ctx.numCells.z - 2;
+		}
 	}
 	return GetTile(ctx, x, z);
 }

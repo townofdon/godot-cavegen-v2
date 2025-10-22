@@ -29,7 +29,9 @@ public:
 	float NoiseFloor;
 	float NoiseCeil;
 	float Curve;
-	float Tilt;
+	float TiltY;
+	float TiltX;
+	float TiltZ;
 	float FalloffAboveCeiling;
 	float Interpolate;
 	float ActiveYSmoothing;
@@ -40,6 +42,7 @@ public:
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float FalloffNearBorder;
+	float BorderTilt;
 	int BorderGapSpread;
 	// tiles
 	float TileStrength;
@@ -60,7 +63,9 @@ public:
 	float GetNoiseFloor();
 	float GetNoiseCeil();
 	float GetCurve();
-	float GetTilt();
+	float GetTiltY();
+	float GetTiltX();
+	float GetTiltZ();
 	float GetFalloffAboveCeiling();
 	float GetActiveYSmoothing();
 	float GetInterpolate();
@@ -70,6 +75,7 @@ public:
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
 	float GetFalloffNearBorder();
+	float GetBorderTilt();
 	float GetBorderGapSpread();
 	float GetTileStrength();
 	float GetTileSmoothing();
@@ -88,7 +94,9 @@ public:
 	void SetNoiseFloor(float p_NoiseFloor);
 	void SetNoiseCeil(float p_NoiseCeil);
 	void SetCurve(float p_Curve);
-	void SetTilt(float p_Tilt);
+	void SetTiltY(float p_TiltY);
+	void SetTiltX(float p_TiltX);
+	void SetTiltZ(float p_TiltZ);
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
 	void SetActiveYSmoothing(float p_ActiveYSmoothing);
 	void SetInterpolate(float p_Interpolate);
@@ -98,6 +106,7 @@ public:
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
+	void SetBorderTilt(float p_BorderTilt);
 	void SetBorderGapSpread(float p_BorderGapSpread);
 	void SetTileStrength(float p_TileStrength);
 	void SetTileSmoothing(float p_TileSmoothing);
@@ -148,8 +157,12 @@ public:
 	//
 	// Noise
 	//
-	float rawSamples[MAX_NOISE_NODES];
+
+	// processed room noise data
 	float noiseSamples[MAX_NOISE_NODES];
+
+	// unprocessed noise data to be shared with other rooms for mixing purposes
+	float rawSamples[MAX_NOISE_NODES];
 
 protected:
 	int tiles[MAX_NOISE_NODES_2D];

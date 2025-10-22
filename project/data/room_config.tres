@@ -1,20 +1,22 @@
-[gd_resource type="RoomConfig" load_steps=2 format=3 uid="uid://b0amjm0lwfuce"]
-
-[ext_resource type="RoomConfig" uid="uid://bdxnsdmut1pnp" path="res://data/room2test.tres" id="1_a1lhk"]
+[gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
-room_noise__tilt = 1.22
-room_noise__falloff_above_ceiling = 0.0
-room_noise__active_y_smoothing = 0.78
-room_border__use_border_noise = true
+room_noise__noise_floor = 0.03
+room_noise__tilt_y = 1.05
+room_noise__tilt_x = 0.98
+room_noise__tilt_z = 0.62
+room_noise__falloff_above_ceiling = 0.73
+room_noise__interpolate = 0.86
+room_noise__active_y_smoothing = 1.0
 room_border__border_size = 5
-room_border__border_noise_strength = 0.39
-room_border__smooth_border_noise = 0.66
-room_border__falloff_near_border = 0.37
+room_border__border_noise_strength = 0.44
+room_border__smooth_border_noise = 0.63
+room_border__falloff_near_border = 0.59
+room_border__border_tilt = 0.77
 room_border__border_gap_spread = 4
-tile_apply__tile_strength = 2.0
+tile_apply__tile_strength = 1.42
+tile_apply__tile_smoothing = 0.5
 tile_apply__tile_floor = 0.53
-tile_apply__tile_ceiling = 0.72
+tile_apply__tile_ceiling = 0.9
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
-internal__node_right = ExtResource("1_a1lhk")

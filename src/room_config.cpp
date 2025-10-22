@@ -45,9 +45,17 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_Curve", "p_Curve"), &RoomConfig::SetCurve);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__curve", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_Curve", "get_Curve");
 
-	ClassDB::bind_method(D_METHOD("get_Tilt"), &RoomConfig::GetTilt);
-	ClassDB::bind_method(D_METHOD("set_Tilt", "p_Tilt"), &RoomConfig::SetTilt);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_Tilt", "get_Tilt");
+	ClassDB::bind_method(D_METHOD("get_TiltY"), &RoomConfig::GetTiltY);
+	ClassDB::bind_method(D_METHOD("set_TiltY", "p_TiltY"), &RoomConfig::SetTiltY);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_y", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltY", "get_TiltY");
+
+	ClassDB::bind_method(D_METHOD("get_TiltX"), &RoomConfig::GetTiltX);
+	ClassDB::bind_method(D_METHOD("set_TiltX", "p_TiltX"), &RoomConfig::SetTiltX);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_x", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltX", "get_TiltX");
+
+	ClassDB::bind_method(D_METHOD("get_TiltZ"), &RoomConfig::GetTiltZ);
+	ClassDB::bind_method(D_METHOD("set_TiltZ", "p_TiltZ"), &RoomConfig::SetTiltZ);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_z", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltZ", "get_TiltZ");
 
 	ClassDB::bind_method(D_METHOD("get_FalloffAboveCeiling"), &RoomConfig::GetFalloffAboveCeiling);
 	ClassDB::bind_method(D_METHOD("set_FalloffAboveCeiling", "p_FalloffAboveCeiling"), &RoomConfig::SetFalloffAboveCeiling);
@@ -86,6 +94,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_FalloffNearBorder"), &RoomConfig::GetFalloffNearBorder);
 	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
+
+	ClassDB::bind_method(D_METHOD("get_BorderTilt"), &RoomConfig::GetBorderTilt);
+	ClassDB::bind_method(D_METHOD("set_BorderTilt", "p_BorderTilt"), &RoomConfig::SetBorderTilt);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__border_tilt", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_BorderTilt", "get_BorderTilt");
 
 	ClassDB::bind_method(D_METHOD("get_BorderGapSpread"), &RoomConfig::GetBorderGapSpread);
 	ClassDB::bind_method(D_METHOD("set_BorderGapSpread", "p_BorderGapSpread"), &RoomConfig::SetBorderGapSpread);
@@ -169,7 +181,9 @@ RoomConfig::RoomConfig() {
 	NoiseFloor = 0;
 	NoiseCeil = 1;
 	Curve = 1.0f;
-	Tilt = 1.0f;
+	TiltY = 1.0f;
+	TiltX = 1.0f;
+	TiltZ = 1.0f;
 	FalloffAboveCeiling = 0.5f;
 	Interpolate = 1.0f;
 	ActiveYSmoothing = 0.5f;
@@ -179,6 +193,7 @@ RoomConfig::RoomConfig() {
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	FalloffNearBorder = 0.2f;
+	BorderTilt = 0.5f;
 	BorderGapSpread = 2;
 	TileStrength = 1.0f;
 	TileSmoothing = 0.0f;
@@ -226,8 +241,14 @@ float RoomConfig::GetNoiseCeil() {
 float RoomConfig::GetCurve() {
 	return Curve;
 }
-float RoomConfig::GetTilt() {
-	return Tilt;
+float RoomConfig::GetTiltY() {
+	return TiltY;
+}
+float RoomConfig::GetTiltX() {
+	return TiltX;
+}
+float RoomConfig::GetTiltZ() {
+	return TiltZ;
 }
 float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
@@ -255,6 +276,9 @@ float RoomConfig::GetSmoothBorderNoise() {
 }
 float RoomConfig::GetFalloffNearBorder() {
 	return FalloffNearBorder;
+}
+float RoomConfig::GetBorderTilt() {
+	return BorderTilt;
 }
 float RoomConfig::GetBorderGapSpread() {
 	return BorderGapSpread;
@@ -317,8 +341,16 @@ void RoomConfig::SetCurve(float p_Curve) {
 	Curve = p_Curve;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetTilt(float p_Tilt) {
-	Tilt = p_Tilt;
+void RoomConfig::SetTiltY(float p_TiltY) {
+	TiltY = p_TiltY;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTiltX(float p_TiltX) {
+	TiltX = p_TiltX;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTiltZ(float p_TiltZ) {
+	TiltZ = p_TiltZ;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
@@ -355,6 +387,10 @@ void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 }
 void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 	FalloffNearBorder = p_FalloffNearBorder;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetBorderTilt(float p_BorderTilt) {
+	BorderTilt = p_BorderTilt;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetBorderGapSpread(float p_BorderGapSpread) {
