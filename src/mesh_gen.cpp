@@ -241,7 +241,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 						if (val > maxV) {
 							maxV = val;
 						}
-						noiseSamples[i] = val;
+						noiseBuffer[i] = val;
 						rawSamples[i] = val;
 					}
 				}
@@ -257,9 +257,9 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					float val;
 					if (cfg.Normalize) {
-						val = inverse_lerpf(minV, maxV, noiseSamples[i]);
+						val = inverse_lerpf(minV, maxV, noiseBuffer[i]);
 					} else {
-						val = inverse_lerpf(-1, 1, noiseSamples[i]);
+						val = inverse_lerpf(-1, 1, noiseBuffer[i]);
 					}
 					val = clamp01(val);
 					val = lerpf(cfg.NoiseFloor, cfg.NoiseCeil, val);
@@ -269,7 +269,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					val = lerpf(valEaseIn, val, clamp01(cfg.Curve));
 					val = lerpf(val, valEaseOut, clamp01(cfg.Curve - 1));
 					// apply falloff above ceiling
-					float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					float zeroValue = minf(noiseBuffer[i], cfg.IsoValue - 0.1f);
 					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
 					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, cfg.FalloffAboveCeiling)));
 					// apply tilt y
@@ -278,7 +278,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
 					val = lerpf(valTiltTop, val, clamp01(cfg.TiltY));
 					val = lerpf(val, valTiltBottom, clamp01(cfg.TiltY - 1));
-					noiseSamples[i] = val;
+					noiseBuffer[i] = val;
 				}
 			}
 		}
@@ -289,28 +289,30 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
-				int y2 = y;
-				if (!MG::IsAtBorderEdge(ctx, x, y, z)) {
+				int yNew = y;
+				if (!MG::IsAtBorderEdge(ctx, x, z)) {
 					// apply tilt x/z - sample different xyz
 					float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
 					float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
 					float px = x / float(numCells.x - 1);
 					float pz = z / float(numCells.z - 1);
-					int y0 = lerpf(y + numCells.y * 0.5f * clamp01(-tiltX), y + numCells.y * 0.5f * clamp01(tiltX), px);
-					int y1 = lerpf(y0 + numCells.y * 0.5f * clamp01(-tiltZ), y0 + numCells.y * 0.5f * clamp01(tiltZ), pz);
-					y2 = y1;
+					int y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
+					int y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
+					// apply offsetY
+					int y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, cfg.OffsetY);
+					yNew = y2;
 				}
-				i = MG::ClampedNoiseIndex(ctx, x, y2, z);
-				float val = noiseSamples[i];
+				i = MG::ClampedNoiseIndex(ctx, x, yNew, z);
+				float val = noiseBuffer[i];
 				// apply smoothing - in a kernel fashion
 				float tSmooth = ctx.cfg.Smoothing;
-				if (tSmooth > 0) {
+				if (tSmooth != 0) {
 					val = 0;
 					for (int k = -1; k <= 1; k++) {
 						for (int j = -1; j <= 1; j++) {
 							// 1/9 = 0.1111111111
-							int i0 = MG::ClampedNoiseIndex(ctx, x + j, j == 0 && k == 0 ? y2 : y, z + k);
-							val += noiseSamples[i0] * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+							int i0 = MG::ClampedNoiseIndex(ctx, x + j, yNew, z + k);
+							val += noiseBuffer[i0] * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
 						}
 					}
 				}
@@ -321,11 +323,11 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
-				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && !MG::IsAtBorderEdge(ctx, x, y, z) && cfg.ShowFloor) {
+				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && !MG::IsAtBorderEdge(ctx, x, z) && cfg.ShowFloor) {
 					// apply floor
 					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
-					MG::IsAtBorder(ctx, x, y, z) && (MG::IsAtBorderEdge(ctx, x, y, z) || !cfg.UseBorderNoise) &&
+					MG::IsAtBorder(ctx, x, y, z) && (MG::IsAtBorderEdge(ctx, x, z) || !cfg.UseBorderNoise) &&
 					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
 					// apply border
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {

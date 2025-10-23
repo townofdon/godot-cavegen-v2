@@ -77,6 +77,7 @@ struct Context {
 		float TiltY;
 		float TiltX;
 		float TiltZ;
+		float OffsetY;
 		float Smoothing;
 		float FalloffAboveCeiling;
 		float FalloffNearBorder;
@@ -138,6 +139,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->TiltY,
 		p_room->TiltX,
 		p_room->TiltZ,
+		p_room->OffsetY,
 		p_room->Smoothing,
 		p_room->FalloffAboveCeiling,
 		p_room->FalloffNearBorder,
@@ -300,10 +302,9 @@ inline bool IsAtBorder(Context ctx, int x, int y, int z) {
 		z >= ctx.numCells.z - 1 - size);
 }
 
-inline bool IsAtBorderEdge(Context ctx, int x, int y, int z) {
+inline bool IsAtBorderEdge(Context ctx, int x, int z) {
 	return (
 		x <= 1 ||
-		y <= 1 ||
 		z <= 1 ||
 		x >= ctx.numCells.x - 2 ||
 		z >= ctx.numCells.z - 2);

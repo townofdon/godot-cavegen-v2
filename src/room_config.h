@@ -32,6 +32,7 @@ public:
 	float TiltY;
 	float TiltX;
 	float TiltZ;
+	float OffsetY;
 	float Smoothing;
 	float FalloffAboveCeiling;
 	float FalloffNearBorder;
@@ -69,6 +70,7 @@ public:
 	float GetTiltY();
 	float GetTiltX();
 	float GetTiltZ();
+	float GetOffsetY();
 	float GetSmoothing();
 	float GetFalloffAboveCeiling();
 	float GetFalloffNearBorder();
@@ -103,6 +105,7 @@ public:
 	void SetTiltY(float p_TiltY);
 	void SetTiltX(float p_TiltX);
 	void SetTiltZ(float p_TiltZ);
+	void SetOffsetY(float p_OffsetY);
 	void SetSmoothing(float p_Smoothing);
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
