@@ -2,5 +2,4 @@
 
 [resource]
 room_height = 50.0
-ceiling = 0.78
 active_plane_offset = 4.32

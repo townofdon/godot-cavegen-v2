@@ -33,6 +33,7 @@ public:
 	float TiltX;
 	float TiltZ;
 	float FalloffAboveCeiling;
+	float FalloffNearBorder;
 	float Interpolate;
 	float ActiveYSmoothing;
 	bool RemoveOrphans;
@@ -42,7 +43,6 @@ public:
 	int BorderSize;
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
-	float FalloffNearBorder;
 	float BorderTilt;
 	int BorderGapSpread;
 	// tiles
@@ -68,6 +68,7 @@ public:
 	float GetTiltX();
 	float GetTiltZ();
 	float GetFalloffAboveCeiling();
+	float GetFalloffNearBorder();
 	float GetActiveYSmoothing();
 	float GetInterpolate();
 	bool GetRemoveOrphans();
@@ -76,7 +77,6 @@ public:
 	int GetBorderSize();
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
-	float GetFalloffNearBorder();
 	float GetBorderTilt();
 	float GetBorderGapSpread();
 	float GetTileStrength();
@@ -100,6 +100,7 @@ public:
 	void SetTiltX(float p_TiltX);
 	void SetTiltZ(float p_TiltZ);
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
+	void SetFalloffNearBorder(float p_FalloffNearBorder);
 	void SetActiveYSmoothing(float p_ActiveYSmoothing);
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
@@ -108,7 +109,6 @@ public:
 	void SetBorderSize(int p_BorderSize);
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
-	void SetFalloffNearBorder(float p_FalloffNearBorder);
 	void SetBorderTilt(float p_BorderTilt);
 	void SetBorderGapSpread(float p_BorderGapSpread);
 	void SetTileStrength(float p_TileStrength);

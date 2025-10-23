@@ -189,6 +189,7 @@ RoomConfig::RoomConfig() {
 	TiltX = 1.0f;
 	TiltZ = 1.0f;
 	FalloffAboveCeiling = 0.5f;
+	FalloffNearBorder = 0.2f;
 	Interpolate = 1.0f;
 	ActiveYSmoothing = 0.5f;
 	RemoveOrphans = true;
@@ -197,7 +198,6 @@ RoomConfig::RoomConfig() {
 	BorderSize = 1;
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
-	FalloffNearBorder = 0.2f;
 	BorderTilt = 0.5f;
 	BorderGapSpread = 2;
 	TileStrength = 1.0f;
@@ -258,6 +258,9 @@ float RoomConfig::GetTiltZ() {
 float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
 }
+float RoomConfig::GetFalloffNearBorder() {
+	return FalloffNearBorder;
+}
 float RoomConfig::GetActiveYSmoothing() {
 	return ActiveYSmoothing;
 }
@@ -281,9 +284,6 @@ float RoomConfig::GetBorderNoiseIsoValue() {
 }
 float RoomConfig::GetSmoothBorderNoise() {
 	return SmoothBorderNoise;
-}
-float RoomConfig::GetFalloffNearBorder() {
-	return FalloffNearBorder;
 }
 float RoomConfig::GetBorderTilt() {
 	return BorderTilt;
@@ -365,6 +365,10 @@ void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
 	FalloffAboveCeiling = p_FalloffAboveCeiling;
 	emit_signal("on_changed");
 }
+void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
+	FalloffNearBorder = p_FalloffNearBorder;
+	emit_signal("on_changed");
+}
 void RoomConfig::SetActiveYSmoothing(float p_ActiveYSmoothing) {
 	ActiveYSmoothing = p_ActiveYSmoothing;
 	emit_signal("on_changed");
@@ -395,10 +399,6 @@ void RoomConfig::SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue) {
 }
 void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 	SmoothBorderNoise = p_SmoothBorderNoise;
-	emit_signal("on_changed");
-}
-void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
-	FalloffNearBorder = p_FalloffNearBorder;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetBorderTilt(float p_BorderTilt) {

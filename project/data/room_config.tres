@@ -2,19 +2,18 @@
 
 [resource]
 room_noise__noise_floor = 0.03
-room_noise__tilt_y = 1.05
-room_noise__tilt_x = 0.98
-room_noise__tilt_z = 0.6
-room_noise__falloff_above_ceiling = 0.88
-room_border__falloff_near_border = 0.59
+room_noise__tilt_y = 1.27
+room_noise__tilt_z = 1.2
+room_noise__falloff_above_ceiling = 1.0
+room_noise__falloff_near_border = 0.78
 room_noise__interpolate = 0.86
 room_noise__active_y_smoothing = 0.69
 room_border__use_border_noise = true
 room_border__normalize_border_noise = true
 room_border__border_size = 5
 room_border__border_noise_strength = 0.73
-room_border__smooth_border_noise = 1.0
-room_border__border_tilt = 0.76
+room_border__smooth_border_noise = 0.97
+room_border__border_tilt = 0.94
 room_border__border_gap_spread = 4
 tile_apply__tile_strength = 1.42
 tile_apply__tile_smoothing = 0.5

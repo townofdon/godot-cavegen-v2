@@ -78,6 +78,7 @@ struct Context {
 		float TiltX;
 		float TiltZ;
 		float FalloffAboveCeiling;
+		float FalloffNearBorder;
 		float Interpolate;
 		float ActiveYSmoothing;
 		bool RemoveOrphans;
@@ -87,7 +88,6 @@ struct Context {
 		int BorderSize;
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
-		float FalloffNearBorder;
 		float BorderTilt;
 		int BorderGapSpread;
 		// tiles
@@ -137,6 +137,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->TiltX,
 		p_room->TiltZ,
 		p_room->FalloffAboveCeiling,
+		p_room->FalloffNearBorder,
 		p_room->Interpolate,
 		p_room->ActiveYSmoothing,
 		p_room->RemoveOrphans,
@@ -146,7 +147,6 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->BorderSize,
 		p_room->BorderNoiseIsoValue,
 		p_room->SmoothBorderNoise,
-		p_room->FalloffNearBorder,
 		p_room->BorderTilt,
 		p_room->BorderGapSpread,
 		// tiles
