@@ -37,6 +37,7 @@ public:
 	float FalloffNearBorder;
 	float Interpolate;
 	float ActiveYSmoothing;
+	float FloorLevel;
 	bool RemoveOrphans;
 	// room border
 	bool UseBorderNoise;
@@ -72,6 +73,7 @@ public:
 	float GetFalloffAboveCeiling();
 	float GetFalloffNearBorder();
 	float GetActiveYSmoothing();
+	float GetFloorLevel();
 	float GetInterpolate();
 	bool GetRemoveOrphans();
 	bool GetUseBorderNoise();
@@ -105,6 +107,7 @@ public:
 	void SetFalloffAboveCeiling(float p_FalloffAboveCeiling);
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
 	void SetActiveYSmoothing(float p_ActiveYSmoothing);
+	void SetFloorLevel(float p_FloorLevel);
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetUseBorderNoise(bool p_UseBorderNoise);

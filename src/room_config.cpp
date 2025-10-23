@@ -77,6 +77,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ActiveYSmoothing", "p_ActiveYSmoothing"), &RoomConfig::SetActiveYSmoothing);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__active_y_smoothing", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_ActiveYSmoothing", "get_ActiveYSmoothing");
 
+	ClassDB::bind_method(D_METHOD("get_FloorLevel"), &RoomConfig::GetFloorLevel);
+	ClassDB::bind_method(D_METHOD("set_FloorLevel", "p_FloorLevel"), &RoomConfig::SetFloorLevel);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__floor_level", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_FloorLevel", "get_FloorLevel");
+
 	ClassDB::bind_method(D_METHOD("get_RemoveOrphans"), &RoomConfig::GetRemoveOrphans);
 	ClassDB::bind_method(D_METHOD("set_RemoveOrphans", "p_RemoveOrphans"), &RoomConfig::SetRemoveOrphans);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_noise__remove_orphans"), "set_RemoveOrphans", "get_RemoveOrphans");
@@ -197,6 +201,7 @@ RoomConfig::RoomConfig() {
 	FalloffNearBorder = 0.2f;
 	Interpolate = 1.0f;
 	ActiveYSmoothing = 0.5f;
+	FloorLevel = 0;
 	RemoveOrphans = true;
 	UseBorderNoise = false;
 	NormalizeBorder = false;
@@ -271,6 +276,9 @@ float RoomConfig::GetFalloffNearBorder() {
 }
 float RoomConfig::GetActiveYSmoothing() {
 	return ActiveYSmoothing;
+}
+float RoomConfig::GetFloorLevel() {
+	return FloorLevel;
 }
 float RoomConfig::GetInterpolate() {
 	return Interpolate;
@@ -383,6 +391,10 @@ void RoomConfig::SetFalloffNearBorder(float p_FalloffNearBorder) {
 }
 void RoomConfig::SetActiveYSmoothing(float p_ActiveYSmoothing) {
 	ActiveYSmoothing = p_ActiveYSmoothing;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetFloorLevel(float p_FloorLevel) {
+	FloorLevel = p_FloorLevel;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetInterpolate(float p_Interpolate) {

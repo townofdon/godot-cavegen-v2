@@ -284,6 +284,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		}
 	}
 	// - third pass - apply bounds, borders, offsets/tilt, smoothing
+	float ceiling = MG::GetCeiling(ctx);
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
@@ -320,7 +321,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
-				} else if (y <= 1 && cfg.ShowFloor) {
+				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && !MG::IsAtBorderEdge(ctx, x, y, z) && cfg.ShowFloor) {
 					// apply floor
 					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
@@ -339,7 +340,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 						val = lerpf(maxf(val, cfg.IsoValue + 0.1f), val, pd);
 						// subtract from border if close to an empty border tile
 						float activeY = (float)MG::GetActivePlaneY(ctx) - 6;
-						float ceiling = (float)MG::GetCeiling(ctx);
 						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderGapSpread);
 						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderGapSpread));
 						float yPct = clamp01(inverse_lerpf(lerpf(activeY, ceiling - CMP_EPSILON, distPct), ceiling, y));

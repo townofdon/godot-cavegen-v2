@@ -82,6 +82,7 @@ struct Context {
 		float FalloffNearBorder;
 		float Interpolate;
 		float ActiveYSmoothing;
+		float FloorLevel;
 		bool RemoveOrphans;
 		// room border
 		bool UseBorderNoise;
@@ -142,6 +143,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->FalloffNearBorder,
 		p_room->Interpolate,
 		p_room->ActiveYSmoothing,
+		p_room->FloorLevel,
 		p_room->RemoveOrphans,
 		// border
 		p_room->UseBorderNoise,
