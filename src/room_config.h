@@ -38,6 +38,7 @@ public:
 	bool RemoveOrphans;
 	// room border
 	bool UseBorderNoise;
+	bool NormalizeBorder;
 	int BorderSize;
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
@@ -71,6 +72,7 @@ public:
 	float GetInterpolate();
 	bool GetRemoveOrphans();
 	bool GetUseBorderNoise();
+	bool GetNormalizeBorder();
 	int GetBorderSize();
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
@@ -102,6 +104,7 @@ public:
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetUseBorderNoise(bool p_UseBorderNoise);
+	void SetNormalizeBorder(bool p_NormalizeBorder);
 	void SetBorderSize(int p_BorderSize);
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);

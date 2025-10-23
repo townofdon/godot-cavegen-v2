@@ -1,6 +1,7 @@
 #ifndef GEN_UTIL_HPP
 #define GEN_UTIL_HPP
 
+#include "global_config.h"
 #include "godot_cpp/classes/noise.hpp"
 #include "godot_cpp/core/math.hpp"
 #include "room_config.h"
@@ -82,6 +83,7 @@ struct Context {
 		bool RemoveOrphans;
 		// room border
 		bool UseBorderNoise;
+		bool NormalizeBorder;
 		int BorderSize;
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
@@ -104,6 +106,68 @@ struct Context {
 	Vector3i numCells;
 	int *tiles;
 };
+
+inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_noise, Noise *p_border_noise) {
+	struct Vector3i numCells;
+	auto cfg = p_global_cfg;
+	auto room = p_room;
+	SizingData sizing = cfg->GetSizingData();
+	numCells = sizing.numCells;
+	int *tiles = p_room->GetTiles();
+	struct MG::Context::Config ctxCfg = {
+		// global
+		cfg->RoomWidth,
+		cfg->RoomHeight,
+		cfg->RoomDepth,
+		sizing.cellSize, // actual cell-size might not reflect value from config
+		cfg->Ceiling,
+		cfg->ActivePlaneOffset,
+		// debug
+		p_room->ShowNoise,
+		p_room->ShowBorder,
+		p_room->ShowFloor,
+		p_room->ShowOuterWalls,
+		// noise
+		p_room->Normalize,
+		p_room->IsoValue,
+		p_room->NoiseFloor,
+		p_room->NoiseCeil,
+		p_room->Curve,
+		p_room->TiltY,
+		p_room->TiltX,
+		p_room->TiltZ,
+		p_room->FalloffAboveCeiling,
+		p_room->Interpolate,
+		p_room->ActiveYSmoothing,
+		p_room->RemoveOrphans,
+		// border
+		p_room->UseBorderNoise,
+		p_room->NormalizeBorder,
+		p_room->BorderSize,
+		p_room->BorderNoiseIsoValue,
+		p_room->SmoothBorderNoise,
+		p_room->FalloffNearBorder,
+		p_room->BorderTilt,
+		p_room->BorderGapSpread,
+		// tiles
+		p_room->TileStrength,
+		p_room->TileSmoothing,
+		p_room->TileFloor,
+		p_room->TileFloorFalloff,
+		p_room->TileCeiling,
+		p_room->TileCeilingFalloff,
+		// neighbors
+		p_room->NeighborBlend,
+	};
+	struct MG::Context ctx = {
+		ctxCfg,
+		*p_noise,
+		*p_border_noise,
+		sizing.numCells,
+		tiles,
+	};
+	return ctx;
+}
 
 inline int NoiseIndex(Context ctx, int x, int y, int z) {
 	int numx = ctx.numCells.x;

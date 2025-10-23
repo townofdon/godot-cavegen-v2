@@ -54,73 +54,17 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_
 		return;
 	}
 
-	// setup context
-	struct Vector3i numCells;
-	auto cfg = p_global_cfg;
-	auto room = p_room;
-	SizingData sizing = cfg->GetSizingData();
-	numCells = sizing.numCells;
-	int *tiles = p_room->GetTiles();
-	struct MG::Context::Config ctxCfg = {
-		// global
-		cfg->RoomWidth,
-		cfg->RoomHeight,
-		cfg->RoomDepth,
-		sizing.cellSize, // actual cell-size might not reflect value from config
-		cfg->Ceiling,
-		cfg->ActivePlaneOffset,
-		// debug
-		p_room->ShowNoise,
-		p_room->ShowBorder,
-		p_room->ShowFloor,
-		p_room->ShowOuterWalls,
-		// noise
-		p_room->Normalize,
-		p_room->IsoValue,
-		p_room->NoiseFloor,
-		p_room->NoiseCeil,
-		p_room->Curve,
-		p_room->TiltY,
-		p_room->TiltX,
-		p_room->TiltZ,
-		p_room->FalloffAboveCeiling,
-		p_room->Interpolate,
-		p_room->ActiveYSmoothing,
-		p_room->RemoveOrphans,
-		// border
-		p_room->UseBorderNoise,
-		p_room->BorderSize,
-		p_room->BorderNoiseIsoValue,
-		p_room->SmoothBorderNoise,
-		p_room->FalloffNearBorder,
-		p_room->BorderTilt,
-		p_room->BorderGapSpread,
-		// tiles
-		p_room->TileStrength,
-		p_room->TileSmoothing,
-		p_room->TileFloor,
-		p_room->TileFloorFalloff,
-		p_room->TileCeiling,
-		p_room->TileCeilingFalloff,
-		// neighbors
-		p_room->NeighborBlend,
-	};
-	struct MG::Context ctx = {
-		ctxCfg,
-		*p_noise,
-		*p_border_noise,
-		sizing.numCells,
-		tiles,
-	};
+	auto ctx = MG::SetupContext(p_global_cfg, p_room, p_noise, p_border_noise);
 
 	//
 	// process noise
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		process_noise(ctx, room);
+		process_noise(ctx, p_room);
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
+		auto numCells = ctx.numCells;
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
 		auto dmillis = String(std::to_string(millis).c_str());
 		auto dnodes = String(std::to_string(numCells.x * numCells.y * numCells.z).c_str());
@@ -444,6 +388,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// apply border noise
 	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
+		bool normalize = cfg.NormalizeBorder;
 		float ceiling = GetCeiling(ctx);
 		float tilt = clamp01(ctx.cfg.BorderTilt);
 		// - first pass - sample and normalize border noise on x walls
@@ -473,7 +418,9 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							maxV = val;
 						}
 					} else {
-						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
+						float val = normalize
+							? clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]))
+							: clamp01(inverse_lerpf(-1, 1, noiseBuffer[i]));
 						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
 							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 						}
@@ -509,7 +456,9 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							maxV = val;
 						}
 					} else {
-						float val = clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]));
+						float val = normalize
+							? clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]))
+							: clamp01(inverse_lerpf(-1, 1, noiseBuffer[i]));
 						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
 							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 						}

@@ -1,10 +1,13 @@
 [gd_resource type="FastNoiseLite" format=3 uid="uid://cmirlmxyie640"]
 
 [resource]
-noise_type = 3
-frequency = 0.0011
-offset = Vector3(43.4, 20.6, -96.9)
+noise_type = 4
+frequency = 0.0126
+offset = Vector3(-24.1, 75.4, -85.4)
 fractal_octaves = 6
-fractal_lacunarity = 3.62
-fractal_gain = 0.53
-domain_warp_amplitude = 26.67
+fractal_lacunarity = 3.82
+fractal_gain = 0.67
+fractal_weighted_strength = 0.16
+cellular_jitter = 1.23
+domain_warp_amplitude = 12.01
+domain_warp_frequency = 3.64

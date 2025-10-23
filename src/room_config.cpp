@@ -61,6 +61,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_FalloffAboveCeiling", "p_FalloffAboveCeiling"), &RoomConfig::SetFalloffAboveCeiling);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__falloff_above_ceiling", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_FalloffAboveCeiling", "get_FalloffAboveCeiling");
 
+	ClassDB::bind_method(D_METHOD("get_FalloffNearBorder"), &RoomConfig::GetFalloffNearBorder);
+	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
+
 	ClassDB::bind_method(D_METHOD("get_Interpolate"), &RoomConfig::GetInterpolate);
 	ClassDB::bind_method(D_METHOD("set_Interpolate", "p_Interpolate"), &RoomConfig::SetInterpolate);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__interpolate", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_Interpolate", "get_Interpolate");
@@ -79,6 +83,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_UseBorderNoise", "p_UseBorderNoise"), &RoomConfig::SetUseBorderNoise);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_border__use_border_noise"), "set_UseBorderNoise", "get_UseBorderNoise");
 
+	ClassDB::bind_method(D_METHOD("get_NormalizeBorder"), &RoomConfig::GetNormalizeBorder);
+	ClassDB::bind_method(D_METHOD("set_NormalizeBorder", "p_NormalizeBorder"), &RoomConfig::SetNormalizeBorder);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_border__normalize_border_noise"), "set_NormalizeBorder", "get_NormalizeBorder");
+
 	ClassDB::bind_method(D_METHOD("get_BorderSize"), &RoomConfig::GetBorderSize);
 	ClassDB::bind_method(D_METHOD("set_BorderSize", "p_BorderSize"), &RoomConfig::SetBorderSize);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "room_border__border_size", PROPERTY_HINT_RANGE, "0,10,"), "set_BorderSize", "get_BorderSize");
@@ -90,10 +98,6 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_SmoothBorderNoise"), &RoomConfig::GetSmoothBorderNoise);
 	ClassDB::bind_method(D_METHOD("set_SmoothBorderNoise", "p_SmoothBorderNoise"), &RoomConfig::SetSmoothBorderNoise);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__smooth_border_noise", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_SmoothBorderNoise", "get_SmoothBorderNoise");
-
-	ClassDB::bind_method(D_METHOD("get_FalloffNearBorder"), &RoomConfig::GetFalloffNearBorder);
-	ClassDB::bind_method(D_METHOD("set_FalloffNearBorder", "p_FalloffNearBorder"), &RoomConfig::SetFalloffNearBorder);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__falloff_near_border", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_FalloffNearBorder", "get_FalloffNearBorder");
 
 	ClassDB::bind_method(D_METHOD("get_BorderTilt"), &RoomConfig::GetBorderTilt);
 	ClassDB::bind_method(D_METHOD("set_BorderTilt", "p_BorderTilt"), &RoomConfig::SetBorderTilt);
@@ -189,6 +193,7 @@ RoomConfig::RoomConfig() {
 	ActiveYSmoothing = 0.5f;
 	RemoveOrphans = true;
 	UseBorderNoise = false;
+	NormalizeBorder = false;
 	BorderSize = 1;
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
@@ -264,6 +269,9 @@ bool RoomConfig::GetRemoveOrphans() {
 }
 bool RoomConfig::GetUseBorderNoise() {
 	return UseBorderNoise;
+}
+bool RoomConfig::GetNormalizeBorder() {
+	return NormalizeBorder;
 }
 int RoomConfig::GetBorderSize() {
 	return BorderSize;
@@ -371,6 +379,10 @@ void RoomConfig::SetRemoveOrphans(bool p_RemoveOrphans) {
 }
 void RoomConfig::SetUseBorderNoise(bool p_UseBorderNoise) {
 	UseBorderNoise = p_UseBorderNoise;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNormalizeBorder(bool p_NormalizeBorder) {
+	NormalizeBorder = p_NormalizeBorder;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetBorderSize(int p_BorderSize) {
