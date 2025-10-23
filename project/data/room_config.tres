@@ -3,7 +3,6 @@
 [resource]
 room_noise__noise_floor = 0.03
 room_noise__tilt_y = 1.27
-room_noise__tilt_z = 1.2
 room_noise__falloff_above_ceiling = 1.0
 room_noise__falloff_near_border = 0.78
 room_noise__interpolate = 0.86

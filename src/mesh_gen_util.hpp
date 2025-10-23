@@ -77,6 +77,7 @@ struct Context {
 		float TiltY;
 		float TiltX;
 		float TiltZ;
+		float Smoothing;
 		float FalloffAboveCeiling;
 		float FalloffNearBorder;
 		float Interpolate;
@@ -136,6 +137,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->TiltY,
 		p_room->TiltX,
 		p_room->TiltZ,
+		p_room->Smoothing,
 		p_room->FalloffAboveCeiling,
 		p_room->FalloffNearBorder,
 		p_room->Interpolate,

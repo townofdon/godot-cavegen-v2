@@ -283,11 +283,12 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			}
 		}
 	}
-	// - third pass - apply bounds, borders, offsets/tilt
+	// - third pass - apply bounds, borders, offsets/tilt, smoothing
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				int i = MG::NoiseIndex(ctx, x, y, z);
+				int y2 = y;
 				if (!MG::IsAtBorderEdge(ctx, x, y, z)) {
 					// apply tilt x/z - sample different xyz
 					float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
@@ -296,10 +297,23 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float pz = z / float(numCells.z - 1);
 					int y0 = lerpf(y + numCells.y * 0.5f * clamp01(-tiltX), y + numCells.y * 0.5f * clamp01(tiltX), px);
 					int y1 = lerpf(y0 + numCells.y * 0.5f * clamp01(-tiltZ), y0 + numCells.y * 0.5f * clamp01(tiltZ), pz);
-					i = MG::ClampedNoiseIndex(ctx, x, y1, z);
+					y2 = y1;
 				}
-				float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+				i = MG::ClampedNoiseIndex(ctx, x, y2, z);
 				float val = noiseSamples[i];
+				// apply smoothing - in a kernel fashion
+				float tSmooth = ctx.cfg.Smoothing;
+				if (tSmooth > 0) {
+					val = 0;
+					for (int k = -1; k <= 1; k++) {
+						for (int j = -1; j <= 1; j++) {
+							// 1/9 = 0.1111111111
+							int i0 = MG::ClampedNoiseIndex(ctx, x + j, j == 0 && k == 0 ? y2 : y, z + k);
+							val += noiseSamples[i0] * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+						}
+					}
+				}
+				float zeroValue = minf(val, cfg.IsoValue - 0.1f);
 				if (MG::IsAtBoundaryY(ctx, y)) {
 					// apply y bounds
 					val = zeroValue;

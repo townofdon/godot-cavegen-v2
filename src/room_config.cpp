@@ -57,6 +57,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TiltZ", "p_TiltZ"), &RoomConfig::SetTiltZ);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_z", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltZ", "get_TiltZ");
 
+	ClassDB::bind_method(D_METHOD("get_Smoothing"), &RoomConfig::GetSmoothing);
+	ClassDB::bind_method(D_METHOD("set_Smoothing", "p_Smoothing"), &RoomConfig::SetSmoothing);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__smoothing", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_Smoothing", "get_Smoothing");
+
 	ClassDB::bind_method(D_METHOD("get_FalloffAboveCeiling"), &RoomConfig::GetFalloffAboveCeiling);
 	ClassDB::bind_method(D_METHOD("set_FalloffAboveCeiling", "p_FalloffAboveCeiling"), &RoomConfig::SetFalloffAboveCeiling);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__falloff_above_ceiling", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_FalloffAboveCeiling", "get_FalloffAboveCeiling");
@@ -188,6 +192,7 @@ RoomConfig::RoomConfig() {
 	TiltY = 1.0f;
 	TiltX = 1.0f;
 	TiltZ = 1.0f;
+	Smoothing = 0;
 	FalloffAboveCeiling = 0.5f;
 	FalloffNearBorder = 0.2f;
 	Interpolate = 1.0f;
@@ -254,6 +259,9 @@ float RoomConfig::GetTiltX() {
 }
 float RoomConfig::GetTiltZ() {
 	return TiltZ;
+}
+float RoomConfig::GetSmoothing() {
+	return Smoothing;
 }
 float RoomConfig::GetFalloffAboveCeiling() {
 	return FalloffAboveCeiling;
@@ -359,6 +367,10 @@ void RoomConfig::SetTiltX(float p_TiltX) {
 }
 void RoomConfig::SetTiltZ(float p_TiltZ) {
 	TiltZ = p_TiltZ;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetSmoothing(float p_Smoothing) {
+	Smoothing = p_Smoothing;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetFalloffAboveCeiling(float p_FalloffAboveCeiling) {
