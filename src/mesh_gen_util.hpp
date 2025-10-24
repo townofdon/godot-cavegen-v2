@@ -92,7 +92,6 @@ struct Context {
 		float BorderNoiseIsoValue;
 		float SmoothBorderNoise;
 		float BorderTilt;
-		int BorderGapSpread;
 		// tiles
 		float TileStrength;
 		float TileSmoothing;
@@ -155,7 +154,6 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->BorderNoiseIsoValue,
 		p_room->SmoothBorderNoise,
 		p_room->BorderTilt,
-		p_room->BorderGapSpread,
 		// tiles
 		p_room->TileStrength,
 		p_room->TileSmoothing,

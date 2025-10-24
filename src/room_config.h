@@ -47,8 +47,6 @@ public:
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float BorderTilt;
-	// TODO: REMOVE
-	int BorderGapSpread;
 	// tiles
 	float TileStrength;
 	float TileSmoothing;
@@ -86,7 +84,6 @@ public:
 	float GetBorderNoiseIsoValue();
 	float GetSmoothBorderNoise();
 	float GetBorderTilt();
-	float GetBorderGapSpread();
 	float GetTileStrength();
 	float GetTileSmoothing();
 	float GetTileCeiling();
@@ -122,7 +119,6 @@ public:
 	void SetBorderNoiseIsoValue(float p_BorderNoiseIsoValue);
 	void SetSmoothBorderNoise(float p_SmoothBorderNoise);
 	void SetBorderTilt(float p_BorderTilt);
-	void SetBorderGapSpread(float p_BorderGapSpread);
 	void SetTileStrength(float p_TileStrength);
 	void SetTileSmoothing(float p_TileSmoothing);
 	void SetTileCeiling(float p_TileCeiling);

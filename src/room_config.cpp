@@ -115,10 +115,6 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_BorderTilt", "p_BorderTilt"), &RoomConfig::SetBorderTilt);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_border__border_tilt", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_BorderTilt", "get_BorderTilt");
 
-	ClassDB::bind_method(D_METHOD("get_BorderGapSpread"), &RoomConfig::GetBorderGapSpread);
-	ClassDB::bind_method(D_METHOD("set_BorderGapSpread", "p_BorderGapSpread"), &RoomConfig::SetBorderGapSpread);
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "room_border__border_gap_spread", PROPERTY_HINT_RANGE, "0,10,"), "set_BorderGapSpread", "get_BorderGapSpread");
-
 	ADD_GROUP("Tile Apply", "tile_apply__");
 
 	ClassDB::bind_method(D_METHOD("get_TileStrength"), &RoomConfig::GetTileStrength);
@@ -218,7 +214,6 @@ RoomConfig::RoomConfig() {
 	BorderNoiseIsoValue = 0.5f;
 	SmoothBorderNoise = 0.5f;
 	BorderTilt = 0.5f;
-	BorderGapSpread = 2;
 	TileStrength = 1.0f;
 	TileSmoothing = 0.0f;
 	TileCeiling = 0.6f;
@@ -315,9 +310,6 @@ float RoomConfig::GetSmoothBorderNoise() {
 }
 float RoomConfig::GetBorderTilt() {
 	return BorderTilt;
-}
-float RoomConfig::GetBorderGapSpread() {
-	return BorderGapSpread;
 }
 float RoomConfig::GetTileStrength() {
 	return TileStrength;
@@ -446,10 +438,6 @@ void RoomConfig::SetSmoothBorderNoise(float p_SmoothBorderNoise) {
 }
 void RoomConfig::SetBorderTilt(float p_BorderTilt) {
 	BorderTilt = p_BorderTilt;
-	emit_signal("on_changed");
-}
-void RoomConfig::SetBorderGapSpread(float p_BorderGapSpread) {
-	BorderGapSpread = p_BorderGapSpread;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetTileStrength(float p_TileStrength) {
