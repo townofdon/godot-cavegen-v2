@@ -190,6 +190,12 @@ func handle_room_size_change() -> void:
 		printerr("invalid prevNumCells (", prevNumCells.x, ",", prevNumCells.y, ") - did you forget to call initialize()?")
 		return
 	processing = true
+	# convert existing tile data from prev coords to new coords
+	for y in range(prevNumCells.y):
+		for x in range(prevNumCells.x):
+			var coords := Vector2i(x, y)
+			var tile := get_cell_atlas_coords(coords).x as NodeTileMapping
+			if room: room.set_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
 	# unset previous border tile, and copy tile to new border tile
 	if numCells.x != prevNumCells.x:
 		for y in range(numCells.y):
