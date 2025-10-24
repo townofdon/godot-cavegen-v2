@@ -96,10 +96,11 @@ struct Context {
 		// tiles
 		float TileStrength;
 		float TileSmoothing;
-		float TileFloor;
-		float TileFloorFalloff;
 		float TileCeiling;
 		float TileCeilingFalloff;
+		float TileFloor;
+		float TileFloorFalloff;
+		float TileEraseSize;
 		// neighbors
 		float NeighborBlend;
 	};
@@ -158,10 +159,11 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		// tiles
 		p_room->TileStrength,
 		p_room->TileSmoothing,
-		p_room->TileFloor,
-		p_room->TileFloorFalloff,
 		p_room->TileCeiling,
 		p_room->TileCeilingFalloff,
+		p_room->TileFloor,
+		p_room->TileFloorFalloff,
+		p_room->TileEraseSize,
 		// neighbors
 		p_room->NeighborBlend,
 	};
@@ -318,6 +320,7 @@ inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
 }
 
 inline float SignedDistFromBorder(Context ctx, int x, int z, float BorderSize) {
+	BorderSize = maxi(BorderSize, 1);
 	int numx = ctx.numCells.x;
 	int numz = ctx.numCells.z;
 	float v0 = x - BorderSize;
@@ -474,15 +477,21 @@ inline bool IsBorderTile(Context ctx, int x, int z) {
 }
 
 inline int GetDistanceToEmptyBorderTile(Context ctx, int x, int z, int spread) {
-	if (x <= ctx.cfg.BorderSize) {
-		x = 1;
-	} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
-		x = ctx.numCells.x - 2;
+	int distX = mini(absi(x - 1), absi(ctx.numCells.x - 2 - x));
+	int distZ = mini(absi(z - 1), absi(ctx.numCells.z - 2 - z));
+	if (distX <= distZ) {
+		if (x <= ctx.cfg.BorderSize) {
+			x = 1;
+		} else if (x >= ctx.numCells.x - 1 - ctx.cfg.BorderSize) {
+			x = ctx.numCells.x - 2;
+		}
 	}
-	if (z <= ctx.cfg.BorderSize) {
-		z = 1;
-	} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
-		z = ctx.numCells.z - 2;
+	if (distZ <= distX) {
+		if (z <= ctx.cfg.BorderSize) {
+			z = 1;
+		} else if (z >= ctx.numCells.z - 1 - ctx.cfg.BorderSize) {
+			z = ctx.numCells.z - 2;
+		}
 	}
 	if (GetTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) {
 		return 0;
@@ -498,6 +507,22 @@ inline int GetDistanceToEmptyBorderTile(Context ctx, int x, int z, int spread) {
 		}
 	}
 	return INT_MAX;
+}
+
+inline int GetDistanceToEmptyTile(Context ctx, int x, int z, int spread) {
+	if (GetTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) {
+		return 0;
+	}
+	int dist = INT_MAX;
+	for (int z0 = z - spread; z0 <= z + spread; z0++) {
+		for (int x0 = x - spread; x0 <= x + spread; x0++) {
+			int currentDist = mini(absi(x - x0), absi(z - z0));
+			if (GetTile(ctx, x0, z0) == RoomConfig::TILE_STATE_EMPTY && currentDist < dist) {
+				dist = currentDist;
+			}
+		}
+	}
+	return dist;
 }
 
 inline int GetActivePlaneY(Context ctx) {

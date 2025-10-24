@@ -47,14 +47,16 @@ public:
 	float BorderNoiseIsoValue;
 	float SmoothBorderNoise;
 	float BorderTilt;
+	// TODO: REMOVE
 	int BorderGapSpread;
 	// tiles
 	float TileStrength;
 	float TileSmoothing;
-	float TileFloor;
-	float TileFloorFalloff;
 	float TileCeiling;
 	float TileCeilingFalloff;
+	float TileFloor;
+	float TileFloorFalloff;
+	float TileEraseSize;
 	// neighbors
 	float NeighborBlend;
 
@@ -87,10 +89,11 @@ public:
 	float GetBorderGapSpread();
 	float GetTileStrength();
 	float GetTileSmoothing();
-	float GetTileFloor();
-	float GetTileFloorFalloff();
 	float GetTileCeiling();
 	float GetTileCeilingFalloff();
+	float GetTileFloor();
+	float GetTileFloorFalloff();
+	float GetTileEraseSize();
 	float GetNeighborBlend();
 
 	void SetShowNoise(bool p_ShowNoise);
@@ -122,10 +125,11 @@ public:
 	void SetBorderGapSpread(float p_BorderGapSpread);
 	void SetTileStrength(float p_TileStrength);
 	void SetTileSmoothing(float p_TileSmoothing);
-	void SetTileFloor(float p_TileFloor);
-	void SetTileFloorFalloff(float p_TileFloorFalloff);
 	void SetTileCeiling(float p_TileCeiling);
 	void SetTileCeilingFalloff(float p_TileCeilingFalloff);
+	void SetTileFloor(float p_TileFloor);
+	void SetTileFloorFalloff(float p_TileFloorFalloff);
+	void SetTileEraseSize(float p_TileEraseSize);
 	void SetNeighborBlend(float p_NeighborBlend);
 
 	int GetPrecedence();

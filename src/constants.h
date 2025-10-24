@@ -2,11 +2,14 @@
 #define CONSTANTS_H
 
 #include "godot_cpp/classes/global_constants.hpp"
+#include <cfloat>
 
 using namespace godot;
 
 inline constexpr const int MAX_NOISE_NODES = 216000;
 inline constexpr const int MAX_NOISE_NODES_2D = 2500;
+inline constexpr const int MAX_TILE_ERASE_SIZE = 10;
+inline constexpr const float MAXVAL = FLT_MAX;
 
 // clang-format off
 inline constexpr const int POINTS[8 * 3] = {

@@ -13,8 +13,6 @@ void MeshGen::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("generate", "global_cfg", "room_cfg", "noise", "border_noise"), &MeshGen::generate);
 }
 
-const float MAXVAL = FLT_MAX;
-
 float *MeshGen::time_processNoise = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -338,14 +336,25 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 						float py = (1 - clamp01(GetFloorToCeilAmount(ctx, y)));
 						float size = lerpf(mini(ctx.cfg.BorderSize, 1), ctx.cfg.BorderSize, clamp01(py));
 						size = lerpf(ctx.cfg.BorderSize, size, tilt);
-						float pd = clamp01(MG::SignedDistFromBorder(ctx, x, z, size)) / maxf(size, 1);
-						val = lerpf(maxf(val, cfg.IsoValue + 0.1f), val, pd);
+						float pdist = clamp01(MG::SignedDistFromBorder(ctx, x, z, size)) / maxf(size, 1);
+						val = lerpf(maxf(val, cfg.IsoValue + 0.1f), val, pdist);
 						// subtract from border if close to an empty border tile
-						float activeY = (float)MG::GetActivePlaneY(ctx) - 6;
-						int dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, cfg.BorderGapSpread);
-						float distPct = Easing::InQuad(clamp01(dist / (float)cfg.BorderGapSpread));
-						float yPct = clamp01(inverse_lerpf(lerpf(activeY, ceiling - CMP_EPSILON, distPct), ceiling, y));
-						val = lerpf(val, 0, yPct);
+						// calculate y thresholds
+						// t = 0   => y = 0
+						// t = 0.5 => y = activeY
+						// t = 1   => y = ceiling
+						float activeY = (float)MG::GetActivePlaneY(ctx);
+						float vfloor = cfg.TileFloor; // user-selected range [0,1]
+						float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
+						float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
+						float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
+						float t = clamp01(t0 + t1);
+						float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
+						float borderGapSize = maxf((float)MAX_TILE_ERASE_SIZE * cfg.TileEraseSize, 1) + 1;
+						float dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, borderGapSize);
+						float distPct = clamp01(dist / borderGapSize);
+						t_floor = lerpf(t_floor, 0, distPct);
+						val = lerpf(val, 0, Easing::OutQuad(t_floor));
 					} else {
 						val = zeroValue;
 					}
@@ -615,21 +624,30 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
 		float vceil = cfg.TileCeiling; // range [0,1]
 		float vceilFalloff = lerpf(vceil - CMP_EPSILON, 0, cfg.TileCeilingFalloff);
-		// border tiles are already accounted for
 		for (int z = 2; z < numCells.z - 2; z++) {
 			for (int y = 2; y < numCells.y - 2; y++) {
 				for (int x = 2; x < numCells.x - 2; x++) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
-					auto defaultTile = MG::GetTile(ctx, x, z);
+					auto currentTile = MG::GetTile(ctx, x, z);
+					float unsetNoiseVal = 1;
+					// subtract noise if close to adjacent empty tile
+					if (cfg.TileEraseSize > 0) {
+						float dist = MG::GetDistanceToEmptyTile(ctx, x, z, MAX_TILE_ERASE_SIZE * cfg.TileEraseSize) - 1;
+						float tDist = clamp01(dist / ((float)MAX_TILE_ERASE_SIZE * cfg.TileEraseSize));
+						tDist = lerpf(1, tDist, clamp01(cfg.TileStrength));
+						tDist = tDist >= 1 ? 1 : lerpf(tDist, 0, clamp01(cfg.TileStrength - 1));
+						tDist = Easing::OutQuad(tDist);
+						unsetNoiseVal = tDist;
+					}
 					// calculate tile kernel, where 0 => empty, 1 => unset, 2 => filled
 					float kernel = 0.0f;
 					for (int j = -1; j <= 1; j++) {
 						for (int k = -1; k <= 1; k++) {
 							bool isBorderTile = MG::IsBorderTile(ctx, x + j, z + k);
-							int tile = isBorderTile ? defaultTile : MG::GetTile(ctx, x + j, z + k, defaultTile);
+							int tile = isBorderTile ? currentTile : MG::GetTile(ctx, x + j, z + k, currentTile);
 							float val = 0;
 							if (tile == RoomConfig::TILE_STATE_UNSET) {
-								val = 1;
+								val = unsetNoiseVal;
 							} else if (tile == RoomConfig::TILE_STATE_FILLED) {
 								val = 2;
 							}
@@ -646,7 +664,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float t = clamp01(t0 + t1);
 					float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
 					float t_ceil = clamp01(inverse_lerpf(vceil, vceilFalloff, t));
-					float targ_unset = noiseSamples[i];
 					// calc empty noise target
 					float targ_empty = 0.0f;
 					targ_empty = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
@@ -663,6 +680,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					targ_filled = lerpf(targ_filled, 1.0f, clamp01(cfg.TileStrength - 1));
 					targ_filled = lerpf(fallback, targ_filled, t_ceil);
 					// aggregate targets based on kernel results
+					float targ_unset = noiseSamples[i];
 					float targ;
 					targ = lerpf(targ_empty, targ_unset, clamp01(kernel));
 					targ = lerpf(targ, targ_filled, clamp01(kernel - 1));

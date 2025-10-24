@@ -129,6 +129,14 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TileSmoothing", "p_TileSmoothing"), &RoomConfig::SetTileSmoothing);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_smoothing", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileSmoothing", "get_TileSmoothing");
 
+	ClassDB::bind_method(D_METHOD("get_TileCeiling"), &RoomConfig::GetTileCeiling);
+	ClassDB::bind_method(D_METHOD("set_TileCeiling", "p_TileCeiling"), &RoomConfig::SetTileCeiling);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceiling", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeiling", "get_TileCeiling");
+
+	ClassDB::bind_method(D_METHOD("get_TileCeilingFalloff"), &RoomConfig::GetTileCeilingFalloff);
+	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
+
 	ClassDB::bind_method(D_METHOD("get_TileFloor"), &RoomConfig::GetTileFloor);
 	ClassDB::bind_method(D_METHOD("set_TileFloor", "p_TileFloor"), &RoomConfig::SetTileFloor);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloor", "get_TileFloor");
@@ -137,13 +145,9 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_TileFloorFalloff", "p_TileFloorFalloff"), &RoomConfig::SetTileFloorFalloff);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloorFalloff", "get_TileFloorFalloff");
 
-	ClassDB::bind_method(D_METHOD("get_TileCeiling"), &RoomConfig::GetTileCeiling);
-	ClassDB::bind_method(D_METHOD("set_TileCeiling", "p_TileCeiling"), &RoomConfig::SetTileCeiling);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceiling", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeiling", "get_TileCeiling");
-
-	ClassDB::bind_method(D_METHOD("get_TileCeilingFalloff"), &RoomConfig::GetTileCeilingFalloff);
-	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
+	ClassDB::bind_method(D_METHOD("get_TileEraseSize"), &RoomConfig::GetTileEraseSize);
+	ClassDB::bind_method(D_METHOD("set_TileEraseSize", "p_TileEraseSize"), &RoomConfig::SetTileEraseSize);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_erase_size", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileEraseSize", "get_TileEraseSize");
 
 	ADD_GROUP("Neighbors", "neighbors__");
 
@@ -217,10 +221,10 @@ RoomConfig::RoomConfig() {
 	BorderGapSpread = 2;
 	TileStrength = 1.0f;
 	TileSmoothing = 0.0f;
-	TileFloor = 0.4f;
 	TileCeiling = 0.6f;
-	TileFloorFalloff = 0.2f;
 	TileCeilingFalloff = 0.2f;
+	TileFloor = 0.4f;
+	TileFloorFalloff = 0.2f;
 	NeighborBlend = 0.25f;
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
@@ -321,17 +325,20 @@ float RoomConfig::GetTileStrength() {
 float RoomConfig::GetTileSmoothing() {
 	return TileSmoothing;
 }
+float RoomConfig::GetTileCeiling() {
+	return TileCeiling;
+}
+float RoomConfig::GetTileCeilingFalloff() {
+	return TileCeilingFalloff;
+}
 float RoomConfig::GetTileFloor() {
 	return TileFloor;
 }
 float RoomConfig::GetTileFloorFalloff() {
 	return TileFloorFalloff;
 }
-float RoomConfig::GetTileCeiling() {
-	return TileCeiling;
-}
-float RoomConfig::GetTileCeilingFalloff() {
-	return TileCeilingFalloff;
+float RoomConfig::GetTileEraseSize() {
+	return TileEraseSize;
 }
 float RoomConfig::GetNeighborBlend() {
 	return NeighborBlend;
@@ -453,6 +460,14 @@ void RoomConfig::SetTileSmoothing(float p_TileSmoothing) {
 	TileSmoothing = p_TileSmoothing;
 	emit_signal("on_changed");
 }
+void RoomConfig::SetTileCeiling(float p_TileCeiling) {
+	TileCeiling = p_TileCeiling;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetTileCeilingFalloff(float p_TileCeilingFalloff) {
+	TileCeilingFalloff = p_TileCeilingFalloff;
+	emit_signal("on_changed");
+}
 void RoomConfig::SetTileFloor(float p_TileFloor) {
 	TileFloor = p_TileFloor;
 	emit_signal("on_changed");
@@ -461,12 +476,8 @@ void RoomConfig::SetTileFloorFalloff(float p_TileFloorFalloff) {
 	TileFloorFalloff = p_TileFloorFalloff;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetTileCeiling(float p_TileCeiling) {
-	TileCeiling = p_TileCeiling;
-	emit_signal("on_changed");
-}
-void RoomConfig::SetTileCeilingFalloff(float p_TileCeilingFalloff) {
-	TileCeilingFalloff = p_TileCeilingFalloff;
+void RoomConfig::SetTileEraseSize(float p_TileEraseSize) {
+	TileEraseSize = p_TileEraseSize;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetNeighborBlend(float p_NeighborBlend) {
