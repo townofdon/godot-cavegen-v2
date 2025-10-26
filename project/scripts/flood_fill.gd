@@ -2,12 +2,15 @@ extends Node
 
 class_name FloodFill
 
+const MAXINT = 9223372036854775807
+
 static func fill(
 	screen: PackedInt32Array,
 	numCells: Vector2i,
 	startAt: Vector2i,
 	prev: int,
 	next: int,
+	maxSteps: int = MAXINT
 ) -> void:
 	var index := func(x: int, y: int) -> int:
 		return x + y * numCells.x
@@ -29,10 +32,12 @@ static func fill(
 	queue.append(startAt)
 	screen.set(index.call(startAt.x, startAt.y), next)
 
+	var step:int = 0
 	while len(queue) > 0:
-		pass
-		var curr:Vector2i = queue.get(len(queue) - 1)
-		queue.remove_at(len(queue) - 1)
+		if step > maxSteps:
+			break
+		var curr:Vector2i = queue.get(0)
+		queue.remove_at(0)
 		var x:= curr.x
 		var y:= curr.y
 		if (isValid.call(x+1, y)):
@@ -51,3 +56,4 @@ static func fill(
 			var i:int = index.call(x, y-1)
 			screen.set(i, next)
 			queue.append(Vector2i(x, y-1))
+		step += 1

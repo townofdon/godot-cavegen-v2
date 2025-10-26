@@ -40,14 +40,30 @@ var anchorTile := Tile.Null
 var prevNumCells := Vector2i(-1,-1)
 var lastTileDrawnCoords := Vector2i(-1,-1)
 var anchorCoords:Vector2i = Vector2i(-1,-1)
+var cancel := false
 
 func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
 	on_mode_changed.emit(mode)
+	cancel = true
 
 func _process(_delta: float) -> void:
 	if !visible || !is_visible_in_tree():
 		return
+
+	if Input.is_action_just_pressed("tile_mode_draw"):
+		set_editor_mode(EditorMode.Draw)
+		return
+	if Input.is_action_just_pressed("tile_mode_line"):
+		set_editor_mode(EditorMode.Line)
+		return
+	if Input.is_action_just_pressed("tile_mode_rect"):
+		set_editor_mode(EditorMode.Rect)
+		return
+	if Input.is_action_just_pressed("tile_mode_fill"):
+		set_editor_mode(EditorMode.Fill)
+		return
+
 	var coords := local_to_map(get_local_mouse_position())
 	var alt_pressed := Input.is_action_pressed("tile_alt")
 	var shift_pressed := Input.is_action_pressed("tile_shift")
@@ -59,18 +75,19 @@ func _process(_delta: float) -> void:
 	if (shift_pressed && has_anchor):
 		drawTile = anchorTile
 
+	if cancel_pressed || (mouse_l_pressed && mouse_r_pressed):
+		cancel = true
+
+	if cancel && (mouse_l_pressed || mouse_r_pressed):
+		drawTile = Tile.Null
+		anchorTile = Tile.Null
+		anchorCoords = Vector2i(-1,-1)
+		lastTileDrawnCoords = Vector2i(-1,-1)
+		return
+
 	# draw mode
 	if mode == EditorMode.Draw:
-		if (mouse_l_pressed && !alt_pressed):
-			var currentTile := get_cell_atlas_coords(coords).x as Tile
-			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
-			if (shift_pressed && has_anchor):
-				_line_at(anchorCoords, coords, drawTile)
-			else:
-				_draw_at(coords, drawTile)
-			anchorCoords = coords
-			anchorTile = drawTile
-		elif ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+		if ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
 			var currentTile := get_cell_atlas_coords(coords).x as Tile
 			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, false);
 			if (shift_pressed && has_anchor):
@@ -79,62 +96,92 @@ func _process(_delta: float) -> void:
 				_draw_at(coords, drawTile)
 			anchorCoords = coords
 			anchorTile = drawTile
+		elif (mouse_l_pressed && !alt_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
+			if (shift_pressed && has_anchor):
+				_line_at(anchorCoords, coords, drawTile)
+			else:
+				_draw_at(coords, drawTile)
+			anchorCoords = coords
+			anchorTile = drawTile
 		else:
-			lastTileDrawnCoords = Vector2i(-1,-1)
+			cancel = false
 			drawTile = Tile.Null
+			lastTileDrawnCoords = Vector2i(-1,-1)
 	elif mode == EditorMode.Line:
-		# TODO: ADD LINE MODE
-		pass
+		if ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+			if anchorCoords == Vector2i(-1,-1):
+				anchorTile = _get_next_tile_to_lay(get_cell_atlas_coords(coords).x, false);
+				anchorCoords = coords
+		elif (mouse_l_pressed && !alt_pressed):
+			if anchorCoords == Vector2i(-1,-1):
+				anchorCoords = coords
+				anchorTile = _get_next_tile_to_lay(get_cell_atlas_coords(coords).x, true)
+		else:
+			if !cancel && anchorTile != Tile.Null: _line_at(anchorCoords, coords, anchorTile)
+			cancel = false
+			drawTile = Tile.Null
+			anchorTile = Tile.Null
+			anchorCoords = Vector2i(-1,-1)
 	elif mode == EditorMode.Fill:
-		if (mouse_l_pressed && !alt_pressed):
-			var currentTile := get_cell_atlas_coords(coords).x as Tile
-			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
-			_fill_at(coords, currentTile, drawTile)
-			anchorCoords = coords
-		elif ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+		if ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
 			var currentTile := get_cell_atlas_coords(coords).x as Tile
 			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, false);
 			_fill_at(coords, currentTile, drawTile)
 			anchorCoords = coords
+		elif (mouse_l_pressed && !alt_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
+			_fill_at(coords, currentTile, drawTile)
+			anchorCoords = coords
 		else:
-			lastTileDrawnCoords = Vector2i(-1,-1)
+			cancel = false
 			drawTile = Tile.Null
+			lastTileDrawnCoords = Vector2i(-1,-1)
 	elif mode == EditorMode.Rect:
-		# TODO: ADD RECT MODE
-		pass
+		if ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+			if anchorCoords == Vector2i(-1,-1):
+				anchorTile = _get_next_tile_to_lay(get_cell_atlas_coords(coords).x, false);
+				anchorCoords = coords
+		elif (mouse_l_pressed && !alt_pressed):
+			if anchorCoords == Vector2i(-1,-1):
+				anchorCoords = coords
+				anchorTile = _get_next_tile_to_lay(get_cell_atlas_coords(coords).x, true)
+		else:
+			if !cancel && anchorTile != Tile.Null: _rect_at(anchorCoords, coords, anchorTile)
+			cancel = false
+			drawTile = Tile.Null
+			anchorTile = Tile.Null
+			anchorCoords = Vector2i(-1,-1)
 	queue_redraw()
 
 func _draw_at(coords: Vector2i, tile: Tile):
 	_user_set_cell_at(coords, tile)
 
-#func _erase_at(coords: Vector2i):
-	#var currentTile := get_cell_atlas_coords(coords).x as Tile
-	#drawTile = _get_next_tile_to_lay(currentTile, false);
-	#_user_set_cell_at(coords, drawTile)
-
 func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
+	var numCells := _get_num_cells()
 	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
 	if (numSteps <= 0):
-		return
-	elif (numSteps <= 1):
-		_draw_at(from, tile)
-		#if (erase):
-			#_erase_at(from)
-		#else:
-			#_draw_at(from)
+		if tile != Tile.Null: _set_cell_at(from, tile, numCells)
+		lastTileDrawnCoords = from
 	else:
 		for i in range(numSteps):
 			var x := roundi(lerpf(from.x, to.x, i / float(numSteps - 1)))
 			var y := roundi(lerpf(from.y, to.y, i / float(numSteps - 1)))
 			var coords := Vector2i(x, y)
-			_draw_at(coords, tile)
-			#if (erase):
-				#_erase_at(coords)
-			#else:
-				#_draw_at(coords)
+			if tile != Tile.Null: _set_cell_at(coords, tile, numCells)
+			lastTileDrawnCoords = coords
+	if room: room.notify_changed()
 
-func _rect_at(from: Vector2i, to: Vector2i):
-	pass
+func _rect_at(from: Vector2i, to: Vector2i, tile: Tile):
+	var numCells := _get_num_cells()
+	for y in range(mini(from.y, to.y), maxi(from.y, to.y) + 1):
+		for x in range(mini(from.x, to.x), maxi(from.x, to.x) + 1):
+			var coords := Vector2i(x, y)
+			if tile != Tile.Null: _set_cell_at(coords, tile, numCells)
+			lastTileDrawnCoords = coords
+	if room: room.notify_changed()
 
 func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile):
 	if coords == lastTileDrawnCoords:
