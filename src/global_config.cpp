@@ -106,9 +106,9 @@ SizingData GlobalConfig::GetSizingData() {
 	float cellSize = CellSize - 0.5f;
 	do {
 		cellSize = cellSize + 0.5f;
-		numCells.x = (int)floor(RoomWidth / cellSize);
-		numCells.y = (int)floor(RoomHeight / cellSize);
-		numCells.z = (int)floor(RoomDepth / cellSize);
+		numCells.x = (int)floor(RoomWidth / cellSize) + 2;
+		numCells.y = (int)floor(RoomHeight / cellSize) + 2;
+		numCells.z = (int)floor(RoomDepth / cellSize) + 2;
 	} while (numCells.x * numCells.y * numCells.z > MAX_NOISE_NODES);
 	struct SizingData sizing = {
 		numCells,

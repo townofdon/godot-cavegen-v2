@@ -310,32 +310,47 @@ inline bool IsAtBorderEdge(Context ctx, int x, int z) {
 		z >= ctx.numCells.z - 2);
 }
 
-inline int DistFromBorder(Context ctx, int x, int y, int z, int BorderSize) {
+inline int DistFromBorder(Context ctx, int x, int z, int BorderSize) {
 	auto numCells = ctx.numCells;
 	int distX = minf(absf(x - BorderSize), absf(numCells.x - 1 - BorderSize - x));
 	int distZ = minf(absf(z - BorderSize), absf(numCells.z - 1 - BorderSize - z));
 	return minf(distX, distZ);
 }
 
-inline float SignedDistFromBorder(Context ctx, int x, int z, float BorderSize) {
+inline int SignedDistFromBorder2(Context ctx, int x, int z, int BorderSize) {
+	auto numCells = ctx.numCells;
+	int dx = minf(x - BorderSize, numCells.x - 1 - BorderSize - x);
+	int dz = minf(z - BorderSize, numCells.z - 1 - BorderSize - z);
+	if (int(dx >= 0) != int(dz >= 0)) {
+		return mini(dx, dz);
+	}
+	if (absi(dx) < absi(dz)) {
+		return dx;
+	}
+	return dz;
+}
+
+// see: https://iquilezles.org/articles/distfunctions2d/
+// p=point
+// b=box half-size
+inline float SignedDistFromBorder(Context ctx, int x, int z, int BorderSize) {
+	// vec2 d = abs(p)-b;
+	// return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 	BorderSize = maxi(BorderSize, 1);
 	int numx = ctx.numCells.x;
 	int numz = ctx.numCells.z;
-	float v0 = x - BorderSize;
-	float v1 = z - BorderSize;
-	float v2 = numx - 1 - BorderSize - x;
-	float v3 = numz - 1 - BorderSize - z;
-	float dist = v0;
-	if (absf(v1) < absf(dist)) {
-		dist = v1;
-	}
-	if (absf(v2) < absf(dist)) {
-		dist = v2;
-	}
-	if (absf(v3) < absf(dist)) {
-		dist = v3;
-	}
-	return dist;
+	int x0 = BorderSize;
+	int z0 = BorderSize;
+	int x1 = numx - 1 - BorderSize;
+	int z1 = numz - 1 - BorderSize;
+	Vector2 b = Vector2(
+		(x1 - x0) * 0.5f,
+		(z1 - z0) * 0.5f);
+	Vector2 p = Vector2(
+		absf(x - BorderSize - b.x),
+		absf(z - BorderSize - b.y));
+	Vector2i d = p.abs() - b;
+	return -(d.max(Vector2i(0, 0)).length() + mini(maxi(d.x, d.y), 0));
 }
 
 inline bool IsBelowCeiling(Context ctx, int y) {

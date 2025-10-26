@@ -336,7 +336,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 						float py = (1 - clamp01(GetFloorToCeilAmount(ctx, y)));
 						float size = lerpf(mini(ctx.cfg.BorderSize, 1), ctx.cfg.BorderSize, clamp01(py));
 						size = lerpf(ctx.cfg.BorderSize, size, tilt);
-						float pdist = clamp01(MG::SignedDistFromBorder(ctx, x, z, size)) / maxf(size, 1);
+						float pdist = clamp01(MG::SignedDistFromBorder2(ctx, x, z, size)) / maxf(size, 1);
 						val = lerpf(maxf(val, cfg.IsoValue + 0.1f), val, pdist);
 						// subtract from border if close to an empty border tile
 						// calculate y thresholds
@@ -361,7 +361,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
 					// apply falloff to noise above ceil && near border
 					int borderSize = cfg.UseBorderNoise ? 1 : cfg.BorderSize;
-					float dist = MG::DistFromBorder(ctx, x, y, z, borderSize);
+					float dist = MG::DistFromBorder(ctx, x, z, borderSize);
 					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
 					float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
 					float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
