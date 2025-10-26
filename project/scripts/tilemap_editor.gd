@@ -27,7 +27,6 @@ enum SelectTile {
 
 enum EditorMode {
 	Draw,
-	Erase,
 	Line,
 	Rect,
 	Fill,
@@ -62,17 +61,6 @@ func _process(_delta: float) -> void:
 
 	# draw mode
 	if mode == EditorMode.Draw:
-		#selectionLayer.clear()
-		## anchor / select
-		#if (shift_pressed && has_anchor):
-			#selectionLayer.set_cell(anchorCoords, 3, Vector2i(SelectTile.Anchor, 0))
-			#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Fill, 0))
-		#else:
-			#if (alt_pressed || mouse_r_pressed):
-				#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Erase, 0))
-			#else:
-				#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Fill, 0))
-		# fill tile
 		if (mouse_l_pressed && !alt_pressed):
 			var currentTile := get_cell_atlas_coords(coords).x as Tile
 			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
@@ -82,7 +70,6 @@ func _process(_delta: float) -> void:
 				_draw_at(coords, drawTile)
 			anchorCoords = coords
 			anchorTile = drawTile
-		# erase tile
 		elif ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
 			var currentTile := get_cell_atlas_coords(coords).x as Tile
 			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, false);
@@ -95,14 +82,23 @@ func _process(_delta: float) -> void:
 		else:
 			lastTileDrawnCoords = Vector2i(-1,-1)
 			drawTile = Tile.Null
-	elif mode == EditorMode.Erase:
-		pass
 	elif mode == EditorMode.Line:
 		# TODO: ADD LINE MODE
 		pass
 	elif mode == EditorMode.Fill:
-		# TODO: ADD FILL MODE
-		pass
+		if (mouse_l_pressed && !alt_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
+			_fill_at(coords, currentTile, drawTile)
+			anchorCoords = coords
+		elif ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, false);
+			_fill_at(coords, currentTile, drawTile)
+			anchorCoords = coords
+		else:
+			lastTileDrawnCoords = Vector2i(-1,-1)
+			drawTile = Tile.Null
 	elif mode == EditorMode.Rect:
 		# TODO: ADD RECT MODE
 		pass
@@ -137,11 +133,26 @@ func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
 			#else:
 				#_draw_at(coords)
 
-func _user_rect_at(from: Vector2i, to: Vector2i):
+func _rect_at(from: Vector2i, to: Vector2i):
 	pass
 
-func _user_fill_at(coords: Vector2i):
-	pass
+func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile):
+	if coords == lastTileDrawnCoords:
+		return
+	if currentTile == fillTile:
+		return
+	var screen := PackedInt32Array()
+	var numCells := _get_num_cells()
+	for y in range(numCells.y):
+		for x in range(numCells.x):
+			var tile := get_cell_atlas_coords(Vector2i(x, y)).x as Tile
+			screen.append(tile)
+	FloodFill.fill(screen, numCells, coords, currentTile, fillTile)
+	for y in range(numCells.y):
+		for x in range(numCells.x):
+			var i := x + y * numCells.x
+			_draw_at(Vector2i(x, y), screen.get(i))
+	lastTileDrawnCoords = coords
 
 func _get_next_tile_to_lay(current: Tile, fill: bool) -> Tile:
 	if fill:

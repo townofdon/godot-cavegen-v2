@@ -131,7 +131,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_TileCeilingFalloff"), &RoomConfig::GetTileCeilingFalloff);
 	ClassDB::bind_method(D_METHOD("set_TileCeilingFalloff", "p_TileCeilingFalloff"), &RoomConfig::SetTileCeilingFalloff);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_ceil_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileCeilingFalloff", "get_TileCeilingFalloff");
 
 	ClassDB::bind_method(D_METHOD("get_TileFloor"), &RoomConfig::GetTileFloor);
 	ClassDB::bind_method(D_METHOD("set_TileFloor", "p_TileFloor"), &RoomConfig::SetTileFloor);
@@ -139,7 +139,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_TileFloorFalloff"), &RoomConfig::GetTileFloorFalloff);
 	ClassDB::bind_method(D_METHOD("set_TileFloorFalloff", "p_TileFloorFalloff"), &RoomConfig::SetTileFloorFalloff);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor_falloff", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloorFalloff", "get_TileFloorFalloff");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "tile_apply__tile_floor_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_TileFloorFalloff", "get_TileFloorFalloff");
 
 	ClassDB::bind_method(D_METHOD("get_TileEraseSize"), &RoomConfig::GetTileEraseSize);
 	ClassDB::bind_method(D_METHOD("set_TileEraseSize", "p_TileEraseSize"), &RoomConfig::SetTileEraseSize);

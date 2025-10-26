@@ -44,6 +44,12 @@ func _process(_delta: float) -> void:
 				_select_cell_at(coords, SelectTile.Erase)
 			else:
 				_select_cell_at(coords, SelectTile.Fill)
+	elif mode == TileMapEditor.EditorMode.Fill:
+		clear()
+		if (alt_pressed):
+			_select_cell_at(coords, SelectTile.Erase)
+		else:
+			_select_cell_at(coords, SelectTile.Fill)
 	queue_redraw()
 
 func _select_cell_at(coords: Vector2i, tile: SelectTile) -> void:
