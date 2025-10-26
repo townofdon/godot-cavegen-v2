@@ -70,8 +70,8 @@ ignore_time_scale = true
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5405, 18.75, 15)
-size = Vector3(27.081, 37.5, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 18.75, 15)
+size = Vector3(30, 37.5, 30)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")

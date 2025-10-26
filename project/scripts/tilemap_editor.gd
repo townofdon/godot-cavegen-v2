@@ -8,7 +8,7 @@ signal on_mode_changed(mode: EditorMode)
 var cfg:GlobalConfig
 var room:RoomConfig
 
-enum NodeTileMapping {
+enum Tile {
 	Null = -1,
 	InnerEmpty = 0,
 	InnerNoise = 1,
@@ -18,8 +18,16 @@ enum NodeTileMapping {
 	WallFilled = 5,
 }
 
+enum SelectTile {
+	Null = -1,
+	Fill = 1,
+	Erase = 2,
+	Anchor = 3,
+}
+
 enum EditorMode {
 	Draw,
+	Erase,
 	Line,
 	Rect,
 	Fill,
@@ -27,79 +35,161 @@ enum EditorMode {
 
 const TILEMAP_SOURCE_ID := 2
 
+var mode:EditorMode = EditorMode.Draw
+var drawTile := Tile.Null
+var anchorTile := Tile.Null
 var prevNumCells := Vector2i(-1,-1)
 var lastTileDrawnCoords := Vector2i(-1,-1)
-var drawTile := NodeTileMapping.Null
-
-var mode := EditorMode.Draw
+var anchorCoords:Vector2i = Vector2i(-1,-1)
 
 func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
 	on_mode_changed.emit(mode)
 
 func _process(_delta: float) -> void:
+	if !visible || !is_visible_in_tree():
+		return
 	var coords := local_to_map(get_local_mouse_position())
+	var alt_pressed := Input.is_action_pressed("tile_alt")
+	var shift_pressed := Input.is_action_pressed("tile_shift")
+	var mouse_l_pressed := Input.is_action_pressed("mouse_btn_left")
+	var mouse_r_pressed := Input.is_action_pressed("mouse_btn_right")
+	var cancel_pressed := Input.is_action_pressed("ui_cancel")
+	var has_anchor := anchorCoords != coords && anchorCoords != Vector2i(-1,-1)
+
+	if (shift_pressed && has_anchor):
+		drawTile = anchorTile
+
 	# draw mode
 	if mode == EditorMode.Draw:
-		selectionLayer.clear()
-		selectionLayer.set_cell(coords, 3, Vector2i(1, 0))
-		var atlasCoords := get_cell_atlas_coords(coords)
-		if(Input.is_action_pressed("mouse_btn_right")):
-			drawTile = _get_next_tile_to_lay(atlasCoords, false);
-			_user_set_cell_at(coords, drawTile)
-		elif(Input.is_action_pressed("mouse_btn_left")):
-			drawTile = _get_next_tile_to_lay(atlasCoords, true);
-			_user_set_cell_at(coords, drawTile)
+		#selectionLayer.clear()
+		## anchor / select
+		#if (shift_pressed && has_anchor):
+			#selectionLayer.set_cell(anchorCoords, 3, Vector2i(SelectTile.Anchor, 0))
+			#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Fill, 0))
+		#else:
+			#if (alt_pressed || mouse_r_pressed):
+				#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Erase, 0))
+			#else:
+				#selectionLayer.set_cell(coords, 3, Vector2i(SelectTile.Fill, 0))
+		# fill tile
+		if (mouse_l_pressed && !alt_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, true);
+			if (shift_pressed && has_anchor):
+				_line_at(anchorCoords, coords, drawTile)
+			else:
+				_draw_at(coords, drawTile)
+			anchorCoords = coords
+			anchorTile = drawTile
+		# erase tile
+		elif ((mouse_l_pressed && alt_pressed) || mouse_r_pressed):
+			var currentTile := get_cell_atlas_coords(coords).x as Tile
+			if drawTile == Tile.Null: drawTile = _get_next_tile_to_lay(currentTile, false);
+			if (shift_pressed && has_anchor):
+				_line_at(anchorCoords, coords, drawTile)
+			else:
+				_draw_at(coords, drawTile)
+			anchorCoords = coords
+			anchorTile = drawTile
 		else:
 			lastTileDrawnCoords = Vector2i(-1,-1)
-			drawTile = NodeTileMapping.Null
+			drawTile = Tile.Null
+	elif mode == EditorMode.Erase:
+		pass
 	elif mode == EditorMode.Line:
 		# TODO: ADD LINE MODE
 		pass
 	elif mode == EditorMode.Fill:
 		# TODO: ADD FILL MODE
 		pass
+	elif mode == EditorMode.Rect:
+		# TODO: ADD RECT MODE
+		pass
+	queue_redraw()
 
-func _get_next_tile_to_lay(atlasCoords: Vector2i, fill: bool) -> NodeTileMapping:
-	if drawTile != NodeTileMapping.Null:
-		return drawTile
-	if fill:
-		if atlasCoords.x == NodeTileMapping.InnerFilled:
-			return NodeTileMapping.InnerFilled
-		if atlasCoords.x == NodeTileMapping.InnerNoise:
-			return NodeTileMapping.InnerFilled
-		elif atlasCoords.x == NodeTileMapping.InnerEmpty:
-			return NodeTileMapping.InnerNoise
-		elif atlasCoords.x == NodeTileMapping.WallEmpty:
-			return NodeTileMapping.WallNoise
-		elif atlasCoords.x == NodeTileMapping.WallNoise:
-			return NodeTileMapping.WallFilled
-		elif atlasCoords.x == NodeTileMapping.WallFilled:
-			return NodeTileMapping.WallFilled
+func _draw_at(coords: Vector2i, tile: Tile):
+	_user_set_cell_at(coords, tile)
+
+#func _erase_at(coords: Vector2i):
+	#var currentTile := get_cell_atlas_coords(coords).x as Tile
+	#drawTile = _get_next_tile_to_lay(currentTile, false);
+	#_user_set_cell_at(coords, drawTile)
+
+func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
+	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
+	if (numSteps <= 0):
+		return
+	elif (numSteps <= 1):
+		_draw_at(from, tile)
+		#if (erase):
+			#_erase_at(from)
+		#else:
+			#_draw_at(from)
 	else:
-		if atlasCoords.x == NodeTileMapping.InnerEmpty:
-			return NodeTileMapping.InnerEmpty
-		if atlasCoords.x == NodeTileMapping.InnerNoise:
-			return NodeTileMapping.InnerEmpty
-		elif atlasCoords.x == NodeTileMapping.InnerFilled:
-			return NodeTileMapping.InnerNoise
-		elif atlasCoords.x == NodeTileMapping.WallFilled:
-			return NodeTileMapping.WallNoise
-		elif atlasCoords.x == NodeTileMapping.WallNoise:
-			return NodeTileMapping.WallEmpty
-		elif atlasCoords.x == NodeTileMapping.WallEmpty:
-			return NodeTileMapping.WallEmpty
-	return NodeTileMapping.Null
+		for i in range(numSteps):
+			var x := roundi(lerpf(from.x, to.x, i / float(numSteps - 1)))
+			var y := roundi(lerpf(from.y, to.y, i / float(numSteps - 1)))
+			var coords := Vector2i(x, y)
+			_draw_at(coords, tile)
+			#if (erase):
+				#_erase_at(coords)
+			#else:
+				#_draw_at(coords)
 
-func _user_set_cell_at(coords: Vector2i, tile: NodeTileMapping) -> void:
+func _user_rect_at(from: Vector2i, to: Vector2i):
+	pass
+
+func _user_fill_at(coords: Vector2i):
+	pass
+
+func _get_next_tile_to_lay(current: Tile, fill: bool) -> Tile:
+	if fill:
+		if current == Tile.InnerFilled:
+			return Tile.InnerFilled
+		if current == Tile.InnerNoise:
+			return Tile.InnerFilled
+		elif current == Tile.InnerEmpty:
+			return Tile.InnerNoise
+		elif current == Tile.WallEmpty:
+			return Tile.WallNoise
+		elif current == Tile.WallNoise:
+			return Tile.WallFilled
+		elif current == Tile.WallFilled:
+			return Tile.WallFilled
+	else:
+		if current == Tile.InnerEmpty:
+			return Tile.InnerEmpty
+		if current == Tile.InnerNoise:
+			return Tile.InnerEmpty
+		elif current == Tile.InnerFilled:
+			return Tile.InnerNoise
+		elif current == Tile.WallFilled:
+			return Tile.WallNoise
+		elif current == Tile.WallNoise:
+			return Tile.WallEmpty
+		elif current == Tile.WallEmpty:
+			return Tile.WallEmpty
+	return Tile.Null
+
+func _user_set_cell_at(coords: Vector2i, tile: Tile) -> void:
 	if coords == lastTileDrawnCoords: return
-	if tile == NodeTileMapping.Null: return
+	if tile == Tile.Null: return
 	var numCells := _get_num_cells()
 	_set_cell_at(coords, tile, numCells)
 	lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
-func _set_cell_at(coords: Vector2i, tile: NodeTileMapping, numCells: Vector2i) -> void:
+func _get_tile_to_place(coords: Vector2i, tile: Tile) -> Tile:
+	if tile == Tile.Null: return Tile.Null
+	var numCells := _get_num_cells()
+	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+		return Tile.Null
+	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
+	tile = _maybe_convert_tile(tile, isWall)
+	return tile	
+
+func _set_cell_at(coords: Vector2i, tile: Tile, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
 	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
 		return
@@ -115,33 +205,33 @@ func _erase_cell_at(coords: Vector2i, numCells: Vector2i) -> void:
 	erase_cell(coords)
 	if room: room.set_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
 
-func _maybe_convert_tile(atlasX:NodeTileMapping, isWall:bool) -> NodeTileMapping:
-	if atlasX == NodeTileMapping.InnerNoise && isWall:
-		return NodeTileMapping.WallFilled
-	if atlasX == NodeTileMapping.InnerFilled && isWall:
-		return NodeTileMapping.WallFilled
-	if atlasX == NodeTileMapping.InnerEmpty && isWall:
-		return NodeTileMapping.WallEmpty
-	if atlasX == NodeTileMapping.WallFilled && !isWall:
-		return NodeTileMapping.InnerFilled
-	if atlasX == NodeTileMapping.WallNoise && !isWall:
-		return NodeTileMapping.InnerNoise
-	if atlasX == NodeTileMapping.WallEmpty && !isWall:
-		return NodeTileMapping.InnerEmpty
+func _maybe_convert_tile(atlasX:Tile, isWall:bool) -> Tile:
+	if atlasX == Tile.InnerNoise && isWall:
+		return Tile.WallFilled
+	if atlasX == Tile.InnerFilled && isWall:
+		return Tile.WallFilled
+	if atlasX == Tile.InnerEmpty && isWall:
+		return Tile.WallEmpty
+	if atlasX == Tile.WallFilled && !isWall:
+		return Tile.InnerFilled
+	if atlasX == Tile.WallNoise && !isWall:
+		return Tile.InnerNoise
+	if atlasX == Tile.WallEmpty && !isWall:
+		return Tile.InnerEmpty
 	return atlasX
 
 func _get_tile_state_from_atlas_x(atlasX:int) -> int:
-	if atlasX == NodeTileMapping.InnerNoise:
+	if atlasX == Tile.InnerNoise:
 		return RoomConfig.TILE_STATE_UNSET
-	if atlasX == NodeTileMapping.InnerFilled:
+	if atlasX == Tile.InnerFilled:
 		return RoomConfig.TILE_STATE_FILLED
-	if atlasX == NodeTileMapping.InnerEmpty:
+	if atlasX == Tile.InnerEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
-	if atlasX == NodeTileMapping.WallFilled:
+	if atlasX == Tile.WallFilled:
 		return RoomConfig.TILE_STATE_FILLED
-	if atlasX == NodeTileMapping.WallNoise:
+	if atlasX == Tile.WallNoise:
 		return RoomConfig.TILE_STATE_UNSET
-	if atlasX == NodeTileMapping.WallEmpty:
+	if atlasX == Tile.WallEmpty:
 		return RoomConfig.TILE_STATE_EMPTY
 	return RoomConfig.TILE_STATE_UNSET
 
@@ -167,9 +257,9 @@ func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
 	for y in range(numCells.y):
 		for x in range(numCells.x):
 			if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-				_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
+				_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
 			else:
-				_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise, numCells)
+				_set_cell_at(Vector2i(x, y), Tile.InnerNoise, numCells)
 	update_internals()
 	prevNumCells = numCells
 	processing = false
@@ -194,7 +284,7 @@ func handle_room_size_change() -> void:
 	for y in range(prevNumCells.y):
 		for x in range(prevNumCells.x):
 			var coords := Vector2i(x, y)
-			var tile := get_cell_atlas_coords(coords).x as NodeTileMapping
+			var tile := get_cell_atlas_coords(coords).x as Tile
 			if room: room.set_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
 	# unset previous border tile, and copy tile to new border tile
 	if numCells.x != prevNumCells.x:
@@ -202,12 +292,12 @@ func handle_room_size_change() -> void:
 			var prevCoords := Vector2i(prevNumCells.x - 1, y)
 			var nextCoords := Vector2i(numCells.x - 1, y)
 			var currentAtlas := get_cell_atlas_coords(prevCoords)
-			var currentTile:NodeTileMapping = currentAtlas.x as NodeTileMapping\
+			var currentTile:Tile = currentAtlas.x as Tile\
 				if currentAtlas.x > -1\
-				else NodeTileMapping.WallFilled
+				else Tile.WallFilled
 			# unset previous border
 			if numCells.x > prevNumCells.x:
-				_set_cell_at(prevCoords, NodeTileMapping.InnerNoise, numCells)
+				_set_cell_at(prevCoords, Tile.InnerNoise, numCells)
 			else:
 				_erase_cell_at(prevCoords, numCells)
 			# copy result to new border
@@ -217,12 +307,12 @@ func handle_room_size_change() -> void:
 			var prevCoords := Vector2i(x, prevNumCells.y - 1)
 			var nextCoords := Vector2i(x, numCells.y - 1)
 			var currentAtlas := get_cell_atlas_coords(prevCoords)
-			var currentTile:NodeTileMapping = currentAtlas.x as NodeTileMapping\
+			var currentTile:Tile = currentAtlas.x as Tile\
 				if currentAtlas.x > -1\
-				else NodeTileMapping.WallFilled
+				else Tile.WallFilled
 			# unset previous border
 			if numCells.y > prevNumCells.y:
-				_set_cell_at(prevCoords, NodeTileMapping.InnerNoise, numCells)
+				_set_cell_at(prevCoords, Tile.InnerNoise, numCells)
 			else:
 				_erase_cell_at(prevCoords, numCells)
 			# copy result to new border
@@ -232,16 +322,16 @@ func handle_room_size_change() -> void:
 		for y in range(numCells.y):
 			for x in range(prevNumCells.x, numCells.x-1):
 				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
+					_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
 				else:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise, numCells)
+					_set_cell_at(Vector2i(x, y), Tile.InnerNoise, numCells)
 	if numCells.y > prevNumCells.y:
 		for y in range(prevNumCells.y, numCells.y-1):
 			for x in range(numCells.x):
 				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.WallFilled, numCells)
+					_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
 				else:
-					_set_cell_at(Vector2i(x, y), NodeTileMapping.InnerNoise,numCells)
+					_set_cell_at(Vector2i(x, y), Tile.InnerNoise,numCells)
 	# clear prev outer cells
 	if numCells.x < prevNumCells.x:
 		for y in range(numCells.y):
