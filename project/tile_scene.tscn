@@ -4,8 +4,10 @@
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="3_exm5h"]
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="3_hx1v8"]
 
-[node name="TilemapUI" type="Node2D"]
+[node name="TilemapUI" type="Control"]
 texture_filter = 1
+layout_mode = 3
+anchors_preset = 0
 
 [node name="TileMapEditor" type="TileMapLayer" parent="."]
 unique_name_in_owner = true
@@ -31,6 +33,7 @@ navigation_enabled = false
 script = ExtResource("3_hx1v8")
 
 [node name="Button" type="Button" parent="."]
+layout_mode = 0
 offset_right = 196.0
 offset_bottom = 73.0
 text = "SAVE"

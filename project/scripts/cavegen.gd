@@ -9,7 +9,9 @@ class_name CaveGen
 @onready var meshGen:MeshGen = %MeshGen
 @onready var notifTimer:Timer = %Timer
 @onready var testCube:CSGBox3D = %TestCube
-@onready var tilemapEditor:TileMapEditor = $"../UI/SubViewportContainer/TilemapSubViewport/TilemapUI/TileMapEditor"
+@onready var tilemapEditor:TileMapEditor = $"../UI/SubViewportContainer/TilemapSubViewport/MarginContainer/BoxContainer/HBoxContainer/TilemapUI/TileMapEditor"
+@onready var tilemapSubViewport:SubViewport = %TilemapSubViewport
+@onready var tilemapSubViewportContainer:SubViewportContainer = %SubViewportContainer
 
 var noiseB:FastNoiseLite
 var borderNoiseB:FastNoiseLite

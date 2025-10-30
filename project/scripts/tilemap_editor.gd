@@ -7,6 +7,7 @@ signal on_mode_changed(mode: EditorMode)
 
 var cfg:GlobalConfig
 var room:RoomConfig
+var tilemapUI:Control
 
 enum Tile {
 	Null = -1,
@@ -33,6 +34,7 @@ enum EditorMode {
 }
 
 const TILEMAP_SOURCE_ID := 2
+const TILEMAP_CELL_SIZE := 32
 
 var mode:EditorMode = EditorMode.Draw
 var drawTile := Tile.Null
@@ -41,6 +43,7 @@ var prevNumCells := Vector2i(-1,-1)
 var lastTileDrawnCoords := Vector2i(-1,-1)
 var anchorCoords:Vector2i = Vector2i(-1,-1)
 var cancel := false
+var tilemapScale := 1.0
 
 func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
@@ -48,6 +51,7 @@ func set_editor_mode(p_mode: EditorMode) -> void:
 	cancel = true
 
 func _process(_delta: float) -> void:
+	if tilemapUI: tilemapUI.scale = Vector2(tilemapScale, tilemapScale)
 	if !visible || !is_visible_in_tree():
 		return
 
@@ -303,14 +307,20 @@ func _get_num_cells() -> Vector2i:
 	return numCells
 
 var initialized:bool = false;
-func initialize(p_cfg: GlobalConfig, p_room: RoomConfig) -> void:
+func initialize(
+	p_cfg: GlobalConfig,
+	p_room: RoomConfig,
+) -> void:
 	if !p_cfg: return
 	if !p_room: return
 	if processing: return
 	processing = true
 	cfg = p_cfg
 	room = p_room
+	assert(get_parent() is Control)
+	tilemapUI = get_parent()
 	var numCells := _get_num_cells()
+	set_tilemap_container_size(numCells)
 	clear()
 	for y in range(numCells.y):
 		for x in range(numCells.x):
@@ -338,6 +348,7 @@ func handle_room_size_change() -> void:
 		printerr("invalid prevNumCells (", prevNumCells.x, ",", prevNumCells.y, ") - did you forget to call initialize()?")
 		return
 	processing = true
+	set_tilemap_container_size(numCells)
 	# convert existing tile data from prev coords to new coords
 	for y in range(prevNumCells.y):
 		for x in range(prevNumCells.x):
@@ -403,3 +414,17 @@ func handle_room_size_change() -> void:
 	update_internals()
 	prevNumCells = numCells
 	processing = false
+
+func set_tilemap_container_size(numCells: Vector2i) -> void:
+	assert(tilemapUI)
+	var x := numCells.x * TILEMAP_CELL_SIZE
+	var y := numCells.y * TILEMAP_CELL_SIZE
+	tilemapScale = 1.0
+	if numCells.x > 30:
+		tilemapScale = 30 / float(numCells.x)
+	if numCells.y > 30 && numCells.y > numCells.x:
+		tilemapScale = 30 / float(numCells.y)
+	tilemapUI.custom_minimum_size = Vector2(x, y)
+	tilemapUI.pivot_offset.x = x
+	tilemapUI.pivot_offset.y = y / 2.0
+	tilemapScale = tilemapScale
