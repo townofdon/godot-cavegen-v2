@@ -1,13 +1,13 @@
-[gd_resource type="TileSet" load_steps=11 format=3 uid="uid://b5xqbx8oru3hk"]
+[gd_resource type="TileSet" load_steps=11 format=3 uid="uid://dydlqy1pq7efs"]
 
-[ext_resource type="Texture2D" uid="uid://dkujuxmk5kbc2" path="res://assets/grid-sm.png" id="1_t7kmj"]
-[ext_resource type="Texture2D" uid="uid://ue0hw2bf4fi1" path="res://assets/grid-xs.png" id="2_sb6w5"]
-[ext_resource type="Texture2D" uid="uid://ohpmr44f1pax" path="res://assets/grid2.png" id="3_sbca7"]
-[ext_resource type="Texture2D" uid="uid://uf5gk24tijlq" path="res://assets/selection.png" id="4_ja2lu"]
-[ext_resource type="Texture2D" uid="uid://buw15efvdk4bf" path="res://assets/editor-tools-200.png" id="5_em7tp"]
+[ext_resource type="Texture2D" uid="uid://dkujuxmk5kbc2" path="res://assets/grid-sm.png" id="1_xfn2j"]
+[ext_resource type="Texture2D" uid="uid://ue0hw2bf4fi1" path="res://assets/grid-xs.png" id="2_kqw47"]
+[ext_resource type="Texture2D" uid="uid://ohpmr44f1pax" path="res://assets/grid2.png" id="3_3smas"]
+[ext_resource type="Texture2D" uid="uid://uf5gk24tijlq" path="res://assets/selection.png" id="4_ch5hf"]
+[ext_resource type="Texture2D" uid="uid://buw15efvdk4bf" path="res://assets/editor-tools-200.png" id="5_xsk6j"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sb6w5"]
-texture = ExtResource("1_t7kmj")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1ggsh"]
+texture = ExtResource("1_xfn2j")
 use_texture_padding = false
 0:0/0 = 0
 1:0/0 = 0
@@ -37,8 +37,8 @@ use_texture_padding = false
 13:0/0 = 0
 13:0/0/custom_data_0 = -1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sbca7"]
-texture = ExtResource("2_sb6w5")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_3m7l1"]
+texture = ExtResource("2_kqw47")
 texture_region_size = Vector2i(8, 8)
 use_texture_padding = false
 0:0/0 = 0
@@ -58,8 +58,8 @@ use_texture_padding = false
 14:0/0 = 0
 15:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ja2lu"]
-texture = ExtResource("3_sbca7")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_0plfd"]
+texture = ExtResource("3_3smas")
 texture_region_size = Vector2i(32, 32)
 0:0/0 = 0
 1:0/0 = 0
@@ -93,16 +93,16 @@ texture_region_size = Vector2i(32, 32)
 15:0/0 = 0
 15:0/0/custom_data_0 = -1
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_em7tp"]
-texture = ExtResource("4_ja2lu")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_shmcw"]
+texture = ExtResource("4_ch5hf")
 texture_region_size = Vector2i(32, 32)
 1:0/0 = 0
 0:0/0 = 0
 2:0/0 = 0
 3:0/0 = 0
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ws2pc"]
-texture = ExtResource("5_em7tp")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v00e0"]
+texture = ExtResource("5_xsk6j")
 texture_region_size = Vector2i(64, 64)
 0:0/0 = 0
 1:0/0 = 0
@@ -124,11 +124,11 @@ texture_region_size = Vector2i(64, 64)
 17:0/0 = 0
 
 [resource]
-tile_size = Vector2i(32, 32)
+tile_size = Vector2i(64, 64)
 custom_data_layer_0/name = "nodestate"
 custom_data_layer_0/type = 2
-sources/0 = SubResource("TileSetAtlasSource_sb6w5")
-sources/1 = SubResource("TileSetAtlasSource_sbca7")
-sources/2 = SubResource("TileSetAtlasSource_ja2lu")
-sources/3 = SubResource("TileSetAtlasSource_em7tp")
-sources/4 = SubResource("TileSetAtlasSource_ws2pc")
+sources/0 = SubResource("TileSetAtlasSource_1ggsh")
+sources/1 = SubResource("TileSetAtlasSource_3m7l1")
+sources/2 = SubResource("TileSetAtlasSource_0plfd")
+sources/3 = SubResource("TileSetAtlasSource_shmcw")
+sources/4 = SubResource("TileSetAtlasSource_v00e0")

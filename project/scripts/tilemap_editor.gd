@@ -3,6 +3,21 @@ class_name TileMapEditor
 
 @onready var selectionLayer:TileMapLayer = %SelectionLayer
 
+
+@onready var toolDraw:TextureButton = %ToolDraw
+@onready var toolLine:TextureButton = %ToolLine
+@onready var toolRect:TextureButton = %ToolRect
+@onready var toolFill:TextureButton = %ToolFill
+
+@onready var txToolDraw:Texture = preload("res://assets/editor-tool-draw.png")
+@onready var txToolDrawUn:Texture = preload("res://assets/editor-tool-draw-unfocused.png")
+@onready var txToolLine:Texture = preload("res://assets/editor-tool-line.png")
+@onready var txToolLineUn:Texture = preload("res://assets/editor-tool-line-unfocused.png")
+@onready var txToolRect:Texture = preload("res://assets/editor-tool-rect.png")
+@onready var txToolRectUn:Texture = preload("res://assets/editor-tool-rect-unfocused.png")
+@onready var txToolFill:Texture = preload("res://assets/editor-tool-fill.png")
+@onready var txToolFillUn:Texture = preload("res://assets/editor-tool-fill-unfocused.png")
+
 signal on_mode_changed(mode: EditorMode)
 
 var cfg:GlobalConfig
@@ -49,6 +64,41 @@ func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
 	on_mode_changed.emit(mode)
 	cancel = true
+	if mode == EditorMode.Draw:
+		toolDraw.texture_normal = txToolDraw
+		toolLine.texture_normal = txToolLineUn
+		toolRect.texture_normal = txToolRectUn
+		toolFill.texture_normal = txToolFillUn
+	elif mode == EditorMode.Line:
+		toolDraw.texture_normal = txToolDrawUn
+		toolLine.texture_normal = txToolLine
+		toolRect.texture_normal = txToolRectUn
+		toolFill.texture_normal = txToolFillUn
+	elif mode == EditorMode.Rect:
+		toolDraw.texture_normal = txToolDrawUn
+		toolLine.texture_normal = txToolLineUn
+		toolRect.texture_normal = txToolRect
+		toolFill.texture_normal = txToolFillUn
+	elif mode == EditorMode.Fill:
+		toolDraw.texture_normal = txToolDrawUn
+		toolLine.texture_normal = txToolLineUn
+		toolRect.texture_normal = txToolRectUn
+		toolFill.texture_normal = txToolFill
+
+func _ready() -> void:
+	toolDraw.pressed.connect(_set_editor_mode_draw)
+	toolLine.pressed.connect(_set_editor_mode_line)
+	toolRect.pressed.connect(_set_editor_mode_rect)
+	toolFill.pressed.connect(_set_editor_mode_fill)
+
+func _set_editor_mode_draw() -> void:
+	set_editor_mode(EditorMode.Draw)
+func _set_editor_mode_line() -> void:
+	set_editor_mode(EditorMode.Line)
+func _set_editor_mode_rect() -> void:
+	set_editor_mode(EditorMode.Rect)
+func _set_editor_mode_fill() -> void:
+	set_editor_mode(EditorMode.Fill)
 
 func _process(_delta: float) -> void:
 	if tilemapUI: tilemapUI.scale = Vector2(tilemapScale, tilemapScale)
@@ -418,7 +468,7 @@ func handle_room_size_change() -> void:
 func set_tilemap_container_size(numCells: Vector2i) -> void:
 	assert(tilemapUI)
 	var x := numCells.x * TILEMAP_CELL_SIZE
-	var y := numCells.y * TILEMAP_CELL_SIZE
+	var y := mini(numCells.y, 30) * TILEMAP_CELL_SIZE
 	tilemapScale = 1.0
 	if numCells.x > 30:
 		tilemapScale = 30 / float(numCells.x)
@@ -426,5 +476,5 @@ func set_tilemap_container_size(numCells: Vector2i) -> void:
 		tilemapScale = 30 / float(numCells.y)
 	tilemapUI.custom_minimum_size = Vector2(x, y)
 	tilemapUI.pivot_offset.x = x
-	tilemapUI.pivot_offset.y = y / 2.0
+	tilemapUI.pivot_offset.y = 0
 	tilemapScale = tilemapScale
