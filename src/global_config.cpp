@@ -26,6 +26,10 @@ void GlobalConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_ActivePlaneOffset", "p_ActivePlaneOffset"), &GlobalConfig::SetActivePlaneOffset);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "active_plane_offset", PROPERTY_HINT_RANGE, "0,50,0.01"), "set_ActivePlaneOffset", "get_ActivePlaneOffset");
 
+	ClassDB::bind_method(D_METHOD("get_MoveActivePlaneToOrigin"), &GlobalConfig::GetMoveActivePlaneToOrigin);
+	ClassDB::bind_method(D_METHOD("set_MoveActivePlaneToOrigin", "p_MoveActivePlaneToOrigin"), &GlobalConfig::SetMoveActivePlaneToOrigin);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "move_active_plane_to_origin"), "set_MoveActivePlaneToOrigin", "get_MoveActivePlaneToOrigin");
+
 	ADD_SIGNAL(MethodInfo("on_changed"));
 	// ADD_SIGNAL(MethodInfo("position_changed", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos")));
 	// ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
@@ -41,6 +45,7 @@ GlobalConfig::GlobalConfig() {
 	CellSize = 1.0f;
 	Ceiling = 0.75f;
 	ActivePlaneOffset = 10;
+	MoveActivePlaneToOrigin = true;
 }
 
 GlobalConfig::~GlobalConfig() {
@@ -98,6 +103,15 @@ float GlobalConfig::GetActivePlaneOffset() {
 
 void GlobalConfig::SetActivePlaneOffset(float p_ActivePlaneOffset) {
 	ActivePlaneOffset = p_ActivePlaneOffset;
+	emit_signal("on_changed");
+}
+
+bool GlobalConfig::GetMoveActivePlaneToOrigin() {
+	return MoveActivePlaneToOrigin;
+}
+
+void GlobalConfig::SetMoveActivePlaneToOrigin(float p_MoveActivePlaneToOrigin) {
+	MoveActivePlaneToOrigin = p_MoveActivePlaneToOrigin;
 	emit_signal("on_changed");
 }
 

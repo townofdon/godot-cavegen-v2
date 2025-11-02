@@ -24,6 +24,7 @@ public:
 	float CellSize;
 	float Ceiling;
 	float ActivePlaneOffset;
+	bool MoveActivePlaneToOrigin;
 
 	float GetRoomWidth();
 	void SetRoomWidth(float p_RoomWidth);
@@ -37,6 +38,8 @@ public:
 	void SetCeiling(float p_Ceiling);
 	float GetActivePlaneOffset();
 	void SetActivePlaneOffset(float p_ActivePlaneOffset);
+	bool GetMoveActivePlaneToOrigin();
+	void SetMoveActivePlaneToOrigin(float p_MoveActivePlaneToOrigin);
 
 	SizingData GetSizingData();
 	Vector3i GetNumCells();

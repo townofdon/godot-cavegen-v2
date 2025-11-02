@@ -55,11 +55,17 @@ func regenerate():
 	if meshGen.mesh is ArrayMesh:
 		var mat:ShaderMaterial = meshGen.material_override
 		if mat && mat is ShaderMaterial:
-			var y_ceil := cfg.room_height * cfg.ceiling - cfg.active_plane_offset
-			mat.set_shader_parameter("y_ceil", y_ceil)
-			mat.set_shader_parameter("y_min", 0.0)
+			var offset := -_get_active_plane_y() * int(cfg.move_active_plane_to_origin)
+			var max_y := cfg.room_height * cfg.ceiling - cfg.active_plane_offset
+			mat.set_shader_parameter("y_ceil", max_y + offset)
+			mat.set_shader_parameter("y_min", 0.0 + offset)
 		# OBJExporter does not support shader material
 		#meshGen.mesh.surface_set_material(0, meshGen.material_override)
+
+func _get_active_plane_y() -> float:
+	var ceiling_y := cfg.room_height * cfg.ceiling
+	var active_y := ceiling_y - cfg.active_plane_offset
+	return maxf(active_y, 2)
 
 func _process(_delta: float) -> void:
 	if _did_noise_change(noise, noiseB):

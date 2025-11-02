@@ -379,7 +379,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	}
 	// - fourth pass - adjust areas around action y plane to improve readability
 	{
-		int activeY = MG::GetActivePlaneY(ctx);
+		int activeY = int(MG::GetActivePlaneY(ctx));
 		float activeYSmoothing = cfg.ActiveYSmoothing;
 		if (activeY > 1 && activeY + 1 < numCells.y - 1) {
 			for (size_t z = 0; z < numCells.z; z++) {
@@ -623,7 +623,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// apply tile data
 	//
 	{
-		int activeY = MG::GetActivePlaneY(ctx);
+		int activeY = int(MG::GetActivePlaneY(ctx));
 		int ceiling = round(MG::GetCeiling(ctx));
 		float tSmooth = cfg.TileSmoothing; // range [0,1]
 		float vfloor = cfg.TileFloor; // range [0,1]
@@ -793,24 +793,25 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 					int x1 = POINTS[p1 * 3 + 0];
 					int y1 = POINTS[p1 * 3 + 1];
 					int z1 = POINTS[p1 * 3 + 2];
-					auto a = Vector3i(x + x0, y + y0, z + z0);
-					auto b = Vector3i(x + x1, y + y1, z + z1);
-					auto p = MG::InterpolateMeshPoints(ctx, noiseSamples, a, b);
+					Vector3 a = Vector3i(x + x0, y + y0, z + z0);
+					Vector3 b = Vector3i(x + x1, y + y1, z + z1);
+					Vector3 p = MG::InterpolateMeshPoints(ctx, noiseSamples, a, b);
 					p = MG::ClampMeshBorderPoint(ctx, p);
 					points[pointIndex] = Vector3(p.x, p.y, p.z);
 					pointIndex++;
 					if (pointIndex == 3) {
 						pointIndex = 0;
-						auto p1 = points[0];
-						auto p2 = points[1];
-						auto p3 = points[2];
-						auto normal = -(p2 - p1).cross(p3 - p1).normalized();
+						Vector3 p1 = points[0];
+						Vector3 p2 = points[1];
+						Vector3 p3 = points[2];
+						Vector3 normal = -(p2 - p1).cross(p3 - p1).normalized();
 						for (size_t i = 0; i < 3; i++) {
-							auto point = points[i];
-							auto x = point.x * ctx.cfg.CellSize;
-							auto y = point.y * ctx.cfg.CellSize;
-							auto z = point.z * ctx.cfg.CellSize;
-							auto vert = get_global_position() + Vector3(x, y, z);
+							Vector3 point = points[i];
+							float x = point.x * ctx.cfg.CellSize;
+							float y = point.y * ctx.cfg.CellSize;
+							float z = point.z * ctx.cfg.CellSize;
+							Vector3 offset = Vector3(0, -(MG::GetActivePlaneYF(ctx) + 1) * int(ctx.cfg.MoveActivePlaneToOrigin), 0);
+							Vector3 vert = get_global_position() + Vector3(x, y, z) + offset;
 							verts.append(vert);
 							uvs.append(uv);
 							normals.append(normal);

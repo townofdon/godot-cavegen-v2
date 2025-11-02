@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=34 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -46,6 +46,14 @@ background_mode = 2
 background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 sky = SubResource("Sky_7ycvg")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6jybn"]
+transparency = 1
+albedo_color = Color(0.17980689, 0.2499161, 0.26663134, 0.20784314)
+
+[sub_resource type="QuadMesh" id="QuadMesh_84odl"]
+material = SubResource("StandardMaterial3D_6jybn")
+size = Vector2(1000, 1000)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6jybn"]
 bg_color = Color(0.10580716, 0.117766716, 0.12882775, 1)
 corner_radius_top_right = 8
@@ -82,7 +90,7 @@ shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
 shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
 shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 33.18
+shader_parameter/y_ceil = 31.63
 shader_parameter/y_min = 0.0
 
 [node name="MainScene" type="Node3D"]
@@ -97,7 +105,9 @@ stretch = true
 stretch_shrink = 3
 
 [node name="MainSubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
 size = Vector2i(640, 360)
+render_target_update_mode = 4
 
 [node name="CaveGen" type="Node3D" parent="SubViewportContainer/MainSubViewport"]
 script = ExtResource("1_2c62f")
@@ -124,8 +134,13 @@ environment = SubResource("Environment_nfk4m")
 size = 33.961
 script = ExtResource("8_66tet")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/MainSubViewport"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("QuadMesh_84odl")
+
 [node name="SubViewportContainer2" type="SubViewportContainer" parent="."]
 unique_name_in_owner = true
+visible = false
 texture_filter = 1
 material = ExtResource("10_2jcla")
 anchors_preset = 15
@@ -145,7 +160,7 @@ handle_input_locally = false
 canvas_item_default_texture_filter = 0
 gui_embed_subwindows = true
 size = Vector2i(1920, 1080)
-render_target_update_mode = 4
+render_target_update_mode = 0
 
 [node name="UI" type="Control" parent="SubViewportContainer2/UISubViewport"]
 layout_mode = 3
@@ -413,8 +428,8 @@ texture_normal = SubResource("AtlasTexture_ghshe")
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 18.75, 15)
-size = Vector3(30, 37.5, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 17.75, 15)
+size = Vector3(30, 35.5, 30)
 material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")

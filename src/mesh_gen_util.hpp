@@ -63,6 +63,7 @@ struct Context {
 		float CellSize;
 		float Ceiling;
 		float ActivePlaneOffset;
+		bool MoveActivePlaneToOrigin;
 		// debug
 		bool ShowNoise;
 		bool ShowBorder;
@@ -125,6 +126,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		sizing.cellSize, // actual cell-size might not reflect value from config
 		cfg->Ceiling,
 		cfg->ActivePlaneOffset,
+		cfg->MoveActivePlaneToOrigin,
 		// debug
 		p_room->ShowNoise,
 		p_room->ShowBorder,
@@ -539,9 +541,15 @@ inline int GetDistanceToEmptyTile(Context ctx, int x, int z, int spread) {
 }
 
 inline int GetActivePlaneY(Context ctx) {
-	int ceiling = round(GetCeiling(ctx)) + 1;
+	int ceiling = floorf(GetCeiling(ctx)) + 1;
 	int activeY = ceiling - ctx.cfg.ActivePlaneOffset;
 	return maxi(activeY, 2);
+}
+
+inline float GetActivePlaneYF(Context ctx) {
+	float ceiling = GetCeiling(ctx) + 1;
+	float activeY = ceiling - ctx.cfg.ActivePlaneOffset;
+	return maxf(activeY, 2);
 }
 
 } //namespace MG
