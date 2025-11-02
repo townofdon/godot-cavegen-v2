@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=32 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -10,13 +10,15 @@
 [ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
 [ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="9_wr18j"]
 [ext_resource type="Material" uid="uid://bicimo0wjm5go" path="res://materials/smooth-pixel-mat.tres" id="10_2jcla"]
-[ext_resource type="Texture2D" uid="uid://diwfykjpo155l" path="res://assets/editor-tool-draw.png" id="10_qwutr"]
-[ext_resource type="Texture2D" uid="uid://dyvunptskonsh" path="res://assets/editor-tool-line-unfocused.png" id="11_42l1d"]
-[ext_resource type="Texture2D" uid="uid://dmbfaaib6iht" path="res://assets/editor-tool-rect-unfocused.png" id="12_2jcla"]
-[ext_resource type="Texture2D" uid="uid://deshfxqj2ags2" path="res://assets/editor-tool-fill-unfocused.png" id="13_m35m6"]
+[ext_resource type="Texture2D" uid="uid://gqfddyoaj0hy" path="res://assets/edtool-draw-f.png" id="11_u0ygc"]
+[ext_resource type="Texture2D" uid="uid://brh5245u8yqi2" path="res://assets/edtool-line.png" id="12_7th4q"]
+[ext_resource type="Texture2D" uid="uid://b1fwcmksahwv4" path="res://assets/edtool-rect.png" id="13_6jybn"]
+[ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="14_7th4q"]
+[ext_resource type="Texture2D" uid="uid://chpanw3ooevlf" path="res://assets/edtool-fill.png" id="14_84odl"]
 [ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="15_u0ygc"]
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="16_7th4q"]
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
+[ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="19_6jybn"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
@@ -55,6 +57,34 @@ background_mode = 2
 background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 sky = SubResource("Sky_7ycvg")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6jybn"]
+bg_color = Color(0.10580716, 0.117766716, 0.12882775, 1)
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+shadow_color = Color(0, 0, 0, 0.22745098)
+shadow_size = 2
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6jybn"]
+atlas = ExtResource("19_6jybn")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_84odl"]
+atlas = ExtResource("19_6jybn")
+region = Rect2(168, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ak604"]
+atlas = ExtResource("19_6jybn")
+region = Rect2(288, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vimvf"]
+atlas = ExtResource("19_6jybn")
+region = Rect2(240, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ghshe"]
+atlas = ExtResource("19_6jybn")
+region = Rect2(336, 0, 24, 24)
+
 [node name="MainScene" type="Node3D"]
 
 [node name="CaveGen" type="Node3D" parent="."]
@@ -91,9 +121,9 @@ environment = SubResource("Environment_nfk4m")
 size = 33.961
 script = ExtResource("8_66tet")
 
-[node name="UI" type="Node3D" parent="."]
+[node name="UIContainer" type="Node3D" parent="."]
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="UI"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="UIContainer"]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -107,7 +137,7 @@ size_flags_vertical = 3
 theme = ExtResource("9_wr18j")
 stretch = true
 
-[node name="TilemapSubViewport" type="SubViewport" parent="UI/SubViewportContainer"]
+[node name="TilemapSubViewport" type="SubViewport" parent="UIContainer/SubViewportContainer"]
 unique_name_in_owner = true
 transparent_bg = true
 handle_input_locally = false
@@ -116,20 +146,35 @@ gui_embed_subwindows = true
 size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
-[node name="MarginContainer" type="MarginContainer" parent="UI/SubViewportContainer/TilemapSubViewport"]
-texture_filter = 1
-material = ExtResource("10_2jcla")
+[node name="UI" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme = ExtResource("9_wr18j")
+
+[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+texture_filter = 1
+material = ExtResource("10_2jcla")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -14.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("9_wr18j")
 theme_override_constants/margin_left = 32
 theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
-theme_override_constants/margin_bottom = 32
+theme_override_constants/margin_bottom = 81
 
-[node name="TileMapEditorContainer" type="BoxContainer" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer"]
+[node name="TileMapEditorContainer" type="BoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer"]
 texture_filter = 1
 material = ExtResource("10_2jcla")
 layout_mode = 2
@@ -137,58 +182,21 @@ theme_override_constants/separation = 12
 alignment = 1
 vertical = true
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer"]
-texture_filter = 1
-material = ExtResource("10_2jcla")
-custom_minimum_size = Vector2(960, 0)
+[node name="offset" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
-size_flags_horizontal = 8
-theme_override_constants/separation = 16
-alignment = 1
 
-[node name="ToolDraw" type="TextureButton" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer2"]
-unique_name_in_owner = true
-texture_filter = 1
-material = ExtResource("10_2jcla")
-layout_mode = 2
-tooltip_text = "Draw Mode (B)"
-texture_normal = ExtResource("10_qwutr")
-
-[node name="ToolLine" type="TextureButton" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer2"]
-unique_name_in_owner = true
-texture_filter = 1
-material = ExtResource("10_2jcla")
-layout_mode = 2
-tooltip_text = "Line Mode (L)"
-texture_normal = ExtResource("11_42l1d")
-
-[node name="ToolRect" type="TextureButton" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer2"]
-unique_name_in_owner = true
-texture_filter = 1
-material = ExtResource("10_2jcla")
-layout_mode = 2
-tooltip_text = "Rect Mode (R)"
-texture_normal = ExtResource("12_2jcla")
-
-[node name="ToolFill" type="TextureButton" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer2"]
-unique_name_in_owner = true
-texture_filter = 1
-material = ExtResource("10_2jcla")
-layout_mode = 2
-tooltip_text = "Fill Mode (G)"
-texture_normal = ExtResource("13_m35m6")
-
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="TilemapUI" type="Control" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer"]
+[node name="TilemapUI" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer"]
 unique_name_in_owner = true
 texture_filter = 1
 custom_minimum_size = Vector2(960, 960)
 layout_mode = 2
 
-[node name="TileMapEditor" type="TileMapLayer" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="TileMapEditor" type="TileMapLayer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
 unique_name_in_owner = true
 show_behind_parent = true
 light_mask = 0
@@ -199,7 +207,7 @@ collision_enabled = false
 navigation_enabled = false
 script = ExtResource("16_7th4q")
 
-[node name="SelectionLayer" type="TileMapLayer" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="SelectionLayer" type="TileMapLayer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.9019608)
 show_behind_parent = true
@@ -211,11 +219,217 @@ collision_enabled = false
 navigation_enabled = false
 script = ExtResource("17_6jybn")
 
-[node name="Button" type="Button" parent="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="Button" type="Button" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
 visible = false
 layout_mode = 0
 offset_right = 196.0
 offset_bottom = 73.0
 text = "SAVE"
 
-[connection signal="pressed" from="UI/SubViewportContainer/TilemapSubViewport/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI/Button" to="CaveGen" method="_on_button_pressed"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TopToolbar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 68.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+theme = ExtResource("9_wr18j")
+theme_override_styles/panel = ExtResource("14_7th4q")
+
+[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 30
+metadata/_edit_use_anchors_ = true
+
+[node name="MenuBar" type="MenuBar" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+
+[node name="File" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+oversampling_override = 1.0
+size = Vector2i(214, 222)
+theme = ExtResource("9_wr18j")
+item_count = 3
+item_0/text = "New"
+item_0/id = 2
+item_1/text = "→ Import"
+item_1/id = 0
+item_2/text = "← Export"
+item_2/id = 1
+
+[node name="View" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+oversampling_override = 1.0
+size = Vector2i(214, 222)
+theme = ExtResource("9_wr18j")
+item_count = 2
+item_0/text = "Side Panel"
+item_0/checkable = 1
+item_0/checked = true
+item_0/id = 2
+item_1/text = "Status Bar"
+item_1/checkable = 1
+item_1/checked = true
+item_1/id = 1
+
+[node name="Options" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+oversampling_override = 1.0
+theme = ExtResource("9_wr18j")
+
+[node name="TileEditorTools" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer"]
+texture_filter = 1
+material = ExtResource("10_2jcla")
+custom_minimum_size = Vector2(960, 0)
+layout_mode = 2
+size_flags_horizontal = 10
+size_flags_vertical = 4
+theme_override_constants/separation = 16
+alignment = 2
+
+[node name="ToolDraw" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+unique_name_in_owner = true
+texture_filter = 1
+material = ExtResource("10_2jcla")
+layout_mode = 2
+tooltip_text = "Draw Mode (B)"
+texture_normal = ExtResource("11_u0ygc")
+
+[node name="ToolLine" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+unique_name_in_owner = true
+texture_filter = 1
+material = ExtResource("10_2jcla")
+layout_mode = 2
+tooltip_text = "Line Mode (L)"
+texture_normal = ExtResource("12_7th4q")
+
+[node name="ToolRect" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+unique_name_in_owner = true
+texture_filter = 1
+material = ExtResource("10_2jcla")
+layout_mode = 2
+tooltip_text = "Rect Mode (R)"
+texture_normal = ExtResource("13_6jybn")
+
+[node name="ToolFill" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+unique_name_in_owner = true
+texture_filter = 1
+material = ExtResource("10_2jcla")
+layout_mode = 2
+tooltip_text = "Fill Mode (G)"
+texture_normal = ExtResource("14_84odl")
+
+[node name="SideToolbar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+custom_minimum_size = Vector2(72, 331.69)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -165.845
+offset_right = 72.0
+offset_bottom = 165.845
+grow_vertical = 2
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_6jybn")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -24.0
+offset_top = -132.0
+offset_right = 24.0
+offset_bottom = 132.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="ModeRoomSelect" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Select Room"
+texture_normal = SubResource("AtlasTexture_6jybn")
+stretch_mode = 4
+
+[node name="ModeRoomConfig" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Room Config"
+texture_normal = SubResource("AtlasTexture_84odl")
+stretch_mode = 4
+
+[node name="ModeTileEditor" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Tile Editor"
+texture_normal = SubResource("AtlasTexture_ak604")
+stretch_mode = 4
+
+[node name="ModePreview" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+tooltip_text = "Preview"
+texture_normal = SubResource("AtlasTexture_vimvf")
+stretch_mode = 4
+
+[node name="StatusBar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("14_7th4q")
+
+[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/StatusBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="RichTextLabel" type="RichTextLabel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/StatusBar/MarginContainer"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+size_flags_vertical = 4
+bbcode_enabled = true
+text = "1=Select Room, 2=Config, 3=Tilemap Editor, 3=Preview"
+fit_content = true
+
+[node name="InfoButton" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -40.0
+offset_right = 36.0
+offset_bottom = -51.0
+grow_vertical = 0
+texture_normal = SubResource("AtlasTexture_ghshe")
+
+[connection signal="pressed" from="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI/Button" to="CaveGen" method="_on_button_pressed"]

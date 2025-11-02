@@ -9,14 +9,14 @@ class_name TileMapEditor
 @onready var toolRect:TextureButton = %ToolRect
 @onready var toolFill:TextureButton = %ToolFill
 
-@onready var txToolDraw:Texture = preload("res://assets/editor-tool-draw.png")
-@onready var txToolDrawUn:Texture = preload("res://assets/editor-tool-draw-unfocused.png")
-@onready var txToolLine:Texture = preload("res://assets/editor-tool-line.png")
-@onready var txToolLineUn:Texture = preload("res://assets/editor-tool-line-unfocused.png")
-@onready var txToolRect:Texture = preload("res://assets/editor-tool-rect.png")
-@onready var txToolRectUn:Texture = preload("res://assets/editor-tool-rect-unfocused.png")
-@onready var txToolFill:Texture = preload("res://assets/editor-tool-fill.png")
-@onready var txToolFillUn:Texture = preload("res://assets/editor-tool-fill-unfocused.png")
+@onready var txToolDraw:Texture = preload("res://assets/edtool-draw-f.png")
+@onready var txToolDrawUn:Texture = preload("res://assets/edtool-draw.png")
+@onready var txToolLine:Texture = preload("res://assets/edtool-line-f.png")
+@onready var txToolLineUn:Texture = preload("res://assets/edtool-line.png")
+@onready var txToolRect:Texture = preload("res://assets/edtool-rect-f.png")
+@onready var txToolRectUn:Texture = preload("res://assets/edtool-rect.png")
+@onready var txToolFill:Texture = preload("res://assets/edtool-fill-f.png")
+@onready var txToolFillUn:Texture = preload("res://assets/edtool-fill.png")
 
 signal on_mode_changed(mode: EditorMode)
 

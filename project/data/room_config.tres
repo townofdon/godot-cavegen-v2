@@ -1,22 +1,27 @@
-[gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
+[gd_resource type="RoomConfig" load_steps=2 format=3 uid="uid://b0amjm0lwfuce"]
+
+[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="1_a1lhk"]
 
 [resource]
 room_noise__iso_value = 0.6
 room_noise__curve = 1.11
-room_noise__smooth_crystalize = -6.05
-room_noise__falloff_above_ceiling = 0.78
-room_noise__falloff_near_border = 0.48
-room_noise__active_y_smoothing = 0.9
-room_noise__floor_level = 0.34
+room_noise__tilt_z = 1.05
+room_noise__offset_y = 0.469
+room_noise__smooth_crystalize = -6.65
+room_noise__falloff_above_ceiling = 0.65
+room_noise__falloff_near_border = 0.53
+room_noise__active_y_smoothing = 0.91
+room_noise__floor_level = 0.57
+room_border__use_border_noise = true
 room_border__normalize_border_noise = true
 room_border__border_size = 4
-room_border__border_noise_strength = 0.73
-room_border__smooth_border_noise = 1.0
-room_border__border_tilt = 1.0
-tile_apply__tile_strength = 1.23
-tile_apply__tile_ceiling = 0.69
-tile_apply__tile_ceil_falloff = 0.46
+room_border__border_noise_strength = 0.81
+room_border__smooth_border_noise = 0.29
+room_border__border_tilt = 0.62
+tile_apply__tile_strength = 1.05
+tile_apply__tile_smoothing = 0.21
+tile_apply__tile_ceiling = 1.0
 tile_apply__tile_floor = 0.45
-tile_apply__tile_floor_falloff = 0.0
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
+internal__node_up = ExtResource("1_a1lhk")

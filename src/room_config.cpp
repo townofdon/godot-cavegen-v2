@@ -31,35 +31,35 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_IsoValue"), &RoomConfig::GetIsoValue);
 	ClassDB::bind_method(D_METHOD("set_IsoValue", "p_IsoValue"), &RoomConfig::SetIsoValue);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__iso_value", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_IsoValue", "get_IsoValue");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__iso_value", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_IsoValue", "get_IsoValue");
 
 	ClassDB::bind_method(D_METHOD("get_NoiseFloor"), &RoomConfig::GetNoiseFloor);
 	ClassDB::bind_method(D_METHOD("set_NoiseFloor", "p_NoiseFloor"), &RoomConfig::SetNoiseFloor);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_floor", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NoiseFloor", "get_NoiseFloor");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_floor", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_NoiseFloor", "get_NoiseFloor");
 
 	ClassDB::bind_method(D_METHOD("get_NoiseCeil"), &RoomConfig::GetNoiseCeil);
 	ClassDB::bind_method(D_METHOD("set_NoiseCeil", "p_NoiseCeil"), &RoomConfig::SetNoiseCeil);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_ceil", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NoiseCeil", "get_NoiseCeil");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__noise_ceil", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_NoiseCeil", "get_NoiseCeil");
 
 	ClassDB::bind_method(D_METHOD("get_Curve"), &RoomConfig::GetCurve);
 	ClassDB::bind_method(D_METHOD("set_Curve", "p_Curve"), &RoomConfig::SetCurve);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__curve", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_Curve", "get_Curve");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__curve", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_Curve", "get_Curve");
 
 	ClassDB::bind_method(D_METHOD("get_TiltY"), &RoomConfig::GetTiltY);
 	ClassDB::bind_method(D_METHOD("set_TiltY", "p_TiltY"), &RoomConfig::SetTiltY);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_y", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltY", "get_TiltY");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_y", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_TiltY", "get_TiltY");
 
 	ClassDB::bind_method(D_METHOD("get_TiltX"), &RoomConfig::GetTiltX);
 	ClassDB::bind_method(D_METHOD("set_TiltX", "p_TiltX"), &RoomConfig::SetTiltX);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_x", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltX", "get_TiltX");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_x", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_TiltX", "get_TiltX");
 
 	ClassDB::bind_method(D_METHOD("get_TiltZ"), &RoomConfig::GetTiltZ);
 	ClassDB::bind_method(D_METHOD("set_TiltZ", "p_TiltZ"), &RoomConfig::SetTiltZ);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_z", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_TiltZ", "get_TiltZ");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_z", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_TiltZ", "get_TiltZ");
 
 	ClassDB::bind_method(D_METHOD("get_OffsetY"), &RoomConfig::GetOffsetY);
 	ClassDB::bind_method(D_METHOD("set_OffsetY", "p_OffsetY"), &RoomConfig::SetOffsetY);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__offset_y", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_OffsetY", "get_OffsetY");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__offset_y", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_OffsetY", "get_OffsetY");
 
 	ClassDB::bind_method(D_METHOD("get_Smoothing"), &RoomConfig::GetSmoothing);
 	ClassDB::bind_method(D_METHOD("set_Smoothing", "p_Smoothing"), &RoomConfig::SetSmoothing);
