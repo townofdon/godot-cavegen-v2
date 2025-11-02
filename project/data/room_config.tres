@@ -4,24 +4,21 @@
 
 [resource]
 room_noise__iso_value = 0.6
-room_noise__curve = 1.11
-room_noise__tilt_z = 1.05
-room_noise__offset_y = 0.469
-room_noise__smooth_crystalize = -6.65
-room_noise__falloff_above_ceiling = 0.65
-room_noise__falloff_near_border = 0.53
-room_noise__active_y_smoothing = 0.91
-room_noise__floor_level = 0.57
-room_border__use_border_noise = true
+room_noise__curve = 1.092
+room_noise__tilt_x = 1.159
+room_noise__tilt_z = 0.891
+room_noise__smooth_crystalize = -3.71
+room_noise__falloff_above_ceiling = 0.0
+room_noise__falloff_near_border = 0.14
 room_border__normalize_border_noise = true
-room_border__border_size = 4
 room_border__border_noise_strength = 0.81
 room_border__smooth_border_noise = 0.29
-room_border__border_tilt = 0.62
-tile_apply__tile_strength = 1.05
-tile_apply__tile_smoothing = 0.21
+room_border__border_tilt = 0.14
+tile_apply__tile_strength = 0.97
+tile_apply__tile_smoothing = 0.72
 tile_apply__tile_ceiling = 1.0
-tile_apply__tile_floor = 0.45
+tile_apply__tile_ceil_blend = 0.23
+tile_apply__tile_floor = 0.56
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
 internal__node_up = ExtResource("1_a1lhk")

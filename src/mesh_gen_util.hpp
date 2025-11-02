@@ -221,7 +221,7 @@ inline float GetFloorToCeilAmount(Context ctx, int y) {
 	return (float)y / ceiling;
 }
 
-inline float GetAboveCeilAmount(Context ctx, int y, float scale) {
+inline float GetAboveCeilAmount(Context ctx, float y, float scale) {
 	auto cfg = ctx.cfg;
 	auto numCells = ctx.numCells;
 	if (cfg.Ceiling >= 1) {

@@ -266,10 +266,9 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float valEaseOut = Easing::OutCubic(val);
 					val = lerpf(valEaseIn, val, clamp01(cfg.Curve));
 					val = lerpf(val, valEaseOut, clamp01(cfg.Curve - 1));
-					// apply falloff above ceiling
-					float zeroValue = minf(noiseBuffer[i], cfg.IsoValue - 0.1f);
-					zeroValue = lerpf(0.0f, zeroValue, cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
-					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, cfg.FalloffAboveCeiling)));
+					// apply falloff above ceiling (gradual, flattening happens below)
+					float zeroValue = minf(noiseBuffer[i], cfg.IsoValue - 0.001f);
+					val = lerpf(val, zeroValue, Easing::InQuint(MG::GetAboveCeilAmount(ctx, y, 1)));
 					// apply tilt y
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
@@ -286,33 +285,40 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	for (size_t z = 0; z < numCells.z; z++) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
-				int i = MG::NoiseIndex(ctx, x, y, z);
-				int yNew = y;
+				float val = noiseBuffer[MG::NoiseIndex(ctx, x, y, z)];
 				if (!MG::IsAtBorderEdge(ctx, x, z)) {
 					// apply tilt x/z - sample different xyz
 					float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
 					float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
 					float px = x / float(numCells.x - 1);
 					float pz = z / float(numCells.z - 1);
-					int y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
-					int y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
+					float y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
+					float y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
 					// apply offsetY
-					int y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, cfg.OffsetY);
-					yNew = y2;
-				}
-				i = MG::ClampedNoiseIndex(ctx, x, yNew, z);
-				float val = noiseBuffer[i];
-				// apply smoothing - in a kernel fashion
-				float tSmooth = ctx.cfg.Smoothing;
-				if (tSmooth != 0) {
-					val = 0;
-					for (int k = -1; k <= 1; k++) {
-						for (int j = -1; j <= 1; j++) {
-							// 1/9 = 0.1111111111
-							int i0 = MG::ClampedNoiseIndex(ctx, x + j, yNew, z + k);
-							val += noiseBuffer[i0] * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+					float y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, cfg.OffsetY);
+					// interpolate
+					int i0 = MG::ClampedNoiseIndex(ctx, x, floor(y2), z);
+					int i1 = MG::ClampedNoiseIndex(ctx, x, ceil(y2), z);
+					float t_offsetInterp = y2 - int(y2);
+					val = lerpf(noiseBuffer[i0], noiseBuffer[i1], clamp01(t_offsetInterp));
+					// apply smoothing - in a kernel fashion
+					float tSmooth = ctx.cfg.Smoothing;
+					if (tSmooth != 0) {
+						val = 0;
+						for (int k = -1; k <= 1; k++) {
+							for (int j = -1; j <= 1; j++) {
+								int i2 = MG::ClampedNoiseIndex(ctx, x + j, floor(y2), z + k);
+								int i3 = MG::ClampedNoiseIndex(ctx, x + j, ceil(y2), z + k);
+								float temp = lerpf(noiseBuffer[i2], noiseBuffer[i3], clamp01(t_offsetInterp));
+								// 1/9 = 0.1111111111
+								val += temp * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+							}
 						}
 					}
+					// apply falloff (flattening) above ceiling
+					float zeroValue = minf(val, cfg.IsoValue - 0.1f);
+					zeroValue = lerpf(0.0f, zeroValue, 1 - cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
+					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, 1 - cfg.FalloffAboveCeiling)));
 				}
 				float zeroValue = minf(val, cfg.IsoValue - 0.1f);
 				if (MG::IsAtBoundaryY(ctx, y)) {

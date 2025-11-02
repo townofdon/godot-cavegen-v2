@@ -34,7 +34,7 @@ shadow_offset = Vector2(2, 2)
 [resource]
 MenuBar/colors/font_pressed_color = Color(0.050980393, 0.05882353, 0.05490196, 1)
 MenuBar/constants/h_separation = 8
-MenuBar/font_sizes/font_size = 24
+MenuBar/font_sizes/font_size = 16
 MenuBar/styles/disabled = ExtResource("1_gco77")
 MenuBar/styles/hover = ExtResource("2_6l1ye")
 MenuBar/styles/normal = ExtResource("1_nrt0f")
@@ -45,6 +45,6 @@ PopupMenu/constants/item_end_padding = 12
 PopupMenu/constants/item_start_padding = 12
 PopupMenu/constants/v_separation = 8
 PopupMenu/font_sizes/font_size = 16
-PopupMenu/font_sizes/title_font_size = 18
+PopupMenu/font_sizes/title_font_size = 16
 PopupMenu/styles/hover = SubResource("StyleBoxFlat_4ytkp")
 PopupMenu/styles/panel = SubResource("StyleBoxFlat_6l1ye")

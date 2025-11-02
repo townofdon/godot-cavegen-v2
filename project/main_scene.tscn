@@ -33,17 +33,6 @@ shader_parameter/y_min = -0.35
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_7ycvg"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
-render_priority = 0
-shader = ExtResource("2_gyfs4")
-shader_parameter/light_direction = Vector3(0, 0, 1)
-shader_parameter/color_lit = Color(1, 1, 1, 1)
-shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
-shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 33.18
-shader_parameter/y_min = 0.0
-
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
 sky_top_color = Color(0.13209105, 0.45330042, 0.7789838, 1)
 sky_horizon_color = Color(0.8549343, 0.594071, 0.25741532, 1)
@@ -85,9 +74,32 @@ region = Rect2(240, 0, 24, 24)
 atlas = ExtResource("19_6jybn")
 region = Rect2(336, 0, 24, 24)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
+render_priority = 0
+shader = ExtResource("2_gyfs4")
+shader_parameter/light_direction = Vector3(0, 0, 1)
+shader_parameter/color_lit = Color(1, 1, 1, 1)
+shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
+shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/y_ceil = 33.18
+shader_parameter/y_min = 0.0
+
 [node name="MainScene" type="Node3D"]
 
-[node name="CaveGen" type="Node3D" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 3
+
+[node name="MainSubViewport" type="SubViewport" parent="SubViewportContainer"]
+size = Vector2i(640, 360)
+
+[node name="CaveGen" type="Node3D" parent="SubViewportContainer/MainSubViewport"]
 script = ExtResource("1_2c62f")
 cfg = ExtResource("4_d5x1h")
 room = ExtResource("3_8mm7a")
@@ -95,35 +107,24 @@ noise = ExtResource("4_nfk4m")
 borderNoise = ExtResource("5_66tet")
 metadata/_custom_type_script = "uid://djfffelu7xi37"
 
-[node name="MeshGen" type="MeshGen" parent="CaveGen"]
+[node name="MeshGen" type="MeshGen" parent="SubViewportContainer/MainSubViewport/CaveGen"]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_d5x1h")
 mesh = SubResource("ArrayMesh_7ycvg")
-skeleton = NodePath("../..")
+skeleton = NodePath("../../../..")
 
-[node name="Timer" type="Timer" parent="CaveGen"]
+[node name="Timer" type="Timer" parent="SubViewportContainer/MainSubViewport/CaveGen"]
 unique_name_in_owner = true
 wait_time = 0.1
 ignore_time_scale = true
 
-[node name="TestCube" type="CSGBox3D" parent="."]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 18.75, 15)
-size = Vector3(30, 37.5, 30)
-material = SubResource("ShaderMaterial_gyfs4")
-script = ExtResource("3_gyfs4")
-cfg = ExtResource("4_d5x1h")
-metadata/_custom_type_script = "uid://btxqynndstb2p"
-
-[node name="Camera3D" type="Camera3D" parent="."]
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/MainSubViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 15, 50, 15)
 environment = SubResource("Environment_nfk4m")
 size = 33.961
 script = ExtResource("8_66tet")
 
-[node name="UIContainer" type="Node3D" parent="."]
-
-[node name="SubViewportContainer" type="SubViewportContainer" parent="UIContainer"]
+[node name="SubViewportContainer2" type="SubViewportContainer" parent="."]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -137,7 +138,7 @@ size_flags_vertical = 3
 theme = ExtResource("9_wr18j")
 stretch = true
 
-[node name="TilemapSubViewport" type="SubViewport" parent="UIContainer/SubViewportContainer"]
+[node name="UISubViewport" type="SubViewport" parent="SubViewportContainer2"]
 unique_name_in_owner = true
 transparent_bg = true
 handle_input_locally = false
@@ -146,7 +147,7 @@ gui_embed_subwindows = true
 size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
-[node name="UI" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport"]
+[node name="UI" type="Control" parent="SubViewportContainer2/UISubViewport"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -157,46 +158,30 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme = ExtResource("9_wr18j")
 
-[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+[node name="TileEditorContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI"]
+visible = false
 texture_filter = 1
 material = ExtResource("10_2jcla")
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 11
+anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -14.0
-offset_bottom = 14.0
-grow_horizontal = 2
+offset_left = -1024.0
+grow_horizontal = 0
 grow_vertical = 2
 theme = ExtResource("9_wr18j")
-theme_override_constants/margin_left = 32
-theme_override_constants/margin_top = 32
+theme_override_constants/margin_top = 122
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 81
 
-[node name="TileMapEditorContainer" type="BoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer"]
-texture_filter = 1
-material = ExtResource("10_2jcla")
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-vertical = true
-
-[node name="offset" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer"]
-custom_minimum_size = Vector2(0, 72)
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer"]
-layout_mode = 2
-alignment = 2
-
-[node name="TilemapUI" type="Control" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer"]
+[node name="TilemapUI" type="Control" parent="SubViewportContainer2/UISubViewport/UI/TileEditorContainer"]
 unique_name_in_owner = true
 texture_filter = 1
 custom_minimum_size = Vector2(960, 960)
 layout_mode = 2
 
-[node name="TileMapEditor" type="TileMapLayer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="TileMapEditor" type="TileMapLayer" parent="SubViewportContainer2/UISubViewport/UI/TileEditorContainer/TilemapUI"]
 unique_name_in_owner = true
 show_behind_parent = true
 light_mask = 0
@@ -207,7 +192,7 @@ collision_enabled = false
 navigation_enabled = false
 script = ExtResource("16_7th4q")
 
-[node name="SelectionLayer" type="TileMapLayer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="SelectionLayer" type="TileMapLayer" parent="SubViewportContainer2/UISubViewport/UI/TileEditorContainer/TilemapUI"]
 unique_name_in_owner = true
 modulate = Color(1, 1, 1, 0.9019608)
 show_behind_parent = true
@@ -219,20 +204,14 @@ collision_enabled = false
 navigation_enabled = false
 script = ExtResource("17_6jybn")
 
-[node name="Button" type="Button" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI"]
+[node name="Button" type="Button" parent="SubViewportContainer2/UISubViewport/UI/TileEditorContainer/TilemapUI"]
 visible = false
 layout_mode = 0
 offset_right = 196.0
 offset_bottom = 73.0
 text = "SAVE"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer"]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/VBoxContainer"]
-layout_mode = 2
-
-[node name="TopToolbar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+[node name="TopBar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
@@ -242,7 +221,7 @@ size_flags_horizontal = 3
 theme = ExtResource("9_wr18j")
 theme_override_styles/panel = ExtResource("14_7th4q")
 
-[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar"]
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/TopBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -253,12 +232,12 @@ theme_override_constants/margin_left = 12
 theme_override_constants/margin_right = 30
 metadata/_edit_use_anchors_ = true
 
-[node name="MenuBar" type="MenuBar" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer"]
+[node name="MenuBar" type="MenuBar" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer"]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 
-[node name="File" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+[node name="File" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/MenuBar"]
 oversampling_override = 1.0
 size = Vector2i(214, 222)
 theme = ExtResource("9_wr18j")
@@ -270,7 +249,7 @@ item_1/id = 0
 item_2/text = "← Export"
 item_2/id = 1
 
-[node name="View" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+[node name="View" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/MenuBar"]
 oversampling_override = 1.0
 size = Vector2i(214, 222)
 theme = ExtResource("9_wr18j")
@@ -284,11 +263,11 @@ item_1/checkable = 1
 item_1/checked = true
 item_1/id = 1
 
-[node name="Options" type="PopupMenu" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/MenuBar"]
+[node name="Options" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/MenuBar"]
 oversampling_override = 1.0
 theme = ExtResource("9_wr18j")
 
-[node name="TileEditorTools" type="HBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer"]
+[node name="TileEditorTools" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer"]
 texture_filter = 1
 material = ExtResource("10_2jcla")
 custom_minimum_size = Vector2(960, 0)
@@ -298,7 +277,7 @@ size_flags_vertical = 4
 theme_override_constants/separation = 16
 alignment = 2
 
-[node name="ToolDraw" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+[node name="ToolDraw" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -306,7 +285,7 @@ layout_mode = 2
 tooltip_text = "Draw Mode (B)"
 texture_normal = ExtResource("11_u0ygc")
 
-[node name="ToolLine" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+[node name="ToolLine" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -314,7 +293,7 @@ layout_mode = 2
 tooltip_text = "Line Mode (L)"
 texture_normal = ExtResource("12_7th4q")
 
-[node name="ToolRect" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+[node name="ToolRect" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -322,7 +301,7 @@ layout_mode = 2
 tooltip_text = "Rect Mode (R)"
 texture_normal = ExtResource("13_6jybn")
 
-[node name="ToolFill" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/TopToolbar/MarginContainer/TileEditorTools"]
+[node name="ToolFill" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
@@ -330,7 +309,7 @@ layout_mode = 2
 tooltip_text = "Fill Mode (G)"
 texture_normal = ExtResource("14_84odl")
 
-[node name="SideToolbar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+[node name="SideToolbar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 custom_minimum_size = Vector2(72, 331.69)
 layout_mode = 1
 anchors_preset = 4
@@ -343,7 +322,7 @@ grow_vertical = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_6jybn")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar"]
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -359,7 +338,7 @@ grow_vertical = 2
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="ModeRoomSelect" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+[node name="ModeRoomSelect" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar/VBoxContainer"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -367,7 +346,7 @@ tooltip_text = "Select Room"
 texture_normal = SubResource("AtlasTexture_6jybn")
 stretch_mode = 4
 
-[node name="ModeRoomConfig" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+[node name="ModeRoomConfig" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar/VBoxContainer"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -375,7 +354,7 @@ tooltip_text = "Room Config"
 texture_normal = SubResource("AtlasTexture_84odl")
 stretch_mode = 4
 
-[node name="ModeTileEditor" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+[node name="ModeTileEditor" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar/VBoxContainer"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -383,7 +362,7 @@ tooltip_text = "Tile Editor"
 texture_normal = SubResource("AtlasTexture_ak604")
 stretch_mode = 4
 
-[node name="ModePreview" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/SideToolbar/VBoxContainer"]
+[node name="ModePreview" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar/VBoxContainer"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -391,7 +370,7 @@ tooltip_text = "Preview"
 texture_normal = SubResource("AtlasTexture_vimvf")
 stretch_mode = 4
 
-[node name="StatusBar" type="Panel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+[node name="StatusBar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 1
 anchors_preset = 12
@@ -402,7 +381,7 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = ExtResource("14_7th4q")
 
-[node name="MarginContainer" type="MarginContainer" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/StatusBar"]
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/StatusBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -412,7 +391,7 @@ grow_vertical = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_right = 8
 
-[node name="RichTextLabel" type="RichTextLabel" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI/StatusBar/MarginContainer"]
+[node name="RichTextLabel" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer"]
 custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
 size_flags_vertical = 4
@@ -420,7 +399,7 @@ bbcode_enabled = true
 text = "1=Select Room, 2=Config, 3=Tilemap Editor, 3=Preview"
 fit_content = true
 
-[node name="InfoButton" type="TextureButton" parent="UIContainer/SubViewportContainer/TilemapSubViewport/UI"]
+[node name="InfoButton" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI"]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 1.0
@@ -432,4 +411,15 @@ offset_bottom = -51.0
 grow_vertical = 0
 texture_normal = SubResource("AtlasTexture_ghshe")
 
-[connection signal="pressed" from="UIContainer/SubViewportContainer/TilemapSubViewport/UI/MarginContainer/TileMapEditorContainer/HBoxContainer/TilemapUI/Button" to="CaveGen" method="_on_button_pressed"]
+[node name="TestCube" type="CSGBox3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 18.75, 15)
+size = Vector3(30, 37.5, 30)
+material = SubResource("ShaderMaterial_gyfs4")
+script = ExtResource("3_gyfs4")
+cfg = ExtResource("4_d5x1h")
+metadata/_custom_type_script = "uid://btxqynndstb2p"
+
+[node name="UIContainer" type="Node3D" parent="."]
+
+[connection signal="pressed" from="SubViewportContainer2/UISubViewport/UI/TileEditorContainer/TilemapUI/Button" to="SubViewportContainer/MainSubViewport/CaveGen" method="_on_button_pressed"]
