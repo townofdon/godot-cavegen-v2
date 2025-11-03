@@ -35,6 +35,8 @@ func _ready() -> void:
 	file_menu.initialize(cfg)
 	export_dialog.initialize(self)
 	export_dialog.user_start_export.connect(func(): _save_mesh())
+	export_dialog.dialog_opened.connect(func(): tilemapEditor.disable())
+	export_dialog.dialog_closed.connect(func(): tilemapEditor.enable())
 
 	# setup notification timer
 	notifTimer.autostart = false

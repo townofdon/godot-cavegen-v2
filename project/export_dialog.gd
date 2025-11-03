@@ -7,13 +7,14 @@ extends Panel
 @onready var button_export_start: Button = %ButtonExportStart
 @onready var button_export_cancel: Button = %ButtonExportCancel
 
-@onready var text_description: Label = $MarginContainer/VBoxContainer/TextExportDescription
-@onready var text_success: Label = $MarginContainer/VBoxContainer/TextExportSuccess
-@onready var text_detail: Label = $MarginContainer/VBoxContainer/TextExportDetail
-@onready var button_export_close: Button = $MarginContainer/VBoxContainer/ButtonExportClose
-
+@onready var text_description: Label = $Panel/MarginContainer/VBoxContainer/TextExportDescription
+@onready var text_success: Label = $Panel/MarginContainer/VBoxContainer/TextExportSuccess
+@onready var text_detail: Label = $Panel/MarginContainer/VBoxContainer/TextExportDetail
+@onready var button_export_close: Button = $Panel/MarginContainer/VBoxContainer/ButtonExportClose
 
 signal user_start_export
+signal dialog_opened
+signal dialog_closed
 
 var cavegen: CaveGen
 
@@ -41,8 +42,10 @@ func _ready() -> void:
 func open() -> void:
 	_set_state(RenderState.ReadyToExport)
 	show()
+	dialog_opened.emit()
 
 func close() -> void:
+	dialog_closed.emit()
 	hide()
 
 func _set_state(p_state: RenderState) -> void:

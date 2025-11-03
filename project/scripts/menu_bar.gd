@@ -2,6 +2,7 @@ class_name FileMenu
 extends MenuBar
 
 @onready var export_dialog: ExportDialog = %ExportDialog
+@onready var confirm_dialog: ConfirmDialog = %ConfirmDialog
 
 enum Menu {
 	File,
@@ -11,8 +12,10 @@ enum Menu {
 
 enum FileItem {
 	New,
-	Import,
+	Load,
+	Save,
 	Export,
+	Quit,
 }
 
 enum ViewItem {
@@ -43,10 +46,14 @@ func _on_menu_item_press(menu: int, item: int):
 	if menu == Menu.File:
 		if item == FileItem.New:
 			_on_new()
-		elif item == FileItem.Import:
-			_on_import()
+		elif item == FileItem.Load:
+			_on_load()
+		elif item == FileItem.Save:
+			_on_save()
 		elif item == FileItem.Export:
 			_on_export()
+		elif item == FileItem.Quit:
+			_on_quit()
 	elif menu == Menu.View:
 		if item == ViewItem.SidePanel:
 			_on_toggle_side_panel()
@@ -68,8 +75,19 @@ func _rerender() -> void:
 func _on_new() -> void:
 	pass
 
-func _on_import() -> void:
+func _on_load() -> void:
 	pass
+
+func _on_save() -> void:
+	pass
+
+func _on_quit() -> void:
+	var data := ConfirmDialogData.new(func():
+		get_tree().quit(0))
+	data.title = "Quit Application?"
+	data.text_body = "All unsaved data will be lost."
+	data.text_btn_confirm = "Quit"
+	confirm_dialog.open(data)
 
 func _on_export() -> void:
 	export_dialog.open()

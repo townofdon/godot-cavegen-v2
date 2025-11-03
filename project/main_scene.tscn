@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=38 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -21,6 +21,7 @@
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
 [ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="19_6jybn"]
 [ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://export_dialog.gd" id="19_84odl"]
+[ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="21_vimvf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
@@ -83,6 +84,11 @@ region = Rect2(240, 0, 24, 24)
 [sub_resource type="AtlasTexture" id="AtlasTexture_ghshe"]
 atlas = ExtResource("19_6jybn")
 region = Rect2(336, 0, 24, 24)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ak604"]
+bg_color = Color(0.03999403, 0.059799403, 0.067012265, 0.23921569)
+shadow_color = Color(0, 0, 0, 0.41568628)
+shadow_size = 1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
 render_priority = 0
@@ -184,7 +190,6 @@ size_flags_vertical = 4
 theme = ExtResource("9_wr18j")
 
 [node name="TileEditorContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI"]
-visible = false
 texture_filter = 1
 material = ExtResource("10_2jcla")
 layout_mode = 1
@@ -261,13 +266,17 @@ script = ExtResource("14_ak604")
 oversampling_override = 1.0
 size = Vector2i(214, 222)
 theme = ExtResource("9_wr18j")
-item_count = 3
+item_count = 5
 item_0/text = "New"
 item_0/id = 0
-item_1/text = "→ Import"
+item_1/text = "Load"
 item_1/id = 1
-item_2/text = "← Export"
+item_2/text = "Save"
 item_2/id = 2
+item_3/text = "← Export"
+item_3/id = 3
+item_4/text = "Quit"
+item_4/id = 4
 
 [node name="View" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/FileMenu"]
 oversampling_override = 1.0
@@ -438,6 +447,19 @@ texture_normal = SubResource("AtlasTexture_ghshe")
 
 [node name="ExportDialog" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(500, 300)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_force_pass_scroll_events = false
+theme_override_styles/panel = SubResource("StyleBoxFlat_ak604")
+script = ExtResource("19_84odl")
+
+[node name="Panel" type="Panel" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog"]
 custom_minimum_size = Vector2(500, 300)
 layout_mode = 1
 anchors_preset = 8
@@ -445,15 +467,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = -250.0
+offset_top = -150.0
+offset_right = 250.0
+offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("19_84odl")
 
-[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog"]
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -465,11 +486,11 @@ theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 45
 theme_override_constants/margin_bottom = 30
 
-[node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Label" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -478,7 +499,7 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.13333334)
 theme_override_font_sizes/font_size = 24
 text = "Export Level"
 
-[node name="TextExportDescription" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="TextExportDescription" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 visible = false
 custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
@@ -488,36 +509,38 @@ text = "Export generated level to .obj files.
 Note - each file will contain up to 256 rooms."
 autowrap_mode = 3
 
-[node name="Spacer" type="Control" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="Spacer" type="Control" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
-[node name="ExportButtons" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="ExportButtons" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 48
 
-[node name="ContainerExportCancel" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer/ExportButtons"]
+[node name="ContainerExportCancel" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer/ExportButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 2
 
-[node name="ButtonExportCancel" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer/ExportButtons/ContainerExportCancel"]
+[node name="ButtonExportCancel" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer/ExportButtons/ContainerExportCancel"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
-[node name="ContainerExportStart" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer/ExportButtons"]
+[node name="ContainerExportStart" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer/ExportButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ButtonExportStart" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer/ExportButtons/ContainerExportStart"]
+[node name="ButtonExportStart" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer/ExportButtons/ContainerExportStart"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "Export"
 
-[node name="ExportProgressLabel" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="ExportProgressLabel" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(100, 30)
@@ -527,24 +550,113 @@ theme_override_constants/paragraph_spacing = 8
 text = "Exporting level..."
 autowrap_mode = 3
 
-[node name="ExportProgressBar" type="ProgressBar" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="ExportProgressBar" type="ProgressBar" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 unique_name_in_owner = true
 visible = false
 layout_mode = 2
 max_value = 1.0
 
-[node name="TextExportSuccess" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="TextExportSuccess" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "Export successful!"
 
-[node name="TextExportDetail" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="TextExportDetail" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "File(s) saved as:
 - file 1
 - file 2"
 
-[node name="ButtonExportClose" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/MarginContainer/VBoxContainer"]
+[node name="ButtonExportClose" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
 layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "OK"
+
+[node name="ConfirmDialog" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_force_pass_scroll_events = false
+theme_override_styles/panel = SubResource("StyleBoxFlat_ak604")
+script = ExtResource("21_vimvf")
+
+[node name="Panel" type="Panel" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog"]
+custom_minimum_size = Vector2(500, 230)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -115.0
+offset_right = 250.0
+offset_bottom = 115.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -105.5
+offset_bottom = 105.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 45
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 45
+theme_override_constants/margin_bottom = 30
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="Title" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(100, 30)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.13333334)
+theme_override_font_sizes/font_size = 24
+text = "Confirm"
+
+[node name="Description" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(100, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8495564, 0.897892, 0.90178615, 1)
+theme_override_constants/paragraph_spacing = 8
+text = "You have unsaved changes. Proceed?"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 48
+
+[node name="ContainerCancel" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="ButtonCancel" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer/Buttons/ContainerCancel"]
+layout_mode = 2
+mouse_default_cursor_shape = 2
+text = "Cancel"
+
+[node name="ContainerConfirm" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ButtonConfirm" type="Button" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog/Panel/MarginContainer/VBoxContainer/Buttons/ContainerConfirm"]
+layout_mode = 2
+mouse_default_cursor_shape = 2
 text = "OK"
 
 [node name="TestCube" type="CSGBox3D" parent="."]

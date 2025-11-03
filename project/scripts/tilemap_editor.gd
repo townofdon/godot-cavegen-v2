@@ -3,7 +3,6 @@ class_name TileMapEditor
 
 @onready var selectionLayer:TileMapLayer = %SelectionLayer
 
-
 @onready var toolDraw:TextureButton = %ToolDraw
 @onready var toolLine:TextureButton = %ToolLine
 @onready var toolRect:TextureButton = %ToolRect
@@ -60,6 +59,14 @@ var anchorCoords:Vector2i = Vector2i(-1,-1)
 var cancel := false
 var tilemapScale := 1.0
 
+func enable() -> void:
+	enabled = true
+	selectionLayer.enabled = true
+
+func disable() -> void:
+	enabled = false
+	selectionLayer.enabled = false
+
 func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
 	on_mode_changed.emit(mode)
@@ -102,7 +109,7 @@ func _set_editor_mode_fill() -> void:
 
 func _process(_delta: float) -> void:
 	if tilemapUI: tilemapUI.scale = Vector2(tilemapScale, tilemapScale)
-	if !visible || !is_visible_in_tree():
+	if !enabled || !visible || !is_visible_in_tree():
 		return
 
 	if Input.is_action_just_pressed("tile_mode_draw"):
