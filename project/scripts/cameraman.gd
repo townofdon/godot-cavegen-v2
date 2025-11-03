@@ -12,6 +12,13 @@ var look:Vector2 = Vector2.ZERO
 var velocity:Vector3 = Vector3.ZERO
 var looking:bool = false
 
+# TODO: handle camera modes
+enum CameraMode {
+	Orbit,
+	Fly,
+	Preview,
+}
+
 func _ready() -> void:
 	# x and y are swapped here bc they represent the axis being rotated around.
 	look.x = camera.transform.basis.get_euler().y / -0.001

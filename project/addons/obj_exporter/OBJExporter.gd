@@ -111,8 +111,8 @@ func save_mesh_to_files(mesh: Mesh, file_path: String, object_name: String):
 	file_obj.store_string("".join(output))
 	
 	var mat_file := file_path + object_name + ".mtl"
-	var file_mtl = FileAccess.open(mat_file, FileAccess.WRITE)
-	file_mtl.store_string(mat_output)
+	#var file_mtl = FileAccess.open(mat_file, FileAccess.WRITE)
+	#file_mtl.store_string(mat_output)
 	
 	emit_signal("export_completed", obj_file, mat_file)
 

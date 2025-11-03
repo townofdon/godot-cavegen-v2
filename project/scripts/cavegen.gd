@@ -11,6 +11,14 @@ class_name CaveGen
 @onready var testCube:CSGBox3D = %TestCube
 @onready var tilemapEditor:TileMapEditor = %TileMapEditor
 
+# UI
+@onready var file_menu: FileMenu = %FileMenu
+@onready var export_dialog: ExportDialog = %ExportDialog
+
+signal export_started
+signal export_progress(pct: float)
+signal export_completed(files: PackedStringArray)
+
 var noiseB:FastNoiseLite
 var borderNoiseB:FastNoiseLite
 
@@ -22,6 +30,11 @@ func _ready() -> void:
 	assert(meshGen)
 	cfg.on_changed.connect(_notify_change)
 	room.on_changed.connect(_notify_change)
+
+	# setup export dialog
+	file_menu.initialize(cfg)
+	export_dialog.initialize(self)
+	export_dialog.user_start_export.connect(func(): _save_mesh())
 
 	# setup notification timer
 	notifTimer.autostart = false
@@ -121,20 +134,21 @@ func _save_mesh() -> void:
 	var dir = DirAccess.open("user://")
 	if !dir.dir_exists("model"):
 		dir.make_dir("model")
-	print("saving mesh... 0% completed")
+	export_started.emit()
+	export_progress.emit(0)
 	timeStarted = Time.get_unix_time_from_system();
 	OBJExporter.save_mesh_to_files(mesh, "user://model/", "cave")
 	saving = true
 
-func _on_button_pressed() -> void:
-	_save_mesh()
-
 func _on_export_progress_updated(_surf_idx:int, progress_value:float):
-	print("saving mesh... ", progress_value * 100, "% completed")
+	export_progress.emit(progress_value)
 
 func _on_export_completed(object_file, material_file):
-	print("save complete. files=", object_file, "," , material_file)
 	var timeEnded := Time.get_unix_time_from_system()
 	var duration := timeEnded - timeStarted
+	print("save complete. files=", object_file, "," , material_file)
 	print ("took ", duration, "s")
 	saving = false
+	var files = PackedStringArray()
+	files.append(object_file)
+	export_completed.emit(files)

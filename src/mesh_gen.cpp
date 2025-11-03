@@ -745,14 +745,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	auto ref = get_mesh();
 	auto ptr = *(ref);
-	ArrayMesh *meshPtr = Object::cast_to<ArrayMesh>(ptr);
-	if (meshPtr == nullptr) {
-		UtilityFunctions::push_warning("mesh cannot be null");
-		return;
-	}
-	ArrayMesh mesh = *meshPtr;
-	mesh.clear_surfaces();
+	ArrayMesh *mesh = Object::cast_to<ArrayMesh>(ptr);
+	ERR_FAIL_NULL_EDMSG(mesh, "mesh cannot be null");
 
+	mesh->clear_surfaces();
 	auto surface_array = godot::Array();
 	surface_array.resize(Mesh::ARRAY_MAX);
 
@@ -828,6 +824,6 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	surface_array[Mesh::ARRAY_TEX_UV] = uvs;
 	surface_array[Mesh::ARRAY_NORMAL] = normals;
 	surface_array[Mesh::ARRAY_INDEX] = indices;
-	mesh.add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
+	mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, surface_array);
 }
 #pragma endregion // march_cubes
