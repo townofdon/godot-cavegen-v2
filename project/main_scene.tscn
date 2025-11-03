@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=40 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
@@ -8,6 +8,7 @@
 [ext_resource type="FastNoiseLite" uid="uid://p3rfigim3d" path="res://data/noise.tres" id="4_nfk4m"]
 [ext_resource type="FastNoiseLite" uid="uid://cmirlmxyie640" path="res://data/border_noise.tres" id="5_66tet"]
 [ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
+[ext_resource type="Shader" uid="uid://bfhwqx5h3pwhp" path="res://shaders/grid.gdshader" id="8_fv2he"]
 [ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="9_wr18j"]
 [ext_resource type="Material" uid="uid://bicimo0wjm5go" path="res://materials/smooth-pixel-mat.tres" id="10_2jcla"]
 [ext_resource type="Texture2D" uid="uid://gqfddyoaj0hy" path="res://assets/edtool-draw-f.png" id="11_u0ygc"]
@@ -21,6 +22,7 @@
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
 [ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="19_6jybn"]
 [ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://export_dialog.gd" id="19_84odl"]
+[ext_resource type="Script" uid="uid://dok56cjhi81ur" path="res://scripts/side_toolbar.gd" id="19_ghshe"]
 [ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="21_vimvf"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
@@ -36,6 +38,37 @@ shader_parameter/y_min = -0.35
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_7ycvg"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5smuj"]
+render_priority = 0
+shader = ExtResource("8_fv2he")
+shader_parameter/world_uv = true
+shader_parameter/object_uv = false
+shader_parameter/object_uv_scale = Vector2(1, 1)
+shader_parameter/uv_offset = Vector2(1, 1)
+shader_parameter/preset_color = 0
+shader_parameter/base_color = Color(0.068713814, 0.09169058, 0.09862656, 1)
+shader_parameter/alpha_base = 0.31600001501
+shader_parameter/alpha_line = 1.0
+shader_parameter/metalic = 0.5490000260775
+shader_parameter/roughness = 0.5830000276925
+shader_parameter/grid_scale = 1.0
+shader_parameter/grid_width = 0.0
+shader_parameter/grid_color = Color(0.8001508, 0.8001509, 0.8001508, 1)
+shader_parameter/inside_scale = 1.0
+shader_parameter/inside_width = 0.02000000095
+shader_parameter/inside_color = Color(0.8, 0.8, 0.8, 0.5137255)
+shader_parameter/checkered = true
+shader_parameter/sub_checkered_grid = false
+shader_parameter/checkered_color = Color(0.25, 0.25, 0.25, 1)
+shader_parameter/checkered_blend_color = 0.1
+shader_parameter/use_inside_uv = false
+shader_parameter/use_albedo_color = false
+shader_parameter/albedo_alpha = 0.5
+
+[sub_resource type="QuadMesh" id="QuadMesh_84odl"]
+material = SubResource("ShaderMaterial_5smuj")
+size = Vector2(10000, 10000)
+
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_66tet"]
 sky_top_color = Color(0.13209105, 0.45330042, 0.7789838, 1)
 sky_horizon_color = Color(0.8549343, 0.594071, 0.25741532, 1)
@@ -48,14 +81,6 @@ sky_material = SubResource("ProceduralSkyMaterial_66tet")
 background_mode = 2
 background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 sky = SubResource("Sky_7ycvg")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6jybn"]
-transparency = 1
-albedo_color = Color(0.17980689, 0.2499161, 0.26663134, 0.20784314)
-
-[sub_resource type="QuadMesh" id="QuadMesh_84odl"]
-material = SubResource("StandardMaterial3D_6jybn")
-size = Vector2(1000, 1000)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6jybn"]
 bg_color = Color(0.10580716, 0.117766716, 0.12882775, 1)
@@ -116,6 +141,7 @@ wait_time = 0.1
 ignore_time_scale = true
 
 [node name="Cameraman" type="Node3D" parent="CaveGen2"]
+unique_name_in_owner = true
 script = ExtResource("8_66tet")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
@@ -145,15 +171,18 @@ unique_name_in_owner = true
 wait_time = 0.1
 ignore_time_scale = true
 
-[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/MainSubViewport"]
-unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 15, 50, 15)
-environment = SubResource("Environment_nfk4m")
-size = 33.961
-
 [node name="OriginPlane" type="MeshInstance3D" parent="SubViewportContainer/MainSubViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 mesh = SubResource("QuadMesh_84odl")
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/MainSubViewport"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.49999997, 0.86602545, 0, -0.86602545, 0.49999997, 15, 30, 23.5)
+environment = SubResource("Environment_nfk4m")
+h_offset = 12.73
+v_offset = -0.86
+projection = 1
+size = 40.0
 
 [node name="SubViewportContainer2" type="SubViewportContainer" parent="."]
 unique_name_in_owner = true
@@ -190,6 +219,7 @@ size_flags_vertical = 4
 theme = ExtResource("9_wr18j")
 
 [node name="TileEditorContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI"]
+unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
 layout_mode = 1
@@ -302,6 +332,7 @@ item_0/checked = true
 item_0/id = 0
 
 [node name="TileEditorTools" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer"]
+unique_name_in_owner = true
 texture_filter = 1
 material = ExtResource("10_2jcla")
 custom_minimum_size = Vector2(960, 0)
@@ -344,17 +375,19 @@ tooltip_text = "Fill Mode (G)"
 texture_normal = ExtResource("14_84odl")
 
 [node name="SideToolbar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(72, 331.69)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_top = -165.845
+offset_top = -165.84503
 offset_right = 72.0
-offset_bottom = 165.845
+offset_bottom = 165.84497
 grow_vertical = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_6jybn")
+script = ExtResource("19_ghshe")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar"]
 layout_mode = 1
@@ -667,5 +700,3 @@ material = SubResource("ShaderMaterial_gyfs4")
 script = ExtResource("3_gyfs4")
 cfg = ExtResource("4_d5x1h")
 metadata/_custom_type_script = "uid://btxqynndstb2p"
-
-[node name="UIContainer" type="Node3D" parent="."]

@@ -1,5 +1,5 @@
-extends Node3D
 class_name CaveGen
+extends Node3D
 
 @export var cfg:GlobalConfig
 @export var room:RoomConfig
@@ -10,17 +10,42 @@ class_name CaveGen
 @onready var notifTimer:Timer = %Timer
 @onready var testCube:CSGBox3D = %TestCube
 @onready var tilemapEditor:TileMapEditor = %TileMapEditor
+@onready var cameraman: CameraMan = %Cameraman
 
 # UI
 @onready var file_menu: FileMenu = %FileMenu
+@onready var tile_editor_container: Control = %TileEditorContainer
+@onready var tile_editor_tools: HBoxContainer = %TileEditorTools
+@onready var side_toolbar: SideToolbar = %SideToolbar
 @onready var export_dialog: ExportDialog = %ExportDialog
 
 signal export_started
 signal export_progress(pct: float)
 signal export_completed(files: PackedStringArray)
+signal mode_changed(mode: Mode)
 
 var noiseB:FastNoiseLite
 var borderNoiseB:FastNoiseLite
+var mode:Mode = Mode.RoomConfig
+
+enum Mode {
+	RoomSelect,
+	RoomConfig,
+	TileEditor,
+	Preview,
+}
+
+func set_mode(p_mode: Mode) -> void:
+	mode = p_mode
+	tile_editor_container.hide()
+	tile_editor_tools.hide()
+	if mode == Mode.TileEditor:
+		tile_editor_container.show()
+		tile_editor_tools.show()
+	call_deferred("notify_mode_changed", mode)
+
+func notify_mode_changed(p_mode: Mode) -> void:
+	mode_changed.emit(p_mode)
 
 func _ready() -> void:
 	testCube.queue_free()
@@ -28,11 +53,13 @@ func _ready() -> void:
 	assert(noise)
 	assert(borderNoise)
 	assert(meshGen)
-	cfg.on_changed.connect(_notify_change)
+	cfg.on_changed.connect(func(_cfg): _notify_change())
 	room.on_changed.connect(_notify_change)
 
-	# setup export dialog
+	# setup UI, camera
+	cameraman.initialize(self, cfg, meshGen.position)
 	file_menu.initialize(cfg)
+	side_toolbar.initialize(self)
 	export_dialog.initialize(self)
 	export_dialog.user_start_export.connect(func(): _save_mesh())
 	export_dialog.dialog_opened.connect(func(): tilemapEditor.disable())
@@ -46,6 +73,7 @@ func _ready() -> void:
 
 	# setup tilemap
 	tilemapEditor.initialize(cfg, room)
+	set_mode(Mode.RoomConfig)
 
 	# setup meshgen
 	regenerate()

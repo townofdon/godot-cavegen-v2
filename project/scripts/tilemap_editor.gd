@@ -71,32 +71,24 @@ func set_editor_mode(p_mode: EditorMode) -> void:
 	mode = p_mode
 	on_mode_changed.emit(mode)
 	cancel = true
+	toolDraw.texture_normal = txToolDrawUn
+	toolLine.texture_normal = txToolLineUn
+	toolRect.texture_normal = txToolRectUn
+	toolFill.texture_normal = txToolFillUn
 	if mode == EditorMode.Draw:
 		toolDraw.texture_normal = txToolDraw
-		toolLine.texture_normal = txToolLineUn
-		toolRect.texture_normal = txToolRectUn
-		toolFill.texture_normal = txToolFillUn
 	elif mode == EditorMode.Line:
-		toolDraw.texture_normal = txToolDrawUn
 		toolLine.texture_normal = txToolLine
-		toolRect.texture_normal = txToolRectUn
-		toolFill.texture_normal = txToolFillUn
 	elif mode == EditorMode.Rect:
-		toolDraw.texture_normal = txToolDrawUn
-		toolLine.texture_normal = txToolLineUn
 		toolRect.texture_normal = txToolRect
-		toolFill.texture_normal = txToolFillUn
 	elif mode == EditorMode.Fill:
-		toolDraw.texture_normal = txToolDrawUn
-		toolLine.texture_normal = txToolLineUn
-		toolRect.texture_normal = txToolRectUn
 		toolFill.texture_normal = txToolFill
 
 func _ready() -> void:
 	toolDraw.pressed.connect(_set_editor_mode_draw)
 	toolLine.pressed.connect(_set_editor_mode_line)
 	toolRect.pressed.connect(_set_editor_mode_rect)
-	toolFill.pressed.connect(_set_editor_mode_fill)
+	toolFill.pressed.connect(_set_editor_mode_fill)	
 
 func _set_editor_mode_draw() -> void:
 	set_editor_mode(EditorMode.Draw)
@@ -368,9 +360,10 @@ func initialize(
 	p_cfg: GlobalConfig,
 	p_room: RoomConfig,
 ) -> void:
-	if !p_cfg: return
-	if !p_room: return
-	if processing: return
+	assert(!initialized)
+	assert(!processing)
+	assert(p_cfg)
+	assert(p_room)
 	processing = true
 	cfg = p_cfg
 	room = p_room

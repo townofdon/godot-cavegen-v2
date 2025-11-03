@@ -30,7 +30,7 @@ void GlobalConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_MoveActivePlaneToOrigin", "p_MoveActivePlaneToOrigin"), &GlobalConfig::SetMoveActivePlaneToOrigin);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "move_active_plane_to_origin"), "set_MoveActivePlaneToOrigin", "get_MoveActivePlaneToOrigin");
 
-	ADD_SIGNAL(MethodInfo("on_changed"));
+	ADD_SIGNAL(MethodInfo("on_changed", PropertyInfo(Variant::OBJECT, "p_config")));
 	// ADD_SIGNAL(MethodInfo("position_changed", PropertyInfo(Variant::OBJECT, "node"), PropertyInfo(Variant::VECTOR2, "new_pos")));
 	// ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
 
@@ -58,7 +58,7 @@ float GlobalConfig::GetRoomWidth() {
 
 void GlobalConfig::SetRoomWidth(float p_RoomWidth) {
 	RoomWidth = p_RoomWidth;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 float GlobalConfig::GetRoomHeight() {
@@ -67,7 +67,7 @@ float GlobalConfig::GetRoomHeight() {
 
 void GlobalConfig::SetRoomHeight(float p_RoomHeight) {
 	RoomHeight = p_RoomHeight;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 float GlobalConfig::GetRoomDepth() {
@@ -76,7 +76,7 @@ float GlobalConfig::GetRoomDepth() {
 
 void GlobalConfig::SetRoomDepth(float p_RoomDepth) {
 	RoomDepth = p_RoomDepth;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 float GlobalConfig::GetCellSize() {
@@ -85,7 +85,7 @@ float GlobalConfig::GetCellSize() {
 
 void GlobalConfig::SetCellSize(float p_CellSize) {
 	CellSize = p_CellSize;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 float GlobalConfig::GetCeiling() {
@@ -94,7 +94,7 @@ float GlobalConfig::GetCeiling() {
 
 void GlobalConfig::SetCeiling(float p_Ceiling) {
 	Ceiling = p_Ceiling;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 float GlobalConfig::GetActivePlaneOffset() {
@@ -103,7 +103,7 @@ float GlobalConfig::GetActivePlaneOffset() {
 
 void GlobalConfig::SetActivePlaneOffset(float p_ActivePlaneOffset) {
 	ActivePlaneOffset = p_ActivePlaneOffset;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 bool GlobalConfig::GetMoveActivePlaneToOrigin() {
@@ -112,7 +112,7 @@ bool GlobalConfig::GetMoveActivePlaneToOrigin() {
 
 void GlobalConfig::SetMoveActivePlaneToOrigin(float p_MoveActivePlaneToOrigin) {
 	MoveActivePlaneToOrigin = p_MoveActivePlaneToOrigin;
-	emit_signal("on_changed");
+	emit_signal("on_changed", this);
 }
 
 SizingData GlobalConfig::GetSizingData() {
