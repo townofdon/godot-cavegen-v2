@@ -19,6 +19,14 @@ static func get_default_data() -> SaveData:
 	data.arr_border_noise.append(FastNoiseLite.new())
 	return data
 
+static func sanitize_data(data: SaveData) -> SaveData:
+	var default_data := get_default_data()
+	if !data: data = default_data
+	if len(data.arr_room) == 0: data.arr_room = default_data.arr_room
+	if len(data.arr_noise) == 0: data.arr_noise = default_data.arr_noise
+	if len(data.arr_border_noise) == 0: data.arr_border_noise = default_data.arr_border_noise
+	return data
+
 static func write_to_file(data: SaveData, file_name: String) -> void:
 	# save resource file as a convenient way to serialize the data.
 	ResourceSaver.save(data, SAVE_PATH)
@@ -38,7 +46,7 @@ static func load_data() -> SaveData:
 		data = ResourceLoader.load(SAVE_PATH, "SaveData", ResourceLoader.CACHE_MODE_IGNORE)
 	else:
 		data = get_default_data()
-	return data
+	return sanitize_data(data)
 
 static func _download_file(path:String, file_name: String) -> void:
 	if OS.has_feature("web"):
@@ -73,22 +81,34 @@ static func _import_from_file(path:String) -> bool:
 	assert(!OS.has_feature("web"))
 	if OS.has_feature("web"):
 		return false
-	var rfile := FileAccess.open(path, FileAccess.READ)
-	if rfile == null:
-		push_error("Failed to load file: %s" % path)
-		return false
-	var file_path := ProjectSettings.globalize_path(SAVE_PATH)
-	var wfile = FileAccess.open(file_path, FileAccess.WRITE)
-	if wfile != null:
-		wfile.store_buffer(rfile.get_buffer(rfile.get_len()))
-		wfile.close()
-		rfile.close()
-		print("File saved to: " + file_path)
+	if ResourceLoader.exists(path):
+		var data:SaveData = ResourceLoader.load(path, "SaveData", ResourceLoader.CACHE_MODE_IGNORE)
+		ResourceSaver.save(data, SAVE_PATH)
 		return true
 	else:
-		print("Error importing file: " + path)
+		print("File does not exist: " + path)
 		return false
+	#var rfile := FileAccess.open(path, FileAccess.READ)
+	#if rfile == null:
+		#push_error("Failed to load file: %s" % path)
+		#return false
+	#var file_path := ProjectSettings.globalize_path(SAVE_PATH)
+	#var wfile = FileAccess.open(file_path, FileAccess.WRITE)
+	#if wfile != null:
+		#wfile.store_buffer(rfile.get_buffer(rfile.get_len()))
+		#wfile.close()
+		#rfile.close()
+		#print("File saved to: " + file_path)
+		#return true
+	#else:
+		#print("Error importing file: " + path)
+		#return false
 
+# In browser contexts we do not have access to the filesystem directly.
+# As a workaround, use the FileSystemAPI to load the file data into memory
+# and manually copy it to the save file.
+# Note that there is no protection against the save file getting corrupted as
+# any `.tres` file is valid.
 static func _import_from_file_web() -> bool:
 	assert(OS.has_feature("web"))
 	if !OS.has_feature("web"):
