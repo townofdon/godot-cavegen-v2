@@ -60,3 +60,10 @@ compile_commands.json
 # Cmake
 cmake-build*
 CMakeUserPresets.json
+
+# build
+build/
+Build/
+DeployScripts/webgl/
+.env
+*/.env
