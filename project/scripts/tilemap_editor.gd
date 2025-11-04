@@ -360,7 +360,6 @@ func initialize(
 	p_cfg: GlobalConfig,
 	p_room: RoomConfig,
 ) -> void:
-	assert(!initialized)
 	assert(!processing)
 	assert(p_cfg)
 	assert(p_room)

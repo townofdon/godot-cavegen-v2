@@ -62,8 +62,8 @@ cmake-build*
 CMakeUserPresets.json
 
 # build
-build/
-Build/
+[a|A]rchives/
+[b|B]uild/
 DeployScripts/webgl/
 .env
 */.env

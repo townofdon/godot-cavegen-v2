@@ -36,3 +36,11 @@ scons platform=<ENVIRONMENT>
 
 This repository comes with a GitHub action that builds the GDExtension for cross-platform use. It triggers automatically for each pushed change. You can find and edit it in [builds.yml](.github/workflows/builds.yml).
 After a workflow run is complete, you can find the file `godot-cpp-template.zip` on the `Actions` tab on GitHub.
+
+## Plugins
+
+The following plugins were utilized in this project:
+
+- https://github.com/fbcosentino/godot-objexporter
+- https://github.com/Scrawach/godot-file-access-web
+- https://github.com/godot-journey-adventures/toastparty

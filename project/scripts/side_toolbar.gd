@@ -22,7 +22,8 @@ var cavegen: CaveGen
 
 func initialize(p_cavegen: CaveGen):
 	cavegen = p_cavegen
-	cavegen.mode_changed.connect(_on_mode_changed)
+	if !cavegen.mode_changed.is_connected(_on_mode_changed):
+		cavegen.mode_changed.connect(_on_mode_changed)
 
 func _ready() -> void:
 	mode_room_select.pressed.connect(func(): cavegen.set_mode(CaveGen.Mode.RoomSelect))

@@ -2,6 +2,13 @@
 
 This docker setup runs a unity webgl build locally.
 
+## Deploy
+
+1. Bump version within Godot
+2. Export your Godot project to `<repo_root>/build/webgl`
+3. `cd /path/to/DeployScripts`
+4. `./deploy.sh`
+
 ## Testing Locally
 
 First, create a Godot build - make sure that it's placed in `/build/webgl`

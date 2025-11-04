@@ -28,9 +28,12 @@ var state := RenderState.ReadyToExport
 
 func initialize(p_cavegen: CaveGen) -> void:
 	cavegen = p_cavegen
-	cavegen.export_started.connect(_on_export_started)
-	cavegen.export_progress.connect(_on_export_progress)
-	cavegen.export_completed.connect(_on_export_completed)
+	if !cavegen.export_started.is_connected(_on_export_started):
+		cavegen.export_started.connect(_on_export_started)
+	if !cavegen.export_progress.is_connected(_on_export_progress):
+		cavegen.export_progress.connect(_on_export_progress)
+	if !cavegen.export_completed.is_connected(_on_export_completed):
+		cavegen.export_completed.connect(_on_export_completed)
 
 func _ready() -> void:
 	button_export_start.pressed.connect(_on_start_pressed)

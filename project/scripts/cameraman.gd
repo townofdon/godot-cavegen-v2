@@ -28,13 +28,12 @@ var cfg:GlobalConfig
 
 func initialize(cavegen: CaveGen, p_cfg: GlobalConfig, p_room_position: Vector3) -> void:
 	cfg = p_cfg
-	cavegen.mode_changed.connect(_on_cavegen_mode_changed)
-	cfg.on_changed.connect(func(_cfg):
-		var target := room_position + _get_target_offset(_cfg)
-		camera.global_position.y = target.y
-		_on_cavegen_mode_changed(cavegen.mode))
+	if !cavegen.mode_changed.is_connected(_on_cavegen_mode_changed):
+		cavegen.mode_changed.connect(_on_cavegen_mode_changed)
+	if !cfg.on_changed.is_connected(_on_config_changed.bind(cavegen.mode)):
+		cfg.on_changed.connect(_on_config_changed.bind(cavegen.mode))
 	room_position = p_room_position
-	camera.global_position = p_room_position + _get_target_offset(cfg)
+	camera.global_position = p_room_position + _get_target_offset()
 
 func _ready() -> void:
 	_initialize_look()
@@ -49,13 +48,13 @@ func _get_active_plane_y() -> float:
 	var active_y := ceiling_y - cfg.active_plane_offset
 	return maxf(active_y, 2)
 
-func _get_target_offset(_cfg: GlobalConfig = cfg) -> Vector3:
+func _get_target_offset() -> Vector3:
 	var offset := -_get_active_plane_y() * int(cfg.move_active_plane_to_origin)
 	var y := cfg.room_height * cfg.ceiling - cfg.active_plane_offset + offset + 27
-	return Vector3(_cfg.room_width / 2, y, _cfg.room_depth / 2)
+	return Vector3(cfg.room_width / 2, y, cfg.room_depth / 2)
 
 func _tween_to_position(p_offset:Vector3, r_offset:Vector3, c_offset: Vector2, size: float, duration: float) -> void:
-	var target_pos := room_position + _get_target_offset(cfg) + p_offset
+	var target_pos := room_position + _get_target_offset() + p_offset
 	var target_rot := Vector3(
 		deg_to_rad(-90),
 		deg_to_rad(0),
@@ -71,6 +70,11 @@ func _tween_to_position(p_offset:Vector3, r_offset:Vector3, c_offset: Vector2, s
 	tween.tween_property(camera, "h_offset", c_offset.x, duration)
 	tween.tween_property(camera, "v_offset", c_offset.y, duration)
 	tween.chain().tween_callback(func(): _initialize_look())
+
+func _on_config_changed(cavegen_mode: CaveGen.Mode) -> void:
+	var target := room_position + _get_target_offset()
+	camera.global_position.y = target.y
+	_on_cavegen_mode_changed(cavegen_mode)
 
 func _on_cavegen_mode_changed(cavegen_mode: CaveGen.Mode) -> void:
 	var extent := maxf(cfg.room_width, cfg.room_depth)

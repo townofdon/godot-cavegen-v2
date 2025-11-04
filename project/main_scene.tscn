@@ -1,12 +1,11 @@
-[gd_scene load_steps=40 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=42 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
+[ext_resource type="Script" uid="uid://c3p7qltmi4384" path="res://scripts/save_data.gd" id="2_vimvf"]
 [ext_resource type="RoomConfig" uid="uid://b0amjm0lwfuce" path="res://data/room_config.tres" id="3_8mm7a"]
 [ext_resource type="Script" uid="uid://btxqynndstb2p" path="res://scripts/testcube.gd" id="3_gyfs4"]
 [ext_resource type="GlobalConfig" uid="uid://5fjn4vb33rgv" path="res://data/global_config.tres" id="4_d5x1h"]
-[ext_resource type="FastNoiseLite" uid="uid://p3rfigim3d" path="res://data/noise.tres" id="4_nfk4m"]
-[ext_resource type="FastNoiseLite" uid="uid://cmirlmxyie640" path="res://data/border_noise.tres" id="5_66tet"]
 [ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
 [ext_resource type="Shader" uid="uid://bfhwqx5h3pwhp" path="res://shaders/grid.gdshader" id="8_fv2he"]
 [ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="9_wr18j"]
@@ -16,7 +15,7 @@
 [ext_resource type="Texture2D" uid="uid://b1fwcmksahwv4" path="res://assets/edtool-rect.png" id="13_6jybn"]
 [ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="14_7th4q"]
 [ext_resource type="Texture2D" uid="uid://chpanw3ooevlf" path="res://assets/edtool-fill.png" id="14_84odl"]
-[ext_resource type="Script" uid="uid://ckdmum3nhbjx7" path="res://scripts/menu_bar.gd" id="14_ak604"]
+[ext_resource type="Script" uid="uid://ckdmum3nhbjx7" path="res://scripts/file_menu.gd" id="14_ak604"]
 [ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="15_u0ygc"]
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="16_7th4q"]
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
@@ -24,6 +23,18 @@
 [ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://export_dialog.gd" id="19_84odl"]
 [ext_resource type="Script" uid="uid://dok56cjhi81ur" path="res://scripts/side_toolbar.gd" id="19_ghshe"]
 [ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="21_vimvf"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_ghshe"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_fv2he"]
+
+[sub_resource type="Resource" id="Resource_kv3aw"]
+script = ExtResource("2_vimvf")
+cfg = ExtResource("4_d5x1h")
+arr_room = Array[RoomConfig]([ExtResource("3_8mm7a")])
+arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_fv2he")])
+arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_ghshe")])
+metadata/_custom_type_script = "uid://c3p7qltmi4384"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
@@ -130,13 +141,11 @@ shader_parameter/y_min = 0.0
 
 [node name="CaveGen2" type="Node3D" parent="."]
 script = ExtResource("1_2c62f")
-cfg = ExtResource("4_d5x1h")
-room = ExtResource("3_8mm7a")
-noise = ExtResource("4_nfk4m")
-borderNoise = ExtResource("5_66tet")
+default_save_data = SubResource("Resource_kv3aw")
 metadata/_custom_type_script = "uid://djfffelu7xi37"
 
 [node name="Timer" type="Timer" parent="CaveGen2"]
+unique_name_in_owner = true
 wait_time = 0.1
 ignore_time_scale = true
 
@@ -159,17 +168,13 @@ size = Vector2i(640, 360)
 render_target_update_mode = 4
 
 [node name="MeshContainer" type="Node3D" parent="SubViewportContainer/MainSubViewport"]
+unique_name_in_owner = true
 
 [node name="MeshGen" type="MeshGen" parent="SubViewportContainer/MainSubViewport/MeshContainer"]
 unique_name_in_owner = true
 material_override = SubResource("ShaderMaterial_d5x1h")
 mesh = SubResource("ArrayMesh_7ycvg")
 skeleton = NodePath("../../../..")
-
-[node name="Timer" type="Timer" parent="SubViewportContainer/MainSubViewport/MeshContainer"]
-unique_name_in_owner = true
-wait_time = 0.1
-ignore_time_scale = true
 
 [node name="OriginPlane" type="MeshInstance3D" parent="SubViewportContainer/MainSubViewport"]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
@@ -303,7 +308,7 @@ item_1/text = "Load"
 item_1/id = 1
 item_2/text = "Save"
 item_2/id = 2
-item_3/text = "← Export"
+item_3/text = "Export"
 item_3/id = 3
 item_4/text = "Quit"
 item_4/id = 4
