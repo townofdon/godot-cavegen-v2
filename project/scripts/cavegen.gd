@@ -1,13 +1,7 @@
 class_name CaveGen
 extends Node3D
 
-const SAVE_PATH := "user://save-data.tres"
-
-#@export var cfg:GlobalConfig
-#@export var arr_room: Array[RoomConfig]
-#@export var arr_noise: Array[FastNoiseLite]
-#@export var arr_border_noise: Array[FastNoiseLite]
-@export var default_save_data:SaveData
+@export var initial_save_data:SaveData
 
 @onready var mesh_container: Node3D = %MeshContainer
 @onready var meshgen:MeshGen = %MeshGen
@@ -68,12 +62,38 @@ func _set_room(p_room: RoomConfig) -> void:
 	room = p_room
 	room.on_changed.connect(_notify_change)
 
-func _on_save_data_loaded(data: SaveData) -> void:
-	_initialize(data)
+func _on_new_file_pressed() -> void:
+	_initialize(initial_save_data)
+
+func _on_open_file_pressed() -> void:
+	pass
+	# TODO: SHOW FILEPICKER DIALOG - WEB OR NON-WEB
+	#_initialize(data)
+
+func _on_save_file_pressed() -> void:
+	ResourceSaver.save(save_data, SaveData.SAVE_PATH)
+
+func _on_save_file_as_pressed() -> void:
+	pass
+	# TODO: OPEN DIALOG TO SAVE AS - TEXT INPUT DIALOG FOR WEB, ELSE FILE DIALOG
 
 func _ready() -> void:
 	test_cube.queue_free()
-	_initialize(default_save_data)
+	var data := SaveData.load_data(SaveData.clone(initial_save_data))
+	_initialize(data)
+	# setup signals
+	file_menu.new_file_pressed.connect(_on_new_file_pressed)
+	file_menu.open_file_pressed.connect(_on_open_file_pressed)
+	file_menu.save_file_pressed.connect(_on_save_file_pressed)
+	file_menu.save_file_as_pressed.connect(_on_save_file_as_pressed)
+	export_dialog.user_start_export.connect(func(): _save_mesh())
+	export_dialog.dialog_opened.connect(func(): tilemap_editor.disable())
+	export_dialog.dialog_closed.connect(func(): tilemap_editor.enable())
+	# setup notification timer
+	notif_timer.autostart = false
+	notif_timer.one_shot = true
+	notif_timer.timeout.connect(regenerate)
+	notif_timer.stop()
 	# setup meshsaver
 	OBJExporter.export_progress_updated.connect(_on_export_progress_updated)
 	OBJExporter.export_completed.connect(_on_export_completed)
@@ -86,7 +106,6 @@ func _initialize(data: SaveData) -> void:
 	assert(len(save_data.arr_border_noise) >= 1)
 	assert(len(save_data.arr_room) == len(save_data.arr_noise))
 	assert(len(save_data.arr_noise) == len(save_data.arr_border_noise))
-
 	_set_cfg(save_data.cfg)
 	_set_room(save_data.arr_room.get(0))
 	noise = save_data.arr_noise.get(0)
@@ -96,30 +115,18 @@ func _initialize(data: SaveData) -> void:
 	assert(noise)
 	assert(border_noise)
 	assert(meshgen)
-
-	# setup UI, camera
+	# init UI, camera
 	cameraman.initialize(self, cfg, meshgen.position)
 	file_menu.initialize(cfg)
 	side_toolbar.initialize(self)
 	export_dialog.initialize(self)
-	export_dialog.user_start_export.connect(func(): _save_mesh())
-	export_dialog.dialog_opened.connect(func(): tilemap_editor.disable())
-	export_dialog.dialog_closed.connect(func(): tilemap_editor.enable())
-
-	# setup notification timer
-	notif_timer.autostart = false
-	notif_timer.one_shot = true
-	notif_timer.timeout.connect(regenerate)
-	notif_timer.stop()
-
-	# setup tilemap
+	# init tilemap
 	tilemap_editor.initialize(cfg, room)
 	set_mode(Mode.RoomConfig)
-
-	# setup meshgen
+	# init meshgen
+	notif_timer.stop()
 	regenerate()
-
-	#setup noise
+	# init noise
 	noise_b = noise.duplicate()
 	border_noise_b = border_noise.duplicate()
 

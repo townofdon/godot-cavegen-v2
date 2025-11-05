@@ -65,7 +65,7 @@ func _process(_delta: float) -> void:
 	var shift_pressed := Input.is_action_pressed("tile_shift")
 	var mouse_r_pressed := Input.is_action_pressed("mouse_btn_right")
 	var has_anchor := anchorCoords != coords && anchorCoords != Vector2i(-1,-1)
-	var numCells:Vector2i = editor._get_num_cells()
+	var numCells:Vector2i = editor.cfg.get_num_cells_2d()
 
 	var coords2 := Vector2i(
 		clampi(coords.x, 0, numCells.x - 1),
@@ -142,7 +142,7 @@ func _fill_preview_at(coords: Vector2i, fill: bool) -> void:
 	if currentTile == fillTile:
 		return
 	var screen := PackedInt32Array()
-	var numCells:Vector2i = editor._get_num_cells()
+	var numCells:Vector2i = editor.cfg.get_num_cells_2d()
 	for y in range(numCells.y):
 		for x in range(numCells.x):
 			var tile := editor.get_cell_atlas_coords(Vector2i(x, y)).x as TileMapEditor.Tile

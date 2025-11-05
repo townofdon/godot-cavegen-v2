@@ -515,26 +515,6 @@ void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 	int y = coords.y;
 	int i = x + y * numCells2d.x;
 
-	// // debug
-	// if (i < 0 || i >= (MAX_NOISE_NODES_2D)) {
-	// 	auto ax = String(std::to_string(x).c_str());
-	// 	auto ay = String(std::to_string(y).c_str());
-	// 	auto bx = String(std::to_string(numCells2d.x).c_str());
-	// 	auto by = String(std::to_string(numCells2d.y).c_str());
-	// 	UtilityFunctions::printerr("tile index out of bounds: (" + ax + "," + ay + "), numCells2d((" + bx + "," + by + ")");
-	// 	return;
-	// }
-	// if (tile < 0 || tile > RoomConfig::TileState::TILE_STATE_FILLED) {
-	// 	auto d_tile = String(std::to_string(tile).c_str());
-	// 	UtilityFunctions::printerr("invalid tile: " + d_tile);
-	// 	return;
-	// }
-	// auto dtile = String(std::to_string(tile).c_str());
-	// auto di = String(std::to_string(i).c_str());
-	// auto dx = String(std::to_string(x).c_str());
-	// auto dy = String(std::to_string(y).c_str());
-	// UtilityFunctions::print("set tile " + dtile + " at index " + di + "(" + dx + "," + dy + ")");
-
 	ERR_FAIL_INDEX_EDMSG(i, MAX_NOISE_NODES_2D, "tile index out of bounds");
 	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
 

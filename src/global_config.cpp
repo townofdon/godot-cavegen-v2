@@ -44,6 +44,7 @@ void GlobalConfig::_bind_methods() {
 	// ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "speed", PROPERTY_HINT_RANGE, "0,20,0.01"), "set_speed", "get_speed");
 
 	ClassDB::bind_method(D_METHOD("get_num_cells"), &GlobalConfig::GetNumCells);
+	ClassDB::bind_method(D_METHOD("get_num_cells_2d"), &GlobalConfig::GetNumCells2d);
 }
 
 GlobalConfig::GlobalConfig() {
@@ -157,4 +158,12 @@ SizingData GlobalConfig::GetSizingData() {
 
 Vector3i GlobalConfig::GetNumCells() {
 	return GlobalConfig::GetSizingData().numCells;
+}
+
+// Get numCells as 2d grid (used for tilemap)
+Vector2i GlobalConfig::GetNumCells2d() {
+	Vector3i numCells = GlobalConfig::GetSizingData().numCells;
+	// remove bounds (which is always just empty space)
+	Vector2i numCells2d = Vector2i(numCells.x - 2, numCells.z - 2);
+	return numCells2d;
 }

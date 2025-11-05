@@ -213,7 +213,7 @@ func _draw_at(coords: Vector2i, tile: Tile):
 	_user_set_cell_at(coords, tile)
 
 func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
 	if (numSteps <= 0):
 		if tile != Tile.Null: _set_cell_at(from, tile, numCells)
@@ -228,7 +228,7 @@ func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
 	if room: room.notify_changed()
 
 func _rect_at(from: Vector2i, to: Vector2i, tile: Tile):
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	for y in range(mini(from.y, to.y), maxi(from.y, to.y) + 1):
 		for x in range(mini(from.x, to.x), maxi(from.x, to.x) + 1):
 			var coords := Vector2i(x, y)
@@ -242,7 +242,7 @@ func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile):
 	if currentTile == fillTile:
 		return
 	var screen := PackedInt32Array()
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	for y in range(numCells.y):
 		for x in range(numCells.x):
 			var tile := get_cell_atlas_coords(Vector2i(x, y)).x as Tile
@@ -286,14 +286,14 @@ func _get_next_tile_to_lay(current: Tile, fill: bool) -> Tile:
 func _user_set_cell_at(coords: Vector2i, tile: Tile) -> void:
 	if coords == lastTileDrawnCoords: return
 	if tile == Tile.Null: return
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	_set_cell_at(coords, tile, numCells)
 	lastTileDrawnCoords = coords
 	room.notify_changed()
 
 func _get_tile_to_place(coords: Vector2i, tile: Tile) -> Tile:
 	if tile == Tile.Null: return Tile.Null
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
 		return Tile.Null
 	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
@@ -361,14 +361,13 @@ func _get_atlas_x_from_tile_state(tile_state:int, is_wall:bool) -> int:
 		return Tile.WallEmpty
 	return Tile.InnerNoise
 
-func _get_num_cells() -> Vector2i:
-	if !cfg: return Vector2i(0, 0)
-	if !room: return Vector2i(0, 0)
-	var numCells3dRaw := cfg.get_num_cells()
-	# remove bounds (which is always just empty space)
-	var numCells3dAdjusted := Vector3i(numCells3dRaw.x - 2, 1, numCells3dRaw.z - 2)
-	var numCells := Vector2i(numCells3dAdjusted.x, numCells3dAdjusted.z);
-	return numCells
+#func _get_num_cells() -> Vector2i:
+	#if !cfg: return Vector2i(0, 0)
+	#var numCells3dRaw := cfg.get_num_cells()
+	## remove bounds (which is always just empty space)
+	#var numCells3dAdjusted := Vector3i(numCells3dRaw.x - 2, 1, numCells3dRaw.z - 2)
+	#var numCells := Vector2i(numCells3dAdjusted.x, numCells3dAdjusted.z);
+	#return numCells
 
 var initialized:bool = false;
 func initialize(
@@ -379,12 +378,12 @@ func initialize(
 	assert(!processing)
 	assert(p_cfg)
 	assert(p_room)
+	assert(get_parent() is Control)
 	processing = true
 	cfg = p_cfg
 	room = p_room
-	assert(get_parent() is Control)
 	tilemapUI = get_parent()
-	var numCells := _get_num_cells()
+	var numCells := cfg.get_num_cells_2d()
 	set_tilemap_container_size(numCells)
 	clear()
 	if room.get_num_tiles() != numCells.x * numCells.y:
@@ -411,7 +410,7 @@ func handle_room_size_change() -> void:
 	if !room: return
 	if !initialized: return
 	if processing: return
-	var numCells := _get_num_cells();
+	var numCells := cfg.get_num_cells_2d()
 	if numCells == prevNumCells:
 		return
 	if numCells.x <= 0 || numCells.y <= 0:

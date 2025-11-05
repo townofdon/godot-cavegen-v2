@@ -8,24 +8,40 @@ extends Resource
 
 const SAVE_PATH := "user://save-data.tres"
 
-static func get_default_data() -> SaveData:
+static func get_default() -> SaveData:
 	var data: SaveData = SaveData.new()
-	data.cfg = GlobalConfig.new()
-	data.arr_room = Array()
-	data.arr_noise = Array()
-	data.arr_border_noise = Array()
-	data.arr_room.append(RoomConfig.new())
-	data.arr_noise.append(FastNoiseLite.new())
-	data.arr_border_noise.append(FastNoiseLite.new())
+	var new_cfg := GlobalConfig.new()
+	var new_room := RoomConfig.new()
+	new_room.init_tiles(new_cfg.get_num_cells_2d())
+	data.cfg = new_cfg
+	data.arr_room = [new_room]
+	data.arr_noise = [FastNoiseLite.new()]
+	data.arr_border_noise = [FastNoiseLite.new()]
 	return data
 
-static func sanitize_data(data: SaveData) -> SaveData:
-	var default_data := get_default_data()
+static func sanitize(data: SaveData) -> SaveData:
+	var default_data := get_default()
 	if !data: data = default_data
+	if !data.cfg: data.cfg = default_data.cfg
 	if len(data.arr_room) == 0: data.arr_room = default_data.arr_room
 	if len(data.arr_noise) == 0: data.arr_noise = default_data.arr_noise
 	if len(data.arr_border_noise) == 0: data.arr_border_noise = default_data.arr_border_noise
+	assert(data.cfg)
+	assert(len(data.arr_room) >= 1)
+	assert(len(data.arr_noise) >= 1)
+	assert(len(data.arr_border_noise) >= 1)
+	var room:RoomConfig = data.arr_room.get(0)
+	var num_cells := data.cfg.get_num_cells_2d()
+	var expected_num_tiles := num_cells.x * num_cells.y
+	if room.get_num_tiles() != expected_num_tiles:
+		room.init_tiles(num_cells)
+	assert(room.get_num_tiles() > 0)
+	assert(room.get_num_tiles() == expected_num_tiles)
 	return data
+
+static func clone(data: SaveData) -> SaveData:
+	var ret:SaveData = data.duplicate_deep(DEEP_DUPLICATE_ALL)
+	return ret
 
 static func write_to_file(data: SaveData, file_name: String) -> void:
 	# save resource file as a convenient way to serialize the data.
@@ -40,13 +56,13 @@ static func import_from_file_web() -> bool:
 	return await _import_from_file_web()
 
 # note - import the save file before calling load_data()
-static func load_data() -> SaveData:
+static func load_data(default_data: SaveData) -> SaveData:
 	var data: SaveData
 	if ResourceLoader.exists(SAVE_PATH):
 		data = ResourceLoader.load(SAVE_PATH, "SaveData", ResourceLoader.CACHE_MODE_IGNORE)
 	else:
-		data = get_default_data()
-	return sanitize_data(data)
+		data = default_data
+	return sanitize(data)
 
 static func _download_file(path:String, file_name: String) -> void:
 	if OS.has_feature("web"):

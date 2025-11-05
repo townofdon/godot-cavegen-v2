@@ -4,6 +4,11 @@ extends MenuBar
 @onready var export_dialog: ExportDialog = %ExportDialog
 @onready var confirm_dialog: ConfirmDialog = %ConfirmDialog
 
+signal new_file_pressed
+signal open_file_pressed
+signal save_file_pressed
+signal save_file_as_pressed
+
 enum Menu {
 	File,
 	View,
@@ -12,8 +17,9 @@ enum Menu {
 
 enum FileItem {
 	New,
-	Load,
+	Open,
 	Save,
+	SaveAs,
 	Export,
 	Quit,
 }
@@ -46,10 +52,12 @@ func _on_menu_item_press(menu: int, item: int):
 	if menu == Menu.File:
 		if item == FileItem.New:
 			_on_new()
-		elif item == FileItem.Load:
-			_on_load()
+		elif item == FileItem.Open:
+			_on_open()
 		elif item == FileItem.Save:
 			_on_save()
+		elif item == FileItem.SaveAs:
+			_on_save_as()
 		elif item == FileItem.Export:
 			_on_export()
 		elif item == FileItem.Quit:
@@ -73,13 +81,16 @@ func _rerender() -> void:
 	_set_menu_item_checked(Menu.Options, OptionsItem.MoveActivePlaneToOrigin, cfg.move_active_plane_to_origin)
 
 func _on_new() -> void:
-	pass
+	new_file_pressed.emit()
 
-func _on_load() -> void:
-	pass
+func _on_open() -> void:
+	open_file_pressed.emit()
 
 func _on_save() -> void:
-	pass
+	save_file_pressed.emit()
+
+func _on_save_as() -> void:
+	save_file_as_pressed.emit()
 
 func _on_quit() -> void:
 	var data := ConfirmDialogData.new(func():
