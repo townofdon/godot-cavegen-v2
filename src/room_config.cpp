@@ -240,6 +240,7 @@ RoomConfig::RoomConfig() {
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
 	}
+	InitTiles(Vector2i(30, 30));
 	numTiles = 0;
 	// initialize internal vars
 	Precedence = 0;
