@@ -18,6 +18,9 @@ public:
 	// delete the copy constructor to avoid accidental assignment by value
 	GlobalConfig(const GlobalConfig &) = delete;
 
+	bool IsNewLevel;
+	godot::String LevelName;
+
 	float RoomWidth;
 	float RoomHeight;
 	float RoomDepth;
@@ -26,6 +29,10 @@ public:
 	float ActivePlaneOffset;
 	bool MoveActivePlaneToOrigin;
 
+	bool GetIsNewLevel();
+	void SetIsNewLevel(bool p_IsNewLevel);
+	String GetLevelName();
+	void SetLevelName(String p_LevelName);
 	float GetRoomWidth();
 	void SetRoomWidth(float p_RoomWidth);
 	float GetRoomHeight();

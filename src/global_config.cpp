@@ -2,6 +2,14 @@
 #include "constants.h"
 
 void GlobalConfig::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("get_IsNewLevel"), &GlobalConfig::GetIsNewLevel);
+	ClassDB::bind_method(D_METHOD("set_IsNewLevel", "p_IsNewLevel"), &GlobalConfig::SetIsNewLevel);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "is_new_level"), "set_IsNewLevel", "get_IsNewLevel");
+
+	ClassDB::bind_method(D_METHOD("get_LevelName"), &GlobalConfig::GetLevelName);
+	ClassDB::bind_method(D_METHOD("set_LevelName", "p_LevelName"), &GlobalConfig::SetLevelName);
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "level_name"), "set_LevelName", "get_LevelName");
+
 	ClassDB::bind_method(D_METHOD("get_RoomWidth"), &GlobalConfig::GetRoomWidth);
 	ClassDB::bind_method(D_METHOD("set_RoomWidth", "p_RoomWidth"), &GlobalConfig::SetRoomWidth);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_width", PROPERTY_HINT_RANGE, "5,50,"), "set_RoomWidth", "get_RoomWidth");
@@ -40,6 +48,8 @@ void GlobalConfig::_bind_methods() {
 
 GlobalConfig::GlobalConfig() {
 	// Initialize any variables here.
+	IsNewLevel = true;
+	LevelName = "AsteroidBase001";
 	RoomWidth = 30.0f;
 	RoomHeight = 30.0f;
 	RoomDepth = 30.0f;
@@ -51,6 +61,19 @@ GlobalConfig::GlobalConfig() {
 
 GlobalConfig::~GlobalConfig() {
 	// Add your cleanup here.
+}
+
+bool GlobalConfig::GetIsNewLevel() {
+	return IsNewLevel;
+}
+void GlobalConfig::SetIsNewLevel(bool p_IsNewLevel) {
+	IsNewLevel = p_IsNewLevel;
+}
+String GlobalConfig::GetLevelName() {
+	return LevelName;
+}
+void GlobalConfig::SetLevelName(String p_LevelName) {
+	LevelName = p_LevelName;
 }
 
 float GlobalConfig::GetRoomWidth() {

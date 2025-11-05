@@ -289,7 +289,7 @@ func _user_set_cell_at(coords: Vector2i, tile: Tile) -> void:
 	var numCells := _get_num_cells()
 	_set_cell_at(coords, tile, numCells)
 	lastTileDrawnCoords = coords
-	if room: room.notify_changed()
+	room.notify_changed()
 
 func _get_tile_to_place(coords: Vector2i, tile: Tile) -> Tile:
 	if tile == Tile.Null: return Tile.Null
@@ -307,14 +307,14 @@ func _set_cell_at(coords: Vector2i, tile: Tile, numCells: Vector2i) -> void:
 	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
 	tile = _maybe_convert_tile(tile, isWall)
 	set_cell(coords, TILEMAP_SOURCE_ID, Vector2i(tile, 0))
-	if room: room.set_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
+	_set_room_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
 
 func _erase_cell_at(coords: Vector2i, numCells: Vector2i) -> void:
 	if numCells == Vector2i.ZERO: return
 	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
 		return
 	erase_cell(coords)
-	if room: room.set_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
+	_set_room_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
 
 func _maybe_convert_tile(atlasX:Tile, isWall:bool) -> Tile:
 	if atlasX == Tile.InnerNoise && isWall:
@@ -346,6 +346,21 @@ func _get_tile_state_from_atlas_x(atlasX:int) -> int:
 		return RoomConfig.TILE_STATE_EMPTY
 	return RoomConfig.TILE_STATE_UNSET
 
+func _get_atlas_x_from_tile_state(tile_state:int, is_wall:bool) -> int:
+	if tile_state == RoomConfig.TILE_STATE_UNSET && !is_wall:
+		return Tile.InnerNoise
+	if tile_state == RoomConfig.TILE_STATE_FILLED && !is_wall:
+		return Tile.InnerFilled
+	if tile_state == RoomConfig.TILE_STATE_EMPTY && !is_wall:
+		return Tile.InnerEmpty
+	if tile_state == RoomConfig.TILE_STATE_FILLED && is_wall:
+		return Tile.WallFilled
+	if tile_state == RoomConfig.TILE_STATE_UNSET && is_wall:
+		return Tile.WallNoise
+	if tile_state == RoomConfig.TILE_STATE_EMPTY && is_wall:
+		return Tile.WallEmpty
+	return Tile.InnerNoise
+
 func _get_num_cells() -> Vector2i:
 	if !cfg: return Vector2i(0, 0)
 	if !room: return Vector2i(0, 0)
@@ -359,6 +374,7 @@ var initialized:bool = false;
 func initialize(
 	p_cfg: GlobalConfig,
 	p_room: RoomConfig,
+	should_reset: bool = false,
 ) -> void:
 	assert(!processing)
 	assert(p_cfg)
@@ -371,12 +387,19 @@ func initialize(
 	var numCells := _get_num_cells()
 	set_tilemap_container_size(numCells)
 	clear()
+	if room.get_num_tiles() != numCells.x * numCells.y:
+		should_reset = true
+	if should_reset:
+		room.tilemap__tiles.resize(numCells.x * numCells.y)
+		room.init_tiles(numCells)
 	for y in range(numCells.y):
 		for x in range(numCells.x):
+			var tile:int
 			if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-				_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
+				tile = _get_atlas_x_from_tile_state(room.get_tile_at(numCells, Vector2i(x, y)), true)
 			else:
-				_set_cell_at(Vector2i(x, y), Tile.InnerNoise, numCells)
+				tile = _get_atlas_x_from_tile_state(room.get_tile_at(numCells, Vector2i(x, y)), false)
+			_set_cell_at(Vector2i(x, y), tile, numCells)
 	update_internals()
 	prevNumCells = numCells
 	processing = false
@@ -398,12 +421,14 @@ func handle_room_size_change() -> void:
 		return
 	processing = true
 	set_tilemap_container_size(numCells)
+	room.tilemap__tiles.resize(maxi(numCells.x * numCells.y, prevNumCells.x * prevNumCells.y))
 	# convert existing tile data from prev coords to new coords
 	for y in range(prevNumCells.y):
 		for x in range(prevNumCells.x):
 			var coords := Vector2i(x, y)
 			var tile := get_cell_atlas_coords(coords).x as Tile
-			if room: room.set_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
+			_set_room_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
+	room.tilemap__tiles.resize(numCells.x * numCells.y)
 	# unset previous border tile, and copy tile to new border tile
 	if numCells.x != prevNumCells.x:
 		for y in range(numCells.y):
@@ -459,7 +484,7 @@ func handle_room_size_change() -> void:
 		for y in range(numCells.y, prevNumCells.y):
 			for x in range(numCells.x):
 				erase_cell(Vector2i(x, y))
-	if room: room.notify_changed()
+	room.notify_changed()
 	update_internals()
 	prevNumCells = numCells
 	processing = false
@@ -477,3 +502,7 @@ func set_tilemap_container_size(numCells: Vector2i) -> void:
 	tilemapUI.pivot_offset.x = x
 	tilemapUI.pivot_offset.y = 0
 	tilemapScale = tilemapScale
+
+func _set_room_tile(num_cells_2d: Vector2i, coords: Vector2i, tile: int) -> void:
+	if !room: return
+	room.set_tile(num_cells_2d, coords, tile)

@@ -157,6 +157,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_Precedence", "p_Precedence"), &RoomConfig::SetPrecedence);
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "internal__precedence"), "set_Precedence", "get_Precedence");
 
+	ClassDB::bind_method(D_METHOD("get_GridPosition"), &RoomConfig::GetGridPosition);
+	ClassDB::bind_method(D_METHOD("set_GridPosition", "p_GridPosition"), &RoomConfig::SetGridPosition);
+	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "internal__grid_position"), "set_GridPosition", "get_GridPosition");
+
 	ClassDB::bind_method(D_METHOD("get_NodeUp"), &RoomConfig::GetNodeUp);
 	ClassDB::bind_method(D_METHOD("set_NodeUp", "p_room"), &RoomConfig::SetNodeUp);
 	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_up", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeUp", "get_NodeUp");
@@ -180,7 +184,18 @@ void RoomConfig::_bind_methods() {
 	//
 	// Tilemap Data
 	//
-	ClassDB::bind_method(D_METHOD("set_tile", "num_cells", "coords", "tile"), &RoomConfig::SetTile);
+
+	ADD_GROUP("Tilemap Data", "tilemap__");
+
+	ClassDB::bind_method(D_METHOD("get_TilesExport"), &RoomConfig::GetTilesExport);
+	ClassDB::bind_method(D_METHOD("set_TilesExport", "p_tiles"), &RoomConfig::SetTilesExport);
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "tilemap__tiles"), "set_TilesExport", "get_TilesExport");
+
+	ClassDB::bind_method(D_METHOD("init_tiles", "num_cells_2d"), &RoomConfig::InitTiles);
+	ClassDB::bind_method(D_METHOD("set_tile", "num_cells_2d", "coords", "tile"), &RoomConfig::SetTile);
+	ClassDB::bind_method(D_METHOD("get_tile_at", "num_cells_2d", "coords"), &RoomConfig::GetTileAt);
+	ClassDB::bind_method(D_METHOD("get_num_tiles"), &RoomConfig::GetNumTiles);
+
 	BIND_ENUM_CONSTANT(TILE_STATE_UNSET);
 	BIND_ENUM_CONSTANT(TILE_STATE_FILLED);
 	BIND_ENUM_CONSTANT(TILE_STATE_EMPTY);
@@ -225,8 +240,10 @@ RoomConfig::RoomConfig() {
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
 	}
+	numTiles = 0;
 	// initialize internal vars
-	precedence = 0;
+	Precedence = 0;
+	GridPosition = Vector2i(0, 0);
 }
 
 RoomConfig::~RoomConfig() {
@@ -480,6 +497,18 @@ void RoomConfig::NotifyChanged() {
 //
 // Tilemap Data
 //
+void RoomConfig::InitTiles(Vector2i numCells2d) {
+	for (size_t y = 0; y < numCells2d.y; y++) {
+		for (size_t x = 0; x < numCells2d.x; x++) {
+			if (x == 0 || x == numCells2d.x - 1 || y == 0 || y == numCells2d.y - 1) {
+				SetTile(numCells2d, Vector2i(x, y), TILE_STATE_FILLED);
+			} else {
+				SetTile(numCells2d, Vector2i(x, y), TILE_STATE_UNSET);
+			}
+		}
+	}
+	numTiles = numCells2d.x * numCells2d.y;
+}
 void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 	int x = coords.x;
 	int y = coords.y;
@@ -509,33 +538,56 @@ void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
 	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
 
 	tiles[i] = tile;
+	numTiles = numCells2d.x * numCells2d.y;
+}
+int RoomConfig::GetTileAt(Vector2i numCells2d, Vector2i coords) {
+	int x = coords.x;
+	int y = coords.y;
+	int i = x + y * numCells2d.x;
+	ERR_FAIL_INDEX_V_EDMSG(i, MAX_NOISE_NODES_2D, 0, "tile index out of bounds");
+	return tiles[i];
+}
+int RoomConfig::GetNumTiles() {
+	return numTiles;
 }
 int *RoomConfig::GetTiles() {
 	return tiles;
+}
+void RoomConfig::SetTilesExport(PackedInt32Array p_tiles) {
+	numTiles = 0;
+	int count = p_tiles.size();
+	for (size_t i = 0; i < count; i++) {
+		int tile = p_tiles.get(i);
+		ERR_FAIL_INDEX_EDMSG(i, MAX_NOISE_NODES_2D, "tile index out of bounds");
+		ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
+		tiles[i] = tile;
+	}
+	numTiles = count;
+}
+PackedInt32Array RoomConfig::GetTilesExport() {
+	auto ret = PackedInt32Array();
+	for (size_t i = 0; i < numTiles; i++) {
+		ret.append(tiles[i]);
+	}
+	return ret;
 }
 
 //
 // INTERNAL
 //
 int RoomConfig::GetPrecedence() {
-	return precedence;
+	return Precedence;
 }
-void RoomConfig::SetPrecedence(int p_precedence) {
-	precedence = p_precedence;
+Vector2 RoomConfig::GetGridPosition() {
+	return GridPosition;
 }
-bool RoomConfig::ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare) {
-	if (!p_room.is_valid()) {
-		return true;
-	}
-	if (!compare.is_valid()) {
-		return true;
-	}
-	String name = p_room->get_name();
-	if (name.is_empty()) {
-		name = p_room->get_path();
-	}
-	ERR_FAIL_COND_V_EDMSG(p_room->get_rid() == compare->get_rid(), false, "node already in use: " + name);
-	return true;
+void RoomConfig::SetPrecedence(int p_Precedence) {
+	Precedence = p_Precedence;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetGridPosition(Vector2 p_GridPosition) {
+	GridPosition = p_GridPosition;
+	emit_signal("on_changed");
 }
 void RoomConfig::SetNodeUp(const Ref<RoomConfig> &p_room) {
 	nodes.up = p_room;
@@ -561,3 +613,18 @@ Ref<RoomConfig> RoomConfig::GetNodeLeft() {
 Ref<RoomConfig> RoomConfig::GetNodeRight() {
 	return nodes.right;
 }
+
+// bool RoomConfig::ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare) {
+// 	if (!p_room.is_valid()) {
+// 		return true;
+// 	}
+// 	if (!compare.is_valid()) {
+// 		return true;
+// 	}
+// 	String name = p_room->get_name();
+// 	if (name.is_empty()) {
+// 		name = p_room->get_path();
+// 	}
+// 	ERR_FAIL_COND_V_EDMSG(p_room->get_rid() == compare->get_rid(), false, "node already in use: " + name);
+// 	return true;
+// }

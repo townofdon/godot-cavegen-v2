@@ -128,9 +128,6 @@ public:
 	void SetTileEraseSize(float p_TileEraseSize);
 	void SetNeighborBlend(float p_NeighborBlend);
 
-	int GetPrecedence();
-	void SetPrecedence(int p_precedence);
-
 	void NotifyChanged();
 
 	//
@@ -142,17 +139,24 @@ public:
 		Ref<RoomConfig> left;
 		Ref<RoomConfig> right;
 	};
-	int precedence;
+	Vector2i GridPosition;
+	int Precedence;
 	RoomNodes nodes;
-	bool ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare);
-	void SetNodeUp(const Ref<RoomConfig> &p_room);
-	void SetNodeDown(const Ref<RoomConfig> &p_room);
-	void SetNodeLeft(const Ref<RoomConfig> &p_room);
-	void SetNodeRight(const Ref<RoomConfig> &p_room);
+
+	int GetPrecedence();
+	Vector2 GetGridPosition();
 	Ref<RoomConfig> GetNodeUp();
 	Ref<RoomConfig> GetNodeDown();
 	Ref<RoomConfig> GetNodeLeft();
 	Ref<RoomConfig> GetNodeRight();
+	void SetPrecedence(int p_Precedence);
+	void SetGridPosition(Vector2 p_GridPosition);
+	void SetNodeUp(const Ref<RoomConfig> &p_room);
+	void SetNodeDown(const Ref<RoomConfig> &p_room);
+	void SetNodeLeft(const Ref<RoomConfig> &p_room);
+	void SetNodeRight(const Ref<RoomConfig> &p_room);
+
+	// bool ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare);
 
 	//
 	// Tilemap Data
@@ -163,8 +167,13 @@ public:
 		TILE_STATE_FILLED,
 		_TILE_STATE_MAX_,
 	};
+	void InitTiles(Vector2i numCells2d);
 	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
+	int GetTileAt(Vector2i numCells2d, Vector2i coords);
+	int GetNumTiles();
 	int *GetTiles();
+	void SetTilesExport(PackedInt32Array p_tiles);
+	PackedInt32Array GetTilesExport();
 
 	//
 	// Noise
@@ -177,5 +186,6 @@ public:
 	float rawSamples[MAX_NOISE_NODES];
 
 protected:
+	int numTiles;
 	int tiles[MAX_NOISE_NODES_2D];
 };
