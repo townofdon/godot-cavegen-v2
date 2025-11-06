@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CaveSaveData" load_steps=2 format=3 uid="uid://cbis2nb8lwpeu"]
+
+[ext_resource type="Script" uid="uid://c3p7qltmi4384" path="res://scripts/cave_save_data.gd" id="1_8kp7c"]
+
+[resource]
+script = ExtResource("1_8kp7c")
+metadata/_custom_type_script = "uid://c3p7qltmi4384"

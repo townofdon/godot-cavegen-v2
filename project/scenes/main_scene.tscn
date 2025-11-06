@@ -1,8 +1,7 @@
-[gd_scene load_steps=46 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=45 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_58gk3"]
-[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="2_to7gp"]
-[ext_resource type="Script" uid="uid://c3p7qltmi4384" path="res://scripts/save_data.gd" id="3_u0fll"]
+[ext_resource type="Script" uid="uid://b1aph5h3epjbd" path="res://scripts/cavegen_data.gd" id="2_58gk3"]
 [ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="4_6p3nn"]
 [ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="5_k67gn"]
 [ext_resource type="Script" uid="uid://btxqynndstb2p" path="res://scripts/testcube.gd" id="6_k3g67"]
@@ -25,64 +24,25 @@
 [ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://scripts/export_dialog.gd" id="22_jix7a"]
 [ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="23_segjr"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_fv2he"]
-resource_local_to_scene = true
-noise_type = 4
-frequency = 0.0126
-offset = Vector3(-24.1, 75.4, -85.4)
-fractal_octaves = 6
-fractal_lacunarity = 3.82
-fractal_gain = 0.67
-fractal_weighted_strength = 0.16
-cellular_jitter = 1.23
-domain_warp_amplitude = 12.01
-domain_warp_frequency = 3.64
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_5smuj"]
-resource_local_to_scene = true
-noise_type = 3
-frequency = 0.0679
-offset = Vector3(446.1, -99.7, 27.7)
-fractal_lacunarity = 2.1
-fractal_gain = 0.4
-fractal_weighted_strength = 0.44
-cellular_jitter = 1.09
-
-[sub_resource type="RoomConfig" id="RoomConfig_y5ved"]
-room_noise__iso_value = 0.6
-room_noise__curve = 1.092
-room_noise__tilt_x = 1.159
-room_noise__offset_y = 0.634
-room_noise__smooth_crystalize = -6.18
-room_noise__falloff_above_ceiling = 0.59
-room_noise__falloff_near_border = 0.14
-room_noise__active_y_smoothing = 0.76
-room_border__normalize_border_noise = true
-room_border__border_noise_strength = 0.81
-room_border__smooth_border_noise = 0.29
-room_border__border_tilt = 0.14
-tile_apply__tile_strength = 0.97
-tile_apply__tile_smoothing = 0.72
-tile_apply__tile_ceiling = 1.0
-tile_apply__tile_ceil_blend = 0.23
-tile_apply__tile_floor = 0.56
-neighbors__neighbor_blend = 0.0
-internal__precedence = 5
-internal__node_up = ExtResource("2_to7gp")
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_58gk3"]
 resource_local_to_scene = true
 
-[sub_resource type="GlobalConfig" id="GlobalConfig_kv3aw"]
-ceiling = 0.71
-active_plane_offset = 3.87
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_to7gp"]
 resource_local_to_scene = true
 
-[sub_resource type="Resource" id="Resource_5smuj"]
-script = ExtResource("3_u0fll")
-cfg = SubResource("GlobalConfig_kv3aw")
-arr_room = Array[RoomConfig]([SubResource("RoomConfig_y5ved")])
-arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_5smuj")])
-arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_fv2he")])
-metadata/_custom_type_script = "uid://c3p7qltmi4384"
+[sub_resource type="RoomConfig" id="RoomConfig_58gk3"]
+resource_local_to_scene = true
+
+[sub_resource type="GlobalConfig" id="GlobalConfig_58gk3"]
+resource_local_to_scene = true
+
+[sub_resource type="Resource" id="Resource_to7gp"]
+script = ExtResource("2_58gk3")
+cfg = SubResource("GlobalConfig_58gk3")
+arr_room = Array[RoomConfig]([SubResource("RoomConfig_58gk3")])
+arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_to7gp")])
+arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_58gk3")])
+metadata/_custom_type_script = "uid://b1aph5h3epjbd"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
 render_priority = 0
@@ -194,7 +154,7 @@ shadow_size = 1
 
 [node name="CaveGen2" type="Node3D" parent="."]
 script = ExtResource("1_58gk3")
-initial_save_data = SubResource("Resource_5smuj")
+initial_save_data = SubResource("Resource_to7gp")
 toast_bg = Color(0.015149527, 0.13787875, 0.13481134, 0.7019608)
 toast_success = Color(0.35585317, 0.7912965, 0.6194208, 1)
 metadata/_custom_type_script = "uid://djfffelu7xi37"

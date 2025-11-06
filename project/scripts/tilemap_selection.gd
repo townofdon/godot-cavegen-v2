@@ -29,7 +29,7 @@ func _draw() -> void:
 	var shift_pressed := Input.is_action_pressed("tile_shift")
 	var mouse_r_pressed := Input.is_action_pressed("mouse_btn_right")
 
-	var shouldPreviewLine = \
+	var shouldPreviewLine := \
 		(mode == TileMapEditor.EditorMode.Line && anchorTile != TileMapEditor.Tile.Null && !editor.cancel) ||\
 		(mode == TileMapEditor.EditorMode.Draw && has_anchor && shift_pressed && !editor.cancel)
 
@@ -38,7 +38,7 @@ func _draw() -> void:
 		if (alt_pressed || mouse_r_pressed):
 			color = eraseColor
 		var from := anchorCoords - Vector2i(1,1)
-		var to = anchorCoords + Vector2i(1,1)
+		var to := anchorCoords + Vector2i(1,1)
 		var fromLocal:Vector2i = map_to_local(from) + Vector2(10, 10)
 		var toLocal:Vector2i = map_to_local(to) - Vector2(10, 10)
 		draw_rect(Rect2(fromLocal, toLocal - fromLocal), color, false, 5)
@@ -50,7 +50,7 @@ func _draw() -> void:
 			mini(anchorCoords.x, coords.x) - 1,
 			mini(anchorCoords.y, coords.y) - 1
 		)
-		var to = Vector2i(
+		var to := Vector2i(
 			maxi(anchorCoords.x, coords.x) + 1,
 			maxi(anchorCoords.y, coords.y) + 1
 		)
@@ -117,7 +117,7 @@ func _process(_delta: float) -> void:
 func _select_cell_at(coords: Vector2i, tile: SelectTile) -> void:
 	set_cell(coords, SELECT_SOURCE_ID, Vector2i(tile, 0))
 
-func _preview_tile(coords: Vector2i, tile: TileMapEditor.Tile):
+func _preview_tile(coords: Vector2i, tile: TileMapEditor.Tile) -> void:
 	tile = editor._get_tile_to_place(coords, tile)
 	if tile != TileMapEditor.Tile.Null:
 		set_cell(coords, TileMapEditor.TILEMAP_SOURCE_ID, Vector2i(tile, 0))

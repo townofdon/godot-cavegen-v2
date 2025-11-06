@@ -102,12 +102,10 @@ func _set_editor_mode_fill() -> void:
 
 func _process(_delta: float) -> void:
 	if tilemapUI: tilemapUI.scale = Vector2(tilemapScale, tilemapScale)
-	if !cfg:
-		return
-	if !room:
-		return
-	if !enabled || !visible || !is_visible_in_tree():
-		return
+	if !initialized: return
+	if !cfg: return
+	if !room: return
+	if !enabled || !visible || !is_visible_in_tree(): return
 
 	if Input.is_action_just_pressed("tile_mode_draw"):
 		set_editor_mode(EditorMode.Draw)
@@ -214,10 +212,10 @@ func _process(_delta: float) -> void:
 			anchorCoords = Vector2i(-1,-1)
 	queue_redraw()
 
-func _draw_at(coords: Vector2i, tile: Tile):
+func _draw_at(coords: Vector2i, tile: Tile) -> void:
 	_user_set_cell_at(coords, tile)
 
-func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
+func _line_at(from: Vector2i, to: Vector2i, tile: Tile) -> void:
 	var num_cells:Vector2i = cfg.get_num_cells_2d()
 	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
 	if (numSteps <= 0):
@@ -232,7 +230,7 @@ func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
-func _rect_at(from: Vector2i, to: Vector2i, tile: Tile):
+func _rect_at(from: Vector2i, to: Vector2i, tile: Tile) -> void:
 	var num_cells:Vector2i = cfg.get_num_cells_2d()
 	for y in range(mini(from.y, to.y), maxi(from.y, to.y) + 1):
 		for x in range(mini(from.x, to.x), maxi(from.x, to.x) + 1):
@@ -241,7 +239,7 @@ func _rect_at(from: Vector2i, to: Vector2i, tile: Tile):
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
-func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile):
+func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile) -> void:
 	if coords == lastTileDrawnCoords:
 		return
 	if currentTile == fillTile:
@@ -372,7 +370,6 @@ func initialize(
 	p_room: RoomConfig,
 	should_reset: bool = false,
 ) -> void:
-	assert(!processing)
 	assert(p_cfg)
 	assert(p_room)
 	assert(get_parent() is Control)

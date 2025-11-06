@@ -1,26 +1,22 @@
-class_name SaveData
-extends Resource
-
-@export var cfg:GlobalConfig
-@export var arr_room: Array[RoomConfig]
-@export var arr_noise: Array[FastNoiseLite]
-@export var arr_border_noise: Array[FastNoiseLite]
+class_name SaveUtil
+extends RefCounted
 
 const SAVE_PATH := "user://save-data.tres"
 
-static func get_default_data() -> SaveData:
-	var data: SaveData = SaveData.new()
+static func get_default_data() -> CaveGenData:
+	var data: CaveGenData = CaveGenData.new()
 	var new_cfg := GlobalConfig.new()
 	var new_room := RoomConfig.new()
-	new_room.init_tiles(new_cfg.get_num_cells_2d())
+	var num_cells:Vector2i = new_cfg.get_num_cells_2d()
+	new_room.init_tiles(num_cells)
 	data.cfg = new_cfg
 	data.arr_room = [new_room]
 	data.arr_noise = [FastNoiseLite.new()]
 	data.arr_border_noise = [FastNoiseLite.new()]
 	return data
 
-static func sanitize(data: SaveData) -> SaveData:
-	var default_data := get_default_data()
+static func sanitize(data: CaveGenData) -> CaveGenData:
+	var default_data:CaveGenData = get_default_data()
 	if !data: data = default_data
 	if !data.cfg: data.cfg = default_data.cfg
 	if len(data.arr_room) == 0: data.arr_room = default_data.arr_room
@@ -39,11 +35,11 @@ static func sanitize(data: SaveData) -> SaveData:
 	assert(room.get_num_tiles() == expected_num_tiles)
 	return data
 
-static func clone(data: SaveData) -> SaveData:
-	return data.duplicate_deep(DEEP_DUPLICATE_ALL)
+static func clone(data: CaveGenData) -> CaveGenData:
+	return data.duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 
 ## save data to SAVE_PATH
-static func save(data: SaveData) -> void:
+static func save(data: CaveGenData) -> void:
 	# save resource file as a convenient way to serialize the data.
 	ResourceSaver.save(data, SAVE_PATH)
 
@@ -64,10 +60,10 @@ static func import_from_file_web() -> bool:
 	return await _import_from_file_web()
 
 # note - import the save file before calling load_data()
-static func load_data(default_data: SaveData) -> SaveData:
-	var data: SaveData
+static func load_data(default_data: CaveGenData) -> CaveGenData:
+	var data: CaveGenData
 	if ResourceLoader.exists(SAVE_PATH):
-		data = ResourceLoader.load(SAVE_PATH, "SaveData", ResourceLoader.CACHE_MODE_IGNORE)
+		data = ResourceLoader.load(SAVE_PATH, "CaveGenData", ResourceLoader.CACHE_MODE_IGNORE)
 	else:
 		data = default_data
 	return sanitize(data)
@@ -80,7 +76,7 @@ static func _download_file(path:String) -> void:
 	if rfile == null:
 		push_error("Failed to load file: %s" % path)
 		return
-	var wfile = FileAccess.open(path, FileAccess.WRITE)
+	var wfile := FileAccess.open(path, FileAccess.WRITE)
 	if wfile != null:
 		wfile.store_buffer(rfile.get_buffer(rfile.get_length()))
 		wfile.close()
@@ -107,27 +103,12 @@ static func _import_from_file(path:String) -> bool:
 	if OS.has_feature("web"):
 		return false
 	if ResourceLoader.exists(path):
-		var data:SaveData = ResourceLoader.load(path, "SaveData", ResourceLoader.CACHE_MODE_IGNORE)
+		var data:CaveGenData = ResourceLoader.load(path, "CaveGenData", ResourceLoader.CACHE_MODE_IGNORE)
 		ResourceSaver.save(data, SAVE_PATH)
 		return true
 	else:
 		print("File does not exist: " + path)
 		return false
-	#var rfile := FileAccess.open(path, FileAccess.READ)
-	#if rfile == null:
-		#push_error("Failed to load file: %s" % path)
-		#return false
-	#var file_path := ProjectSettings.globalize_path(SAVE_PATH)
-	#var wfile = FileAccess.open(file_path, FileAccess.WRITE)
-	#if wfile != null:
-		#wfile.store_buffer(rfile.get_buffer(rfile.get_len()))
-		#wfile.close()
-		#rfile.close()
-		#print("File saved to: " + file_path)
-		#return true
-	#else:
-		#print("Error importing file: " + path)
-		#return false
 
 # In browser contexts we do not have access to the filesystem directly.
 # As a workaround, use the FileSystemAPI to load the file data into memory
@@ -140,6 +121,7 @@ static func _import_from_file_web() -> bool:
 		return false
 	var file_access_web: FileAccessWeb = FileAccessWeb.new()
 	file_access_web.open(".tres")
+	@warning_ignore("untyped_declaration")
 	var result = await file_access_web.load_completed
 	var status:int = result[0]
 	var file_name: String = result[1]
@@ -149,7 +131,7 @@ static func _import_from_file_web() -> bool:
 		return false
 	var raw_data:= Marshalls.base64_to_utf8(base64_data)
 	var wfile_path := ProjectSettings.globalize_path(SAVE_PATH)
-	var wfile = FileAccess.open(wfile_path, FileAccess.WRITE)
+	var wfile := FileAccess.open(wfile_path, FileAccess.WRITE)
 	if wfile != null:
 		wfile.store_string(raw_data)
 		wfile.close()

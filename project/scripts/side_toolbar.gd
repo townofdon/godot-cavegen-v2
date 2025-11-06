@@ -20,17 +20,17 @@ enum AtlasTextureX {
 
 var cavegen: CaveGen
 
-func initialize(p_cavegen: CaveGen):
+func initialize(p_cavegen: CaveGen) -> void:
 	cavegen = p_cavegen
 	if !cavegen.mode_changed.is_connected(_on_mode_changed):
 		cavegen.mode_changed.connect(_on_mode_changed)
 
 func _ready() -> void:
-	mode_room_select.pressed.connect(func(): cavegen.set_mode(CaveGen.Mode.RoomSelect))
-	mode_room_config.pressed.connect(func(): cavegen.set_mode(CaveGen.Mode.RoomConfig))
-	mode_tile_editor.pressed.connect(func(): cavegen.set_mode(CaveGen.Mode.TileEditor))
-	mode_preview.pressed.connect(func(): cavegen.set_mode(CaveGen.Mode.Preview))
-	_on_mode_changed(cavegen.mode)
+	mode_room_select.pressed.connect(func()->void: cavegen.set_mode(CaveGen.Mode.RoomSelect))
+	mode_room_config.pressed.connect(func()->void: cavegen.set_mode(CaveGen.Mode.RoomConfig))
+	mode_tile_editor.pressed.connect(func()->void: cavegen.set_mode(CaveGen.Mode.TileEditor))
+	mode_preview.pressed.connect(func()->void: cavegen.set_mode(CaveGen.Mode.Preview))
+	_on_mode_changed(CaveGen.Mode.RoomConfig)
 
 func _on_mode_changed(mode: CaveGen.Mode) -> void:
 	_set_btn_texture(mode_room_select, AtlasTextureX.RoomSelect)

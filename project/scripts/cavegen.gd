@@ -1,7 +1,8 @@
 class_name CaveGen
 extends Node3D
 
-@export var initial_save_data:SaveData
+@export var initial_save_data:CaveGenData = CaveGenData.new()
+
 @export var toast_bg:Color = Color(0, 0, 0, 0.7)
 @export var toast_bg_error:Color = Color(0, 0, 0, 0.7)
 @export var toast_success:Color = Color(1,1,1,1)
@@ -29,7 +30,7 @@ signal export_progress(pct: float)
 signal export_completed(files: PackedStringArray)
 signal mode_changed(mode: Mode)
 
-var save_data:SaveData
+var save_data:CaveGenData
 var mode:Mode = Mode.RoomConfig
 var cfg:GlobalConfig
 var room:RoomConfig
@@ -60,27 +61,15 @@ func set_mode(p_mode: Mode) -> void:
 func notify_mode_changed(p_mode: Mode) -> void:
 	mode_changed.emit(p_mode)
 
-func _set_cfg(p_cfg: GlobalConfig) -> void:
-	#if cfg && cfg.on_changed.is_connected(_notify_change):
-		#cfg.on_changed.disconnect(_notify_change)
-	cfg = p_cfg
-	cfg.on_changed.connect(_notify_change)
-
-func _set_room(p_room: RoomConfig) -> void:
-	#if room && room.on_changed.is_connected(_notify_change):
-		#room.on_changed.disconnect(_notify_change)
-	room = p_room
-	room.on_changed.connect(_notify_change)
-
 func _on_new_file_pressed() -> void:
-	_initialize(SaveData.clone(initial_save_data))
+	_initialize(SaveUtil.clone(initial_save_data))
 
 func _on_open_file_pressed() -> void:
 	if OS.has_feature("web"):
 		tilemap_editor.disable()
-		var ok := await SaveData.import_from_file_web()
+		var ok := await SaveUtil.import_from_file_web()
 		if ok:
-			_initialize(SaveData.load_data(SaveData.clone(save_data)))
+			_initialize(SaveUtil.load_data(SaveUtil.clone(save_data)))
 			_notify_success("File loaded")
 		tilemap_editor.enable()
 	else:
@@ -91,20 +80,20 @@ func _on_open_file_pressed() -> void:
 
 func _on_open_file(path: String) -> void:
 	tilemap_editor.enable()
-	if SaveData.import_from_file(path):
-		_initialize(SaveData.load_data(SaveData.clone(save_data)))
+	if SaveUtil.import_from_file(path):
+		_initialize(SaveUtil.load_data(SaveUtil.clone(save_data)))
 		_notify_success("File loaded")
 	else:
 		_notify_error("Failed to load file")
 
 func _on_save_file_pressed() -> void:
-	ResourceSaver.save(save_data, SaveData.SAVE_PATH)
+	SaveUtil.save(save_data)
 	_notify_success("File saved")
 
 func _on_save_file_as_pressed() -> void:
 	if OS.has_feature("web"):
-		SaveData.save(save_data)
-		SaveData.download_file_web(cfg.level_name)
+		SaveUtil.save(save_data)
+		SaveUtil.download_file_web(cfg.level_name)
 		_notify_success("File saved")
 	else:
 		tilemap_editor.disable()
@@ -116,8 +105,8 @@ func _on_save_file_as_pressed() -> void:
 func _on_save_file_as(path: String) -> void:
 	tilemap_editor.enable()
 	save_file_dialog.hide()
-	SaveData.save(save_data)
-	SaveData.download_file(path)
+	SaveUtil.save(save_data)
+	SaveUtil.download_file(path)
 	_notify_success("File saved")
 
 func _on_file_dialog_cancel() -> void:
@@ -141,22 +130,22 @@ func _notify_error(text: String) -> void:
 
 func _ready() -> void:
 	test_cube.queue_free()
-	var data := SaveData.load_data(SaveData.clone(initial_save_data))
-	_initialize(data)
 	# setup signals
 	file_menu.new_file_pressed.connect(_on_new_file_pressed)
 	file_menu.open_file_pressed.connect(_on_open_file_pressed)
 	file_menu.save_file_pressed.connect(_on_save_file_pressed)
 	file_menu.save_file_as_pressed.connect(_on_save_file_as_pressed)
-	export_dialog.user_start_export.connect(func(): _save_mesh())
-	export_dialog.dialog_opened.connect(func(): tilemap_editor.disable())
-	export_dialog.dialog_closed.connect(func(): tilemap_editor.enable())
+	export_dialog.user_start_export.connect(func()->void: _save_mesh())
+	export_dialog.dialog_opened.connect(func()->void: tilemap_editor.disable())
+	export_dialog.dialog_closed.connect(func()->void: tilemap_editor.enable())
 	save_file_dialog.file_selected.connect(_on_save_file_as)
-	save_file_dialog.visibility_changed.connect(func():save_file_dialog.get_line_edit().grab_focus())
+	save_file_dialog.visibility_changed.connect(func()->void:save_file_dialog.get_line_edit().grab_focus())
 	save_file_dialog.canceled.connect(_on_file_dialog_cancel)
 	load_file_dialog.file_selected.connect(_on_open_file)
 	load_file_dialog.canceled.connect(_on_file_dialog_cancel)
-
+	# setup ui
+	side_toolbar.initialize(self)
+	export_dialog.initialize(self)
 	# setup notification timer
 	notif_timer.autostart = false
 	notif_timer.one_shot = true
@@ -165,8 +154,11 @@ func _ready() -> void:
 	# setup meshsaver
 	OBJExporter.export_progress_updated.connect(_on_export_progress_updated)
 	OBJExporter.export_completed.connect(_on_export_completed)
+	# load data
+	var data := SaveUtil.load_data(SaveUtil.clone(initial_save_data))
+	_initialize(data)
 
-func _initialize(data: SaveData) -> void:
+func _initialize(data: CaveGenData) -> void:
 	save_data = data
 	assert(save_data)
 	assert(len(save_data.arr_room) >= 1)
@@ -174,8 +166,7 @@ func _initialize(data: SaveData) -> void:
 	assert(len(save_data.arr_border_noise) >= 1)
 	assert(len(save_data.arr_room) == len(save_data.arr_noise))
 	assert(len(save_data.arr_noise) == len(save_data.arr_border_noise))
-	_set_cfg(save_data.cfg)
-	_set_room(save_data.arr_room.get(0))
+	cfg = save_data.cfg
 	noise = save_data.arr_noise.get(0)
 	room = save_data.arr_room.get(0)
 	border_noise = save_data.arr_noise.get(0)
@@ -184,11 +175,14 @@ func _initialize(data: SaveData) -> void:
 	assert(noise)
 	assert(border_noise)
 	assert(meshgen)
+	# connect cfg, room signals
+	assert(!cfg.on_changed.is_connected(_notify_change))
+	assert(!room.on_changed.is_connected(_notify_change))
+	cfg.on_changed.connect(_notify_change)
+	room.on_changed.connect(_notify_change)
 	# init UI, camera
 	cameraman.initialize(self, cfg, meshgen.position)
 	file_menu.initialize(cfg)
-	side_toolbar.initialize(self)
-	export_dialog.initialize(self)
 	# init tilemap, roomconfig
 	tilemap_editor.initialize(cfg, room)
 	room_config_form.initialize(room, noise, border_noise)
@@ -232,7 +226,7 @@ func _process(_delta: float) -> void:
 		_notify_change()
 		border_noise_b = border_noise.duplicate()
 
-func _notify_change():
+func _notify_change() -> void:
 	tilemap_editor.handle_room_size_change()
 	if notif_timer.is_stopped(): notif_timer.start()
 
@@ -267,15 +261,11 @@ var saving:bool = false
 func _save_mesh() -> void:
 	if saving:
 		return
-	if !meshgen:
-		printerr("[TestSaver] MeshGen is null")
-		return
-	if !meshgen.mesh:
-		printerr("[TestSaver] mesh is null")
-		return
+	assert(meshgen)
+	assert(meshgen.mesh)
 	var mesh := meshgen.mesh
-	
-	var dir = DirAccess.open("user://")
+
+	var dir := DirAccess.open("user://")
 	if !dir.dir_exists("model"):
 		dir.make_dir("model")
 	export_started.emit()
@@ -284,15 +274,15 @@ func _save_mesh() -> void:
 	OBJExporter.save_mesh_to_files(mesh, "user://model/", "cave")
 	saving = true
 
-func _on_export_progress_updated(_surf_idx:int, progress_value:float):
+func _on_export_progress_updated(_surf_idx:int, progress_value:float) -> void:
 	export_progress.emit(progress_value)
 
-func _on_export_completed(object_file, material_file):
+func _on_export_completed(object_file: String, material_file: String) -> void:
 	var timeEnded := Time.get_unix_time_from_system()
 	var duration := timeEnded - timeStarted
 	print("save complete. files=", object_file, "," , material_file)
 	print ("took ", duration, "s")
 	saving = false
-	var files = PackedStringArray()
+	var files := PackedStringArray()
 	files.append(object_file)
 	export_completed.emit(files)

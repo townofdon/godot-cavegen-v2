@@ -54,7 +54,6 @@ func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, m
 	)
 	field.value_changed.connect(func(val: float): _room_set(room, fieldname, val))
 	room.on_changed.connect(func(): field_iso_value.update_val())
-	print(fieldname, "=", _room_get(default_room, fieldname))
 
 func _setup_room_bool(field: BoolField, room: RoomConfig, fieldname: String) -> void:
 	assert(_room_get(room, fieldname) is bool, fieldname)
