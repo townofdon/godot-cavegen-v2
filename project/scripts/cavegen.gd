@@ -18,6 +18,7 @@ extends Node3D
 @onready var file_menu: FileMenu = %FileMenu
 @onready var tile_editor_container: Control = %TileEditorContainer
 @onready var tile_editor_tools: HBoxContainer = %TileEditorTools
+@onready var room_config_form: RoomConfigForm = %RoomConfigForm
 @onready var side_toolbar: SideToolbar = %SideToolbar
 @onready var export_dialog: ExportDialog = %ExportDialog
 @onready var save_file_dialog: FileDialog = %SaveFileDialog
@@ -48,28 +49,31 @@ func set_mode(p_mode: Mode) -> void:
 	mode = p_mode
 	tile_editor_container.hide()
 	tile_editor_tools.hide()
+	room_config_form.hide()
 	if mode == Mode.TileEditor:
 		tile_editor_container.show()
 		tile_editor_tools.show()
+	elif mode == Mode.RoomConfig:
+		room_config_form.show()
 	call_deferred("notify_mode_changed", mode)
 
 func notify_mode_changed(p_mode: Mode) -> void:
 	mode_changed.emit(p_mode)
 
 func _set_cfg(p_cfg: GlobalConfig) -> void:
-	if cfg && cfg.on_changed.is_connected(_notify_change):
-		cfg.on_changed.disconnect(_notify_change)
+	#if cfg && cfg.on_changed.is_connected(_notify_change):
+		#cfg.on_changed.disconnect(_notify_change)
 	cfg = p_cfg
 	cfg.on_changed.connect(_notify_change)
 
 func _set_room(p_room: RoomConfig) -> void:
-	if room && room.on_changed.is_connected(_notify_change):
-		room.on_changed.disconnect(_notify_change)
+	#if room && room.on_changed.is_connected(_notify_change):
+		#room.on_changed.disconnect(_notify_change)
 	room = p_room
 	room.on_changed.connect(_notify_change)
 
 func _on_new_file_pressed() -> void:
-	_initialize(initial_save_data)
+	_initialize(SaveData.clone(initial_save_data))
 
 func _on_open_file_pressed() -> void:
 	if OS.has_feature("web"):
@@ -173,6 +177,7 @@ func _initialize(data: SaveData) -> void:
 	_set_cfg(save_data.cfg)
 	_set_room(save_data.arr_room.get(0))
 	noise = save_data.arr_noise.get(0)
+	room = save_data.arr_room.get(0)
 	border_noise = save_data.arr_noise.get(0)
 	assert(cfg)
 	assert(room)
@@ -184,8 +189,9 @@ func _initialize(data: SaveData) -> void:
 	file_menu.initialize(cfg)
 	side_toolbar.initialize(self)
 	export_dialog.initialize(self)
-	# init tilemap
+	# init tilemap, roomconfig
 	tilemap_editor.initialize(cfg, room)
+	room_config_form.initialize(room, noise, border_noise)
 	set_mode(Mode.RoomConfig)
 	# init meshgen
 	notif_timer.stop()

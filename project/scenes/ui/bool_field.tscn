@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://bn5k1xeydqtad"]
+
+[ext_resource type="Script" uid="uid://b7ot7kdcti6ag" path="res://scripts/bool_field.gd" id="1_onst4"]
+[ext_resource type="PackedScene" uid="uid://bupf60vnbq063" path="res://scenes/ui/base_field.tscn" id="2_2krvq"]
+
+[node name="BoolField" type="Control"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_onst4")
+
+[node name="BaseField" parent="." instance=ExtResource("2_2krvq")]
+layout_mode = 1
+
+[node name="CheckButton" parent="BaseField/MarginContainer/HBoxContainer" index="1"]
+autowrap_trim_flags = 192
+
+[node name="LineEdit" parent="BaseField/MarginContainer/HBoxContainer" index="2"]
+visible = false
+
+[node name="SpinBox" parent="BaseField/MarginContainer/HBoxContainer" index="3"]
+visible = false
+
+[node name="HSlider" parent="BaseField/MarginContainer/HBoxContainer" index="4"]
+visible = false
+
+[editable path="BaseField"]

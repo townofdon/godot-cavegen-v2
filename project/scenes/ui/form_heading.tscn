@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://upsj8hq04i0s"]
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_eaarr"]
+content_margin_left = 4.0
+content_margin_top = 0.0
+content_margin_right = 4.0
+content_margin_bottom = 0.0
+color = Color(0.02745098, 0.03529412, 0.039215688, 1)
+
+[node name="FormHeading" type="Control"]
+custom_minimum_size = Vector2(200, 32)
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+size_flags_vertical = 0
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 78.0
+offset_bottom = 28.0
+theme_override_colors/font_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
+theme_override_font_sizes/font_size = 20
+text = "heading"
+
+[node name="HSeparator" type="HSeparator" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/separator = SubResource("StyleBoxLine_eaarr")

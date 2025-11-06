@@ -1,28 +1,29 @@
-[gd_scene load_steps=44 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=46 format=4 uid="uid://dldu5uhu5swo2"]
 
-[ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_2c62f"]
-[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="2_ghshe"]
-[ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="2_gyfs4"]
-[ext_resource type="Script" uid="uid://c3p7qltmi4384" path="res://scripts/save_data.gd" id="2_vimvf"]
-[ext_resource type="Script" uid="uid://btxqynndstb2p" path="res://scripts/testcube.gd" id="3_gyfs4"]
-[ext_resource type="GlobalConfig" uid="uid://5fjn4vb33rgv" path="res://data/global_config.tres" id="4_d5x1h"]
-[ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="8_66tet"]
-[ext_resource type="Shader" uid="uid://bfhwqx5h3pwhp" path="res://shaders/grid.gdshader" id="8_fv2he"]
-[ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="9_wr18j"]
-[ext_resource type="Material" uid="uid://bicimo0wjm5go" path="res://materials/smooth-pixel-mat.tres" id="10_2jcla"]
-[ext_resource type="Texture2D" uid="uid://gqfddyoaj0hy" path="res://assets/edtool-draw-f.png" id="11_u0ygc"]
-[ext_resource type="Texture2D" uid="uid://brh5245u8yqi2" path="res://assets/edtool-line.png" id="12_7th4q"]
-[ext_resource type="Texture2D" uid="uid://b1fwcmksahwv4" path="res://assets/edtool-rect.png" id="13_6jybn"]
-[ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="14_7th4q"]
-[ext_resource type="Texture2D" uid="uid://chpanw3ooevlf" path="res://assets/edtool-fill.png" id="14_84odl"]
-[ext_resource type="Script" uid="uid://ckdmum3nhbjx7" path="res://scripts/file_menu.gd" id="14_ak604"]
-[ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="15_u0ygc"]
-[ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="16_7th4q"]
-[ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
-[ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="19_6jybn"]
-[ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://scripts/export_dialog.gd" id="19_84odl"]
-[ext_resource type="Script" uid="uid://dok56cjhi81ur" path="res://scripts/side_toolbar.gd" id="19_ghshe"]
-[ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="21_vimvf"]
+[ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_58gk3"]
+[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="2_to7gp"]
+[ext_resource type="Script" uid="uid://c3p7qltmi4384" path="res://scripts/save_data.gd" id="3_u0fll"]
+[ext_resource type="Script" uid="uid://b4ynsybp6b8hn" path="res://scripts/cameraman.gd" id="4_6p3nn"]
+[ext_resource type="Shader" uid="uid://boasu8qq7cwai" path="res://shaders/mesh-preview.gdshader" id="5_k67gn"]
+[ext_resource type="Script" uid="uid://btxqynndstb2p" path="res://scripts/testcube.gd" id="6_k3g67"]
+[ext_resource type="GlobalConfig" uid="uid://5fjn4vb33rgv" path="res://data/global_config.tres" id="7_4bgka"]
+[ext_resource type="Shader" uid="uid://bfhwqx5h3pwhp" path="res://shaders/grid.gdshader" id="8_02d50"]
+[ext_resource type="Material" uid="uid://bicimo0wjm5go" path="res://materials/smooth-pixel-mat.tres" id="9_pgk25"]
+[ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="10_kkokr"]
+[ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="11_lhwp2"]
+[ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="12_l40q6"]
+[ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="13_iav3h"]
+[ext_resource type="PackedScene" uid="uid://b2qbmyypnnpmy" path="res://scenes/ui/room_config_form.tscn" id="14_to7gp"]
+[ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="14_womr8"]
+[ext_resource type="Script" uid="uid://ckdmum3nhbjx7" path="res://scripts/file_menu.gd" id="15_onjth"]
+[ext_resource type="Texture2D" uid="uid://gqfddyoaj0hy" path="res://assets/edtool-draw-f.png" id="16_xa0eo"]
+[ext_resource type="Texture2D" uid="uid://brh5245u8yqi2" path="res://assets/edtool-line.png" id="17_3mjum"]
+[ext_resource type="Texture2D" uid="uid://b1fwcmksahwv4" path="res://assets/edtool-rect.png" id="18_p27gv"]
+[ext_resource type="Texture2D" uid="uid://chpanw3ooevlf" path="res://assets/edtool-fill.png" id="19_cn4eu"]
+[ext_resource type="Script" uid="uid://dok56cjhi81ur" path="res://scripts/side_toolbar.gd" id="20_0wyf6"]
+[ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="21_xp01v"]
+[ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://scripts/export_dialog.gd" id="22_jix7a"]
+[ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="23_segjr"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_fv2he"]
 resource_local_to_scene = true
@@ -67,7 +68,7 @@ tile_apply__tile_ceil_blend = 0.23
 tile_apply__tile_floor = 0.56
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
-internal__node_up = ExtResource("2_ghshe")
+internal__node_up = ExtResource("2_to7gp")
 resource_local_to_scene = true
 
 [sub_resource type="GlobalConfig" id="GlobalConfig_kv3aw"]
@@ -76,7 +77,7 @@ active_plane_offset = 3.87
 resource_local_to_scene = true
 
 [sub_resource type="Resource" id="Resource_5smuj"]
-script = ExtResource("2_vimvf")
+script = ExtResource("3_u0fll")
 cfg = SubResource("GlobalConfig_kv3aw")
 arr_room = Array[RoomConfig]([SubResource("RoomConfig_y5ved")])
 arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_5smuj")])
@@ -85,7 +86,7 @@ metadata/_custom_type_script = "uid://c3p7qltmi4384"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
 render_priority = 0
-shader = ExtResource("2_gyfs4")
+shader = ExtResource("5_k67gn")
 shader_parameter/light_direction = Vector3(0, 0, 1)
 shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
@@ -96,7 +97,7 @@ shader_parameter/y_min = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
-shader = ExtResource("2_gyfs4")
+shader = ExtResource("5_k67gn")
 shader_parameter/light_direction = Vector3(0, 1, 0)
 shader_parameter/color_lit = Color(1, 1, 1, 1)
 shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
@@ -109,7 +110,7 @@ shader_parameter/y_min = -0.35
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_5smuj"]
 render_priority = 0
-shader = ExtResource("8_fv2he")
+shader = ExtResource("8_02d50")
 shader_parameter/world_uv = true
 shader_parameter/object_uv = false
 shader_parameter/object_uv_scale = Vector2(1, 1)
@@ -151,6 +152,11 @@ background_mode = 2
 background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 sky = SubResource("Sky_7ycvg")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_to7gp"]
+bg_color = Color(0.6617701, 0.7072231, 0.6713199, 1)
+shadow_size = 2
+shadow_offset = Vector2(0, 15)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6jybn"]
 bg_color = Color(0.10580716, 0.117766716, 0.12882775, 1)
 corner_radius_top_right = 8
@@ -160,23 +166,23 @@ shadow_size = 2
 shadow_offset = Vector2(0, 8)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6jybn"]
-atlas = ExtResource("19_6jybn")
+atlas = ExtResource("21_xp01v")
 region = Rect2(0, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_84odl"]
-atlas = ExtResource("19_6jybn")
+atlas = ExtResource("21_xp01v")
 region = Rect2(168, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ak604"]
-atlas = ExtResource("19_6jybn")
+atlas = ExtResource("21_xp01v")
 region = Rect2(288, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vimvf"]
-atlas = ExtResource("19_6jybn")
+atlas = ExtResource("21_xp01v")
 region = Rect2(240, 0, 24, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ghshe"]
-atlas = ExtResource("19_6jybn")
+atlas = ExtResource("21_xp01v")
 region = Rect2(336, 0, 24, 24)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ak604"]
@@ -187,7 +193,7 @@ shadow_size = 1
 [node name="MainScene" type="Node3D"]
 
 [node name="CaveGen2" type="Node3D" parent="."]
-script = ExtResource("1_2c62f")
+script = ExtResource("1_58gk3")
 initial_save_data = SubResource("Resource_5smuj")
 toast_bg = Color(0.015149527, 0.13787875, 0.13481134, 0.7019608)
 toast_success = Color(0.35585317, 0.7912965, 0.6194208, 1)
@@ -200,15 +206,15 @@ ignore_time_scale = true
 
 [node name="Cameraman" type="Node3D" parent="CaveGen2"]
 unique_name_in_owner = true
-script = ExtResource("8_66tet")
+script = ExtResource("4_6p3nn")
 
 [node name="TestCube" type="CSGBox3D" parent="."]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 10.65, 15)
 size = Vector3(30, 21.3, 30)
 material = SubResource("ShaderMaterial_gyfs4")
-script = ExtResource("3_gyfs4")
-cfg = ExtResource("4_d5x1h")
+script = ExtResource("6_k3g67")
+cfg = ExtResource("7_4bgka")
 metadata/_custom_type_script = "uid://btxqynndstb2p"
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
@@ -250,7 +256,7 @@ size = 40.0
 [node name="SubViewportContainer2" type="SubViewportContainer" parent="."]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -258,7 +264,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 stretch = true
 
 [node name="UISubViewport" type="SubViewport" parent="SubViewportContainer2"]
@@ -279,12 +285,12 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 
 [node name="TileEditorContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -293,7 +299,7 @@ anchor_bottom = 1.0
 offset_left = -1024.0
 grow_horizontal = 0
 grow_vertical = 2
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 theme_override_constants/margin_top = 122
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 81
@@ -310,10 +316,10 @@ show_behind_parent = true
 light_mask = 0
 texture_filter = 1
 tile_map_data = PackedByteArray("AAAAAAAAAgAFAAAAAAAAAAIAAgAFAAAAAAAAAAEAAgAFAAAAAAAAAAMAAgAFAAAAAAAAAAQAAgAFAAAAAAAAAAUAAgAFAAAAAAAAAAYAAgAFAAAAAAAAAAcAAgAFAAAAAAAAAAgAAgAFAAAAAAAAAAkAAgAFAAAAAAAAAAoAAgAFAAAAAAAAAAsAAgAFAAAAAAAAAAwAAgAFAAAAAAAAAA0AAgAFAAAAAAAAAA4AAgAFAAAAAAAAAA8AAgAFAAAAAAAAABAAAgAFAAAAAAAAABEAAgAFAAAAAAAAABIAAgAFAAAAAAAAABMAAgAFAAAAAAAAABQAAgAFAAAAAAAAABUAAgAFAAAAAAAAABYAAgAFAAAAAAAAABcAAgAFAAAAAAAAABgAAgAFAAAAAAAAABkAAgAFAAAAAAAAABoAAgAFAAAAAAAAABsAAgAFAAAAAAAAABwAAgAFAAAAAAAAAB0AAgAFAAAAAAABAB0AAgAFAAAAAAACAB0AAgAFAAAAAAADAB0AAgAFAAAAAAAEAB0AAgAFAAAAAAAFAB0AAgAFAAAAAAAGAB0AAgAFAAAAAAAHAB0AAgAFAAAAAAAIAB0AAgAFAAAAAAAJAB0AAgAFAAAAAAAKAB0AAgAFAAAAAAALAB0AAgAFAAAAAAAMAB0AAgAFAAAAAAANAB0AAgAFAAAAAAAOAB0AAgAFAAAAAAAPAB0AAgAFAAAAAAAQAB0AAgAFAAAAAAARAB0AAgAFAAAAAAASAB0AAgAFAAAAAAATAB0AAgAFAAAAAAAUAB0AAgAFAAAAAAAVAB0AAgAFAAAAAAAWAB0AAgAFAAAAAAAXAB0AAgAFAAAAAAAYAB0AAgAFAAAAAAAZAB0AAgAFAAAAAAAaAB0AAgAFAAAAAAAbAB0AAgAFAAAAAAAcAB0AAgAFAAAAAAAdAB0AAgAFAAAAAAAdABwAAgAFAAAAAAAdABsAAgAFAAAAAAAdABoAAgAFAAAAAAAdABkAAgAFAAAAAAAdABgAAgAFAAAAAAAdABcAAgAFAAAAAAAdABYAAgAFAAAAAAAdABUAAgAFAAAAAAAdABQAAgAFAAAAAAAdABMAAgAFAAAAAAAdABIAAgAFAAAAAAAdABEAAgAFAAAAAAAdABAAAgAGAAAAAAAdAA8AAgAGAAAAAAAdAA4AAgAGAAAAAAAdAA0AAgAGAAAAAAAdAAwAAgAFAAAAAAAdAAsAAgAFAAAAAAAdAAoAAgAFAAAAAAAdAAkAAgAFAAAAAAAdAAgAAgAFAAAAAAAdAAcAAgAFAAAAAAAdAAYAAgAFAAAAAAAdAAUAAgAFAAAAAAAdAAQAAgAFAAAAAAAdAAMAAgAFAAAAAAAdAAIAAgAFAAAAAAABAAAAAgAFAAAAAAACAAAAAgAFAAAAAAADAAAAAgAFAAAAAAAEAAAAAgAFAAAAAAAFAAAAAgAFAAAAAAAGAAAAAgAFAAAAAAAHAAAAAgAFAAAAAAAIAAAAAgAFAAAAAAAJAAAAAgAFAAAAAAAKAAAAAgAFAAAAAAALAAAAAgAFAAAAAAAMAAAAAgAFAAAAAAANAAAAAgAFAAAAAAAOAAAAAgAFAAAAAAAPAAAAAgAFAAAAAAAQAAAAAgAFAAAAAAARAAAAAgAFAAAAAAASAAAAAgAFAAAAAAATAAAAAgAFAAAAAAAUAAAAAgAFAAAAAAAVAAAAAgAFAAAAAAAWAAAAAgAFAAAAAAAXAAAAAgAFAAAAAAAYAAAAAgAFAAAAAAAZAAAAAgAFAAAAAAAaAAAAAgAFAAAAAAAbAAAAAgAFAAAAAAAcAAAAAgAFAAAAAAAdAAAAAgAFAAAAAAAdAAEAAgAFAAAAAAATABEAAgAAAAAAAAATABAAAgAAAAAAAAATAA8AAgAAAAAAAAATAA4AAgAAAAAAAAATAA0AAgAAAAAAAAATAAwAAgAAAAAAAAATAAsAAgAAAAAAAAATAAoAAgAAAAAAAAATAAkAAgAAAAAAAAATAAgAAgAAAAAAAAATAAcAAgAAAAAAAAATAAYAAgAAAAAAAAATAAUAAgAAAAAAAAATAAQAAgAAAAAAAAATAAMAAgAAAAAAAAATAAIAAgAAAAAAAAATAAEAAgAAAAAAAAASAAEAAgAAAAAAAAARAAEAAgAAAAAAAAAQAAEAAgAAAAAAAAAPAAEAAgAAAAAAAAAOAAEAAgAAAAAAAAANAAEAAgAAAAAAAAAMAAEAAgAAAAAAAAALAAEAAgAAAAAAAAAKAAEAAgAAAAAAAAAJAAEAAgAAAAAAAAAIAAEAAgAAAAAAAAAHAAEAAgAAAAAAAAAGAAEAAgAAAAAAAAAFAAEAAgAAAAAAAAAEAAEAAgAAAAAAAAADAAEAAgAAAAAAAAACAAEAAgAAAAAAAAABAAEAAgAAAAAAAAABAAIAAgAAAAAAAAABAAMAAgAAAAAAAAABAAQAAgAAAAAAAAABAAUAAgAAAAAAAAABAAYAAgAAAAAAAAABAAcAAgAAAAAAAAABAAgAAgAAAAAAAAABAAkAAgAAAAAAAAABAAoAAgAAAAAAAAABAAsAAgAAAAAAAAABAAwAAgAAAAAAAAABAA0AAgADAAAAAAABAA4AAgADAAAAAAABAA8AAgADAAAAAAABABAAAgADAAAAAAABABEAAgAAAAAAAAABABIAAgAAAAAAAAABABMAAgAAAAAAAAABABQAAgAAAAAAAAABABUAAgAAAAAAAAABABYAAgAAAAAAAAABABcAAgAAAAAAAAABABgAAgAAAAAAAAABABkAAgAAAAAAAAABABoAAgAAAAAAAAABABsAAgAAAAAAAAABABwAAgAAAAAAAAACABwAAgAAAAAAAAACABsAAgAAAAAAAAACABoAAgAAAAAAAAACABkAAgAAAAAAAAACABgAAgAAAAAAAAACABcAAgAAAAAAAAACABYAAgAAAAAAAAACABUAAgAAAAAAAAACABQAAgAAAAAAAAACABMAAgAAAAAAAAACABIAAgAAAAAAAAACABEAAgAAAAAAAAACABAAAgADAAAAAAACAA8AAgADAAAAAAACAA4AAgADAAAAAAACAA0AAgADAAAAAAACAAwAAgAAAAAAAAACAAsAAgAAAAAAAAACAAoAAgAAAAAAAAACAAkAAgAAAAAAAAACAAgAAgAAAAAAAAACAAcAAgAAAAAAAAACAAYAAgAAAAAAAAACAAUAAgAAAAAAAAACAAQAAgAAAAAAAAACAAMAAgAAAAAAAAACAAIAAgAAAAAAAAADAAIAAgAAAAAAAAADAAMAAgAAAAAAAAADAAQAAgAAAAAAAAADAAUAAgAAAAAAAAADAAYAAgAAAAAAAAADAAcAAgAAAAAAAAADAAgAAgAAAAAAAAADAAkAAgAAAAAAAAADAAoAAgAAAAAAAAADAAsAAgAAAAAAAAADAAwAAgAAAAAAAAADAA0AAgADAAAAAAADAA4AAgADAAAAAAADAA8AAgADAAAAAAADABAAAgADAAAAAAADABEAAgAAAAAAAAADABIAAgAAAAAAAAADABMAAgAAAAAAAAADABQAAgAAAAAAAAADABUAAgAAAAAAAAADABYAAgAAAAAAAAADABcAAgAAAAAAAAADABgAAgAAAAAAAAADABkAAgAAAAAAAAADABoAAgAAAAAAAAADABsAAgAAAAAAAAADABwAAgAAAAAAAAAEABwAAgAAAAAAAAAEABsAAgAAAAAAAAAEABoAAgAAAAAAAAAEABkAAgAAAAAAAAAEABgAAgAAAAAAAAAEABcAAgAAAAAAAAAEABYAAgAAAAAAAAAEABUAAgAAAAAAAAAEABQAAgAAAAAAAAAEABMAAgAAAAAAAAAEABIAAgAAAAAAAAAEABEAAgAAAAAAAAAEABAAAgADAAAAAAAEAA8AAgADAAAAAAAEAA4AAgADAAAAAAAEAA0AAgADAAAAAAAEAAwAAgAAAAAAAAAEAAsAAgAAAAAAAAAEAAoAAgAAAAAAAAAEAAkAAgAAAAAAAAAEAAgAAgAAAAAAAAAEAAcAAgAAAAAAAAAEAAYAAgAAAAAAAAAEAAUAAgAAAAAAAAAEAAQAAgAAAAAAAAAEAAMAAgAAAAAAAAAEAAIAAgAAAAAAAAAFAAIAAgAAAAAAAAAFAAMAAgAAAAAAAAAFAAQAAgAAAAAAAAAFAAUAAgAAAAAAAAAFAAYAAgAAAAAAAAAFAAcAAgAAAAAAAAAFAAgAAgAAAAAAAAAFAAkAAgAAAAAAAAAFAAoAAgAAAAAAAAAFAAsAAgAAAAAAAAAFAAwAAgAAAAAAAAAFAA0AAgAAAAAAAAAFAA4AAgAAAAAAAAAFAA8AAgAAAAAAAAAFABAAAgAAAAAAAAAFABEAAgAAAAAAAAAFABIAAgAAAAAAAAAFABMAAgAAAAAAAAAFABQAAgAAAAAAAAAFABUAAgAAAAAAAAAFABYAAgAAAAAAAAAFABcAAgAAAAAAAAAFABgAAgAAAAAAAAAFABkAAgAAAAAAAAAFABoAAgAAAAAAAAAFABsAAgAAAAAAAAAFABwAAgAAAAAAAAAGABwAAgAAAAAAAAAGABsAAgAAAAAAAAAGABoAAgAAAAAAAAAGABkAAgAAAAAAAAAGABgAAgAAAAAAAAAGABcAAgAAAAAAAAAGABYAAgAAAAAAAAAGABUAAgAAAAAAAAAGABQAAgAAAAAAAAAGABMAAgAAAAAAAAAGABIAAgAAAAAAAAAGABEAAgAAAAAAAAAGABAAAgAAAAAAAAAGAA8AAgAAAAAAAAAGAA4AAgAAAAAAAAAGAA0AAgAAAAAAAAAGAAwAAgAAAAAAAAAGAAsAAgAAAAAAAAAGAAoAAgAAAAAAAAAGAAkAAgAAAAAAAAAGAAgAAgAAAAAAAAAGAAcAAgAAAAAAAAAGAAYAAgAAAAAAAAAGAAUAAgAAAAAAAAAGAAQAAgAAAAAAAAAGAAMAAgAAAAAAAAAGAAIAAgAAAAAAAAAHAAIAAgAAAAAAAAAHAAMAAgAAAAAAAAAHAAQAAgAAAAAAAAAHAAUAAgAAAAAAAAAHAAYAAgAAAAAAAAAHAAcAAgAAAAAAAAAHAAgAAgAAAAAAAAAHAAkAAgAAAAAAAAAHAAoAAgAAAAAAAAAHAAsAAgAAAAAAAAAHAAwAAgAAAAAAAAAHAA0AAgAAAAAAAAAHAA4AAgAAAAAAAAAHAA8AAgAAAAAAAAAHABAAAgAAAAAAAAAHABEAAgAAAAAAAAAHABIAAgAAAAAAAAAHABMAAgAAAAAAAAAHABQAAgAAAAAAAAAHABUAAgAAAAAAAAAHABYAAgAAAAAAAAAHABcAAgAAAAAAAAAHABgAAgAAAAAAAAAHABkAAgAAAAAAAAAHABoAAgAAAAAAAAAHABsAAgAAAAAAAAAHABwAAgAAAAAAAAAIABwAAgAAAAAAAAAIABsAAgAAAAAAAAAIABoAAgAAAAAAAAAIABkAAgAAAAAAAAAIABgAAgAAAAAAAAAIABcAAgAAAAAAAAAIABYAAgAAAAAAAAAIABUAAgAAAAAAAAAIABQAAgAAAAAAAAAIABMAAgAAAAAAAAAIABIAAgAAAAAAAAAIABEAAgAAAAAAAAAIABAAAgAAAAAAAAAIAA8AAgAAAAAAAAAIAA4AAgAAAAAAAAAIAA0AAgAAAAAAAAAIAAwAAgAAAAAAAAAIAAsAAgAAAAAAAAAIAAoAAgAAAAAAAAAIAAkAAgAAAAAAAAAIAAgAAgAAAAAAAAAIAAcAAgAAAAAAAAAIAAYAAgAAAAAAAAAIAAUAAgAAAAAAAAAIAAQAAgAAAAAAAAAIAAMAAgAAAAAAAAAIAAIAAgAAAAAAAAAJAAIAAgAAAAAAAAAJAAMAAgAAAAAAAAAJAAQAAgAAAAAAAAAJAAUAAgAAAAAAAAAJAAYAAgAAAAAAAAAJAAcAAgAAAAAAAAAJAAgAAgAAAAAAAAAJAAkAAgAAAAAAAAAJAAoAAgAAAAAAAAAJAAsAAgAAAAAAAAAJAAwAAgAAAAAAAAAJAA0AAgAAAAAAAAAJAA4AAgAAAAAAAAAJAA8AAgAAAAAAAAAJABAAAgAAAAAAAAAJABEAAgAAAAAAAAAJABIAAgAAAAAAAAAJABMAAgAAAAAAAAAJABQAAgAAAAAAAAAJABUAAgAAAAAAAAAJABYAAgAAAAAAAAAJABcAAgAAAAAAAAAJABgAAgAAAAAAAAAJABkAAgAAAAAAAAAJABoAAgAAAAAAAAAJABsAAgAAAAAAAAAJABwAAgAAAAAAAAAKABwAAgAAAAAAAAAKABsAAgAAAAAAAAAKABoAAgAAAAAAAAAKABkAAgAAAAAAAAAKABgAAgAAAAAAAAAKABcAAgAAAAAAAAAKABYAAgAAAAAAAAAKABUAAgAAAAAAAAAKABQAAgAAAAAAAAAKABMAAgAAAAAAAAAKABIAAgAAAAAAAAAKABEAAgAAAAAAAAAKABAAAgAAAAAAAAAKAA8AAgAAAAAAAAAKAA4AAgAAAAAAAAAKAA0AAgAAAAAAAAAKAAwAAgAAAAAAAAAKAAsAAgAAAAAAAAAKAAoAAgAAAAAAAAAKAAkAAgAAAAAAAAAKAAgAAgAAAAAAAAAKAAcAAgAAAAAAAAAKAAYAAgAAAAAAAAAKAAUAAgAAAAAAAAAKAAQAAgAAAAAAAAAKAAMAAgAAAAAAAAAKAAIAAgAAAAAAAAALAAIAAgAAAAAAAAALAAMAAgAAAAAAAAALAAQAAgAAAAAAAAALAAUAAgAAAAAAAAALAAYAAgAAAAAAAAALAAcAAgAAAAAAAAALAAgAAgAAAAAAAAALAAkAAgAAAAAAAAALAAoAAgAAAAAAAAALAAsAAgAAAAAAAAALAAwAAgAAAAAAAAALAA0AAgAAAAAAAAALAA4AAgAAAAAAAAALAA8AAgAAAAAAAAALABAAAgAAAAAAAAALABEAAgAAAAAAAAALABIAAgAAAAAAAAALABMAAgAAAAAAAAALABQAAgAAAAAAAAALABUAAgAAAAAAAAALABYAAgAAAAAAAAALABcAAgAAAAAAAAALABgAAgAAAAAAAAALABkAAgAAAAAAAAALABoAAgAAAAAAAAALABsAAgAAAAAAAAALABwAAgAAAAAAAAAMABwAAgAAAAAAAAAMABsAAgAAAAAAAAAMABoAAgAAAAAAAAAMABkAAgAAAAAAAAAMABgAAgAAAAAAAAAMABcAAgAAAAAAAAAMABYAAgAAAAAAAAAMABUAAgAAAAAAAAAMABQAAgAAAAAAAAAMABMAAgAAAAAAAAAMABIAAgAAAAAAAAAMABEAAgAAAAAAAAAMABAAAgAAAAAAAAAMAA8AAgAAAAAAAAAMAA4AAgAAAAAAAAAMAA0AAgAAAAAAAAAMAAwAAgAAAAAAAAAMAAsAAgAAAAAAAAAMAAoAAgAAAAAAAAAMAAkAAgAAAAAAAAAMAAgAAgAAAAAAAAAMAAcAAgAAAAAAAAAMAAYAAgAAAAAAAAAMAAUAAgAAAAAAAAAMAAQAAgAAAAAAAAAMAAMAAgAAAAAAAAAMAAIAAgAAAAAAAAANAAIAAgAAAAAAAAANAAMAAgAAAAAAAAANAAQAAgAAAAAAAAANAAUAAgAAAAAAAAANAAYAAgAAAAAAAAANAAcAAgAAAAAAAAANAAgAAgAAAAAAAAANAAkAAgAAAAAAAAANAAoAAgAAAAAAAAANAAsAAgAAAAAAAAANAAwAAgAAAAAAAAANAA0AAgAAAAAAAAANAA4AAgAAAAAAAAANAA8AAgAAAAAAAAANABAAAgAAAAAAAAANABEAAgAAAAAAAAANABIAAgAAAAAAAAANABMAAgAAAAAAAAANABQAAgAAAAAAAAANABUAAgAAAAAAAAANABYAAgAAAAAAAAANABcAAgAAAAAAAAANABgAAgAAAAAAAAANABkAAgAAAAAAAAANABoAAgAAAAAAAAANABsAAgAAAAAAAAANABwAAgAAAAAAAAAOABwAAgAAAAAAAAAOABsAAgAAAAAAAAAOABoAAgAAAAAAAAAOABkAAgAAAAAAAAAOABgAAgAAAAAAAAAOABcAAgAAAAAAAAAOABYAAgAAAAAAAAAOABUAAgAAAAAAAAAOABQAAgAAAAAAAAAOABMAAgAAAAAAAAAOABIAAgAAAAAAAAAOABEAAgAAAAAAAAAOABAAAgAAAAAAAAAOAA8AAgAAAAAAAAAOAA4AAgAAAAAAAAAOAA0AAgAAAAAAAAAOAAwAAgAAAAAAAAAOAAsAAgAAAAAAAAAOAAoAAgAAAAAAAAAOAAkAAgAAAAAAAAAOAAgAAgAAAAAAAAAOAAcAAgAAAAAAAAAOAAYAAgAAAAAAAAAOAAUAAgAAAAAAAAAOAAQAAgAAAAAAAAAOAAMAAgAAAAAAAAAOAAIAAgAAAAAAAAAPAAIAAgAAAAAAAAAPAAMAAgAAAAAAAAAPAAQAAgAAAAAAAAAPAAUAAgAAAAAAAAAPAAYAAgAAAAAAAAAPAAcAAgAAAAAAAAAPAAgAAgAAAAAAAAAPAAkAAgAAAAAAAAAPAAoAAgAAAAAAAAAPAAsAAgAAAAAAAAAPAAwAAgAAAAAAAAAPAA0AAgAAAAAAAAAPAA4AAgAAAAAAAAAPAA8AAgAAAAAAAAAPABAAAgAAAAAAAAAPABEAAgAAAAAAAAAPABIAAgAAAAAAAAAPABMAAgAAAAAAAAAPABQAAgAAAAAAAAAPABUAAgAAAAAAAAAPABYAAgAAAAAAAAAPABcAAgAAAAAAAAAPABgAAgAAAAAAAAAPABkAAgAAAAAAAAAPABoAAgAAAAAAAAAPABsAAgAAAAAAAAAPABwAAgAAAAAAAAAQABwAAgAAAAAAAAAQABsAAgAAAAAAAAAQABoAAgAAAAAAAAAQABkAAgAAAAAAAAAQABgAAgAAAAAAAAAQABcAAgAAAAAAAAAQABYAAgAAAAAAAAAQABUAAgAAAAAAAAAQABQAAgAAAAAAAAAQABMAAgAAAAAAAAAQABIAAgAAAAAAAAAQABEAAgAAAAAAAAAQABAAAgAAAAAAAAAQAA8AAgAAAAAAAAAQAA4AAgAAAAAAAAAQAA0AAgAAAAAAAAAQAAwAAgAAAAAAAAAQAAsAAgAAAAAAAAAQAAoAAgAAAAAAAAAQAAkAAgAAAAAAAAAQAAgAAgAAAAAAAAAQAAcAAgAAAAAAAAAQAAYAAgAAAAAAAAAQAAUAAgAAAAAAAAAQAAQAAgAAAAAAAAAQAAMAAgAAAAAAAAAQAAIAAgAAAAAAAAARAAIAAgAAAAAAAAARAAMAAgAAAAAAAAARAAQAAgAAAAAAAAARAAUAAgAAAAAAAAARAAYAAgAAAAAAAAARAAcAAgAAAAAAAAARAAgAAgAAAAAAAAARAAkAAgAAAAAAAAARAAoAAgAAAAAAAAARAAsAAgAAAAAAAAARAAwAAgAAAAAAAAARAA0AAgAAAAAAAAARAA4AAgAAAAAAAAARAA8AAgAAAAAAAAARABAAAgAAAAAAAAARABEAAgAAAAAAAAARABIAAgAAAAAAAAARABMAAgAAAAAAAAARABQAAgAAAAAAAAARABUAAgAAAAAAAAARABYAAgAAAAAAAAARABcAAgAAAAAAAAARABgAAgAAAAAAAAARABkAAgAAAAAAAAARABoAAgAAAAAAAAARABsAAgAAAAAAAAARABwAAgAAAAAAAAASABwAAgAAAAAAAAASABsAAgAAAAAAAAASABoAAgAAAAAAAAASABkAAgAAAAAAAAASABgAAgAAAAAAAAASABcAAgAAAAAAAAASABYAAgAAAAAAAAASABUAAgAAAAAAAAASABQAAgAAAAAAAAASABMAAgAAAAAAAAASABIAAgAAAAAAAAASABEAAgAAAAAAAAASABAAAgAAAAAAAAASAA8AAgAAAAAAAAASAA4AAgAAAAAAAAASAA0AAgAAAAAAAAASAAwAAgAAAAAAAAASAAsAAgAAAAAAAAASAAoAAgAAAAAAAAASAAkAAgAAAAAAAAASAAgAAgAAAAAAAAASAAcAAgAAAAAAAAASAAYAAgAAAAAAAAASAAUAAgAAAAAAAAASAAQAAgAAAAAAAAASAAMAAgAAAAAAAAASAAIAAgAAAAAAAAATABIAAgAAAAAAAAATABMAAgAAAAAAAAATABQAAgAAAAAAAAATABUAAgAAAAAAAAATABYAAgAAAAAAAAATABcAAgAAAAAAAAATABgAAgAAAAAAAAATABkAAgAAAAAAAAATABoAAgAAAAAAAAATABsAAgAAAAAAAAATABwAAgAAAAAAAAAUABwAAgAAAAAAAAAUABsAAgAAAAAAAAAUABoAAgAAAAAAAAAUABkAAgAAAAAAAAAUABgAAgAAAAAAAAAUABcAAgAAAAAAAAAUABYAAgAAAAAAAAAUABUAAgAAAAAAAAAUABQAAgAAAAAAAAAUABMAAgAAAAAAAAAUABIAAgAAAAAAAAAUABEAAgAAAAAAAAAUABAAAgAAAAAAAAAUAA8AAgAAAAAAAAAUAA4AAgAAAAAAAAAUAA0AAgAAAAAAAAAUAAwAAgAAAAAAAAAUAAsAAgAAAAAAAAAUAAoAAgAAAAAAAAAUAAkAAgAAAAAAAAAUAAgAAgAAAAAAAAAUAAcAAgAAAAAAAAAUAAYAAgAAAAAAAAAUAAUAAgAAAAAAAAAUAAQAAgAAAAAAAAAUAAMAAgAAAAAAAAAUAAIAAgAAAAAAAAAUAAEAAgAAAAAAAAAVAAEAAgAAAAAAAAAVAAIAAgAAAAAAAAAVAAMAAgAAAAAAAAAVAAQAAgAAAAAAAAAVAAUAAgAAAAAAAAAVAAYAAgAAAAAAAAAVAAcAAgAAAAAAAAAVAAgAAgAAAAAAAAAVAAkAAgAAAAAAAAAVAAoAAgAAAAAAAAAVAAsAAgAAAAAAAAAVAAwAAgAAAAAAAAAVAA0AAgAEAAAAAAAVAA4AAgAEAAAAAAAVAA8AAgAEAAAAAAAVABAAAgAEAAAAAAAVABEAAgAAAAAAAAAVABIAAgAAAAAAAAAVABMAAgAAAAAAAAAVABQAAgAAAAAAAAAVABUAAgAAAAAAAAAVABYAAgAAAAAAAAAVABcAAgAAAAAAAAAVABgAAgAAAAAAAAAVABkAAgAAAAAAAAAVABoAAgAAAAAAAAAVABsAAgAAAAAAAAAVABwAAgAAAAAAAAAWABwAAgAAAAAAAAAWABsAAgAAAAAAAAAWABoAAgAAAAAAAAAWABkAAgAAAAAAAAAWABgAAgAAAAAAAAAWABcAAgAAAAAAAAAWABYAAgAAAAAAAAAWABUAAgAAAAAAAAAWABQAAgAAAAAAAAAWABMAAgAAAAAAAAAWABIAAgAAAAAAAAAWABEAAgAAAAAAAAAWABAAAgAEAAAAAAAWAA8AAgAEAAAAAAAWAA4AAgAEAAAAAAAWAA0AAgAEAAAAAAAWAAwAAgAAAAAAAAAWAAsAAgAAAAAAAAAWAAoAAgAAAAAAAAAWAAkAAgAAAAAAAAAWAAgAAgAAAAAAAAAWAAcAAgAAAAAAAAAWAAYAAgAAAAAAAAAWAAUAAgAAAAAAAAAWAAQAAgAAAAAAAAAWAAMAAgAAAAAAAAAWAAIAAgAAAAAAAAAWAAEAAgAAAAAAAAAXAAEAAgAAAAAAAAAXAAIAAgAAAAAAAAAXAAMAAgAAAAAAAAAXAAQAAgAAAAAAAAAXAAUAAgAAAAAAAAAXAAYAAgAAAAAAAAAXAAcAAgAAAAAAAAAXAAgAAgAAAAAAAAAXAAkAAgAAAAAAAAAXAAoAAgAAAAAAAAAXAAsAAgAAAAAAAAAXAAwAAgAAAAAAAAAXAA0AAgAEAAAAAAAXAA4AAgAEAAAAAAAXAA8AAgAEAAAAAAAXABAAAgAEAAAAAAAXABEAAgAAAAAAAAAXABIAAgAAAAAAAAAXABMAAgAAAAAAAAAXABQAAgAAAAAAAAAXABUAAgAAAAAAAAAXABYAAgAAAAAAAAAXABcAAgAAAAAAAAAXABgAAgAAAAAAAAAXABkAAgAAAAAAAAAXABoAAgAAAAAAAAAXABsAAgAAAAAAAAAXABwAAgAAAAAAAAAYABwAAgAAAAAAAAAYABsAAgAAAAAAAAAYABoAAgAAAAAAAAAYABkAAgAAAAAAAAAYABgAAgAAAAAAAAAYABcAAgAAAAAAAAAYABYAAgAAAAAAAAAYABUAAgAAAAAAAAAYABQAAgAAAAAAAAAYABMAAgAAAAAAAAAYABIAAgAAAAAAAAAYABEAAgAAAAAAAAAYABAAAgAEAAAAAAAYAA8AAgAEAAAAAAAYAA4AAgAEAAAAAAAYAA0AAgAEAAAAAAAYAAwAAgAAAAAAAAAYAAsAAgAAAAAAAAAYAAoAAgAAAAAAAAAYAAkAAgAAAAAAAAAYAAgAAgAAAAAAAAAYAAcAAgAAAAAAAAAYAAYAAgAAAAAAAAAYAAUAAgAAAAAAAAAYAAQAAgAAAAAAAAAYAAMAAgAAAAAAAAAYAAIAAgAAAAAAAAAYAAEAAgAAAAAAAAAZAAEAAgAAAAAAAAAZAAIAAgAAAAAAAAAZAAMAAgAAAAAAAAAZAAQAAgAAAAAAAAAZAAUAAgAAAAAAAAAZAAYAAgAAAAAAAAAZAAcAAgAAAAAAAAAZAAgAAgAAAAAAAAAZAAkAAgAAAAAAAAAZAAoAAgAAAAAAAAAZAAsAAgAAAAAAAAAZAAwAAgAAAAAAAAAZAA0AAgAEAAAAAAAZAA4AAgAEAAAAAAAZAA8AAgAEAAAAAAAZABAAAgAEAAAAAAAZABEAAgAAAAAAAAAZABIAAgAAAAAAAAAZABMAAgAAAAAAAAAZABQAAgAAAAAAAAAZABUAAgAAAAAAAAAZABYAAgAAAAAAAAAZABcAAgAAAAAAAAAZABgAAgAAAAAAAAAZABkAAgAAAAAAAAAZABoAAgAAAAAAAAAZABsAAgAAAAAAAAAZABwAAgAAAAAAAAAaABwAAgAAAAAAAAAaABsAAgAAAAAAAAAaABoAAgAAAAAAAAAaABkAAgAAAAAAAAAaABgAAgAAAAAAAAAaABcAAgAAAAAAAAAaABYAAgAAAAAAAAAaABUAAgAAAAAAAAAaABQAAgAAAAAAAAAaABMAAgAAAAAAAAAaABIAAgAAAAAAAAAaABEAAgAAAAAAAAAaABAAAgAEAAAAAAAaAA8AAgAEAAAAAAAaAA4AAgAEAAAAAAAaAA0AAgAEAAAAAAAaAAwAAgAAAAAAAAAaAAsAAgAAAAAAAAAaAAoAAgAAAAAAAAAaAAkAAgAAAAAAAAAaAAgAAgAAAAAAAAAaAAcAAgAAAAAAAAAaAAYAAgAAAAAAAAAaAAUAAgAAAAAAAAAaAAQAAgAAAAAAAAAaAAMAAgAAAAAAAAAaAAIAAgAAAAAAAAAaAAEAAgAAAAAAAAAbAAEAAgAAAAAAAAAbAAIAAgAAAAAAAAAbAAMAAgAAAAAAAAAbAAQAAgAAAAAAAAAbAAUAAgAAAAAAAAAbAAYAAgAAAAAAAAAbAAcAAgAAAAAAAAAbAAgAAgAAAAAAAAAbAAkAAgAAAAAAAAAbAAoAAgAAAAAAAAAbAAsAAgAAAAAAAAAbAAwAAgAAAAAAAAAbAA0AAgAEAAAAAAAbAA4AAgAEAAAAAAAbAA8AAgAEAAAAAAAbABAAAgAEAAAAAAAbABEAAgAAAAAAAAAbABIAAgAAAAAAAAAbABMAAgAAAAAAAAAbABQAAgAAAAAAAAAbABUAAgAAAAAAAAAbABYAAgAAAAAAAAAbABcAAgAAAAAAAAAbABgAAgAAAAAAAAAbABkAAgAAAAAAAAAbABoAAgAAAAAAAAAbABsAAgAAAAAAAAAbABwAAgAAAAAAAAAcABwAAgAAAAAAAAAcABsAAgAAAAAAAAAcABoAAgAAAAAAAAAcABkAAgAAAAAAAAAcABgAAgAAAAAAAAAcABcAAgAAAAAAAAAcABYAAgAAAAAAAAAcABUAAgAAAAAAAAAcABQAAgAAAAAAAAAcABMAAgAAAAAAAAAcABIAAgAAAAAAAAAcABEAAgAAAAAAAAAcABAAAgAEAAAAAAAcAA8AAgAEAAAAAAAcAA4AAgAEAAAAAAAcAA0AAgAEAAAAAAAcAAwAAgAAAAAAAAAcAAsAAgAAAAAAAAAcAAoAAgAAAAAAAAAcAAkAAgAAAAAAAAAcAAgAAgAAAAAAAAAcAAcAAgAAAAAAAAAcAAYAAgAAAAAAAAAcAAUAAgAAAAAAAAAcAAQAAgAAAAAAAAAcAAMAAgAAAAAAAAAcAAIAAgAAAAAAAAAcAAEAAgAAAAAAAAA=")
-tile_set = ExtResource("15_u0ygc")
+tile_set = ExtResource("11_lhwp2")
 collision_enabled = false
 navigation_enabled = false
-script = ExtResource("16_7th4q")
+script = ExtResource("12_l40q6")
 
 [node name="SelectionLayer" type="TileMapLayer" parent="SubViewportContainer2/UISubViewport/UI/TileEditorContainer/TilemapUI"]
 unique_name_in_owner = true
@@ -322,10 +328,28 @@ show_behind_parent = true
 light_mask = 0
 texture_filter = 1
 tile_map_data = PackedByteArray("AAAKABcAAwABAAAAAAA=")
-tile_set = ExtResource("15_u0ygc")
+tile_set = ExtResource("11_lhwp2")
 collision_enabled = false
 navigation_enabled = false
-script = ExtResource("17_6jybn")
+script = ExtResource("13_iav3h")
+
+[node name="RoomConfigForm" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("14_to7gp")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -1020.0
+offset_top = -464.0
+offset_right = -59.997437
+offset_bottom = 496.00073
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="Panel" parent="SubViewportContainer2/UISubViewport/UI/RoomConfigForm" index="0"]
+theme_override_styles/panel = SubResource("StyleBoxFlat_to7gp")
 
 [node name="TopBar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 layout_mode = 1
@@ -334,8 +358,8 @@ anchor_right = 1.0
 offset_bottom = 68.0
 grow_horizontal = 2
 size_flags_horizontal = 3
-theme = ExtResource("9_wr18j")
-theme_override_styles/panel = ExtResource("14_7th4q")
+theme = ExtResource("10_kkokr")
+theme_override_styles/panel = ExtResource("14_womr8")
 
 [node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/TopBar"]
 layout_mode = 1
@@ -353,12 +377,12 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
-script = ExtResource("14_ak604")
+script = ExtResource("15_onjth")
 
 [node name="File" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/FileMenu"]
 oversampling_override = 1.0
 size = Vector2i(214, 222)
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 item_count = 6
 item_0/text = "New"
 item_0/id = 0
@@ -376,7 +400,7 @@ item_5/id = 5
 [node name="View" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/FileMenu"]
 oversampling_override = 1.0
 size = Vector2i(214, 222)
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 item_count = 2
 item_0/text = "Side Panel"
 item_0/checkable = 1
@@ -389,7 +413,7 @@ item_1/id = 1
 
 [node name="Options" type="PopupMenu" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/FileMenu"]
 oversampling_override = 1.0
-theme = ExtResource("9_wr18j")
+theme = ExtResource("10_kkokr")
 item_count = 1
 item_0/text = "Move Active Plane To Origin"
 item_0/checkable = 1
@@ -399,7 +423,7 @@ item_0/id = 0
 [node name="TileEditorTools" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 custom_minimum_size = Vector2(960, 0)
 layout_mode = 2
 size_flags_horizontal = 10
@@ -410,34 +434,34 @@ alignment = 2
 [node name="ToolDraw" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 layout_mode = 2
 tooltip_text = "Draw Mode (B)"
-texture_normal = ExtResource("11_u0ygc")
+texture_normal = ExtResource("16_xa0eo")
 
 [node name="ToolLine" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 layout_mode = 2
 tooltip_text = "Line Mode (L)"
-texture_normal = ExtResource("12_7th4q")
+texture_normal = ExtResource("17_3mjum")
 
 [node name="ToolRect" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 layout_mode = 2
 tooltip_text = "Rect Mode (R)"
-texture_normal = ExtResource("13_6jybn")
+texture_normal = ExtResource("18_p27gv")
 
 [node name="ToolFill" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI/TopBar/MarginContainer/TileEditorTools"]
 unique_name_in_owner = true
 texture_filter = 1
-material = ExtResource("10_2jcla")
+material = ExtResource("9_pgk25")
 layout_mode = 2
 tooltip_text = "Fill Mode (G)"
-texture_normal = ExtResource("14_84odl")
+texture_normal = ExtResource("19_cn4eu")
 
 [node name="SideToolbar" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 unique_name_in_owner = true
@@ -452,7 +476,7 @@ offset_bottom = 165.84497
 grow_vertical = 2
 size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_6jybn")
-script = ExtResource("19_ghshe")
+script = ExtResource("20_0wyf6")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/SideToolbar"]
 layout_mode = 1
@@ -511,7 +535,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_styles/panel = ExtResource("14_7th4q")
+theme_override_styles/panel = ExtResource("14_womr8")
 
 [node name="MarginContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI/StatusBar"]
 layout_mode = 1
@@ -555,7 +579,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_force_pass_scroll_events = false
 theme_override_styles/panel = SubResource("StyleBoxFlat_ak604")
-script = ExtResource("19_84odl")
+script = ExtResource("22_jix7a")
 
 [node name="Panel" type="Panel" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog"]
 custom_minimum_size = Vector2(500, 300)
@@ -680,7 +704,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_force_pass_scroll_events = false
 theme_override_styles/panel = SubResource("StyleBoxFlat_ak604")
-script = ExtResource("21_vimvf")
+script = ExtResource("23_segjr")
 
 [node name="Panel" type="Panel" parent="SubViewportContainer2/UISubViewport/UI/ConfirmDialog"]
 custom_minimum_size = Vector2(500, 230)
@@ -789,3 +813,6 @@ hidden_files_toggle_enabled = false
 file_filter_toggle_enabled = false
 folder_creation_enabled = false
 favorites_enabled = false
+
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/VBoxContainer/FormHeading"]
