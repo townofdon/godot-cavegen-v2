@@ -31,7 +31,7 @@ static func sanitize(data: SaveData) -> SaveData:
 	assert(len(data.arr_noise) >= 1)
 	assert(len(data.arr_border_noise) >= 1)
 	var room:RoomConfig = data.arr_room.get(0)
-	var num_cells := data.cfg.get_num_cells_2d()
+	var num_cells:Vector2i = data.cfg.get_num_cells_2d()
 	var expected_num_tiles := num_cells.x * num_cells.y
 	if room.get_num_tiles() != expected_num_tiles:
 		room.init_tiles(num_cells)

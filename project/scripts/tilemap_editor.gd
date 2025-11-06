@@ -102,6 +102,10 @@ func _set_editor_mode_fill() -> void:
 
 func _process(_delta: float) -> void:
 	if tilemapUI: tilemapUI.scale = Vector2(tilemapScale, tilemapScale)
+	if !cfg:
+		return
+	if !room:
+		return
 	if !enabled || !visible || !is_visible_in_tree():
 		return
 
@@ -214,26 +218,26 @@ func _draw_at(coords: Vector2i, tile: Tile):
 	_user_set_cell_at(coords, tile)
 
 func _line_at(from: Vector2i, to: Vector2i, tile: Tile):
-	var numCells := cfg.get_num_cells_2d()
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
 	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
 	if (numSteps <= 0):
-		if tile != Tile.Null: _set_cell_at(from, tile, numCells)
+		if tile != Tile.Null: _set_cell_at(from, tile, num_cells)
 		lastTileDrawnCoords = from
 	else:
 		for i in range(numSteps):
 			var x := roundi(lerpf(from.x, to.x, i / float(numSteps - 1)))
 			var y := roundi(lerpf(from.y, to.y, i / float(numSteps - 1)))
 			var coords := Vector2i(x, y)
-			if tile != Tile.Null: _set_cell_at(coords, tile, numCells)
+			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells)
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
 func _rect_at(from: Vector2i, to: Vector2i, tile: Tile):
-	var numCells := cfg.get_num_cells_2d()
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
 	for y in range(mini(from.y, to.y), maxi(from.y, to.y) + 1):
 		for x in range(mini(from.x, to.x), maxi(from.x, to.x) + 1):
 			var coords := Vector2i(x, y)
-			if tile != Tile.Null: _set_cell_at(coords, tile, numCells)
+			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells)
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
@@ -243,15 +247,15 @@ func _fill_at(coords: Vector2i, currentTile: Tile, fillTile: Tile):
 	if currentTile == fillTile:
 		return
 	var screen := PackedInt32Array()
-	var numCells := cfg.get_num_cells_2d()
-	for y in range(numCells.y):
-		for x in range(numCells.x):
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
+	for y in range(num_cells.y):
+		for x in range(num_cells.x):
 			var tile := get_cell_atlas_coords(Vector2i(x, y)).x as Tile
 			screen.append(tile)
-	FloodFill.fill(screen, numCells, coords, currentTile, fillTile)
-	for y in range(numCells.y):
-		for x in range(numCells.x):
-			var i := x + y * numCells.x
+	FloodFill.fill(screen, num_cells, coords, currentTile, fillTile)
+	for y in range(num_cells.y):
+		for x in range(num_cells.x):
+			var i := x + y * num_cells.x
 			_draw_at(Vector2i(x, y), screen.get(i))
 	lastTileDrawnCoords = coords
 
@@ -287,35 +291,35 @@ func _get_next_tile_to_lay(current: Tile, fill: bool) -> Tile:
 func _user_set_cell_at(coords: Vector2i, tile: Tile) -> void:
 	if coords == lastTileDrawnCoords: return
 	if tile == Tile.Null: return
-	var numCells := cfg.get_num_cells_2d()
-	_set_cell_at(coords, tile, numCells)
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
+	_set_cell_at(coords, tile, num_cells)
 	lastTileDrawnCoords = coords
 	room.notify_changed()
 
 func _get_tile_to_place(coords: Vector2i, tile: Tile) -> Tile:
 	if tile == Tile.Null: return Tile.Null
-	var numCells := cfg.get_num_cells_2d()
-	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
+	if coords.x < 0 || coords.x >= num_cells.x || coords.y < 0 || coords.y >= num_cells.y:
 		return Tile.Null
-	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
+	var isWall := coords.x==0 || coords.x==num_cells.x-1 || coords.y==0 || coords.y==num_cells.y-1
 	tile = _maybe_convert_tile(tile, isWall)
 	return tile	
 
-func _set_cell_at(coords: Vector2i, tile: Tile, numCells: Vector2i) -> void:
-	if numCells == Vector2i.ZERO: return
-	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+func _set_cell_at(coords: Vector2i, tile: Tile, num_cells: Vector2i) -> void:
+	if num_cells == Vector2i.ZERO: return
+	if coords.x < 0 || coords.x >= num_cells.x || coords.y < 0 || coords.y >= num_cells.y:
 		return
-	var isWall := coords.x==0 || coords.x==numCells.x-1 || coords.y==0 || coords.y==numCells.y-1
+	var isWall := coords.x==0 || coords.x==num_cells.x-1 || coords.y==0 || coords.y==num_cells.y-1
 	tile = _maybe_convert_tile(tile, isWall)
 	set_cell(coords, TILEMAP_SOURCE_ID, Vector2i(tile, 0))
-	_set_room_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
+	_set_room_tile(num_cells, coords, _get_tile_state_from_atlas_x(tile))
 
-func _erase_cell_at(coords: Vector2i, numCells: Vector2i) -> void:
-	if numCells == Vector2i.ZERO: return
-	if coords.x < 0 || coords.x >= numCells.x || coords.y < 0 || coords.y >= numCells.y:
+func _erase_cell_at(coords: Vector2i, num_cells: Vector2i) -> void:
+	if num_cells == Vector2i.ZERO: return
+	if coords.x < 0 || coords.x >= num_cells.x || coords.y < 0 || coords.y >= num_cells.y:
 		return
 	erase_cell(coords)
-	_set_room_tile(numCells, coords, RoomConfig.TILE_STATE_UNSET)
+	_set_room_tile(num_cells, coords, RoomConfig.TILE_STATE_UNSET)
 
 func _maybe_convert_tile(atlasX:Tile, isWall:bool) -> Tile:
 	if atlasX == Tile.InnerNoise && isWall:
@@ -376,24 +380,24 @@ func initialize(
 	cfg = p_cfg
 	room = p_room
 	tilemapUI = get_parent()
-	var numCells := cfg.get_num_cells_2d()
-	set_tilemap_container_size(numCells)
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
+	set_tilemap_container_size(num_cells)
 	clear()
-	if room.get_num_tiles() != numCells.x * numCells.y:
+	if room.get_num_tiles() != num_cells.x * num_cells.y:
 		should_reset = true
 	if should_reset:
-		room.tilemap__tiles.resize(numCells.x * numCells.y)
-		room.init_tiles(numCells)
-	for y in range(numCells.y):
-		for x in range(numCells.x):
+		room.tilemap__tiles.resize(num_cells.x * num_cells.y)
+		room.init_tiles(num_cells)
+	for y in range(num_cells.y):
+		for x in range(num_cells.x):
 			var tile:int
-			if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-				tile = _get_atlas_x_from_tile_state(room.get_tile_at(numCells, Vector2i(x, y)), true)
+			if x==0 || x==num_cells.x-1 || y==0 || y==num_cells.y-1:
+				tile = _get_atlas_x_from_tile_state(room.get_tile_at(num_cells, Vector2i(x, y)), true)
 			else:
-				tile = _get_atlas_x_from_tile_state(room.get_tile_at(numCells, Vector2i(x, y)), false)
-			_set_cell_at(Vector2i(x, y), tile, numCells)
+				tile = _get_atlas_x_from_tile_state(room.get_tile_at(num_cells, Vector2i(x, y)), false)
+			_set_cell_at(Vector2i(x, y), tile, num_cells)
 	update_internals()
-	prevNumCells = numCells
+	prevNumCells = num_cells
 	processing = false
 	initialized = true
 
@@ -403,93 +407,93 @@ func handle_room_size_change() -> void:
 	if !room: return
 	if !initialized: return
 	if processing: return
-	var numCells := cfg.get_num_cells_2d()
-	if numCells == prevNumCells:
+	var num_cells:Vector2i = cfg.get_num_cells_2d()
+	if num_cells == prevNumCells:
 		return
-	if numCells.x <= 0 || numCells.y <= 0:
+	if num_cells.x <= 0 || num_cells.y <= 0:
 		return
 	if prevNumCells.x < 0 || prevNumCells.y < 0:
 		printerr("invalid prevNumCells (", prevNumCells.x, ",", prevNumCells.y, ") - did you forget to call initialize()?")
 		return
 	processing = true
-	set_tilemap_container_size(numCells)
-	room.tilemap__tiles.resize(maxi(numCells.x * numCells.y, prevNumCells.x * prevNumCells.y))
+	set_tilemap_container_size(num_cells)
+	room.tilemap__tiles.resize(maxi(num_cells.x * num_cells.y, prevNumCells.x * prevNumCells.y))
 	# convert existing tile data from prev coords to new coords
 	for y in range(prevNumCells.y):
 		for x in range(prevNumCells.x):
 			var coords := Vector2i(x, y)
 			var tile := get_cell_atlas_coords(coords).x as Tile
-			_set_room_tile(numCells, coords, _get_tile_state_from_atlas_x(tile))
-	room.tilemap__tiles.resize(numCells.x * numCells.y)
+			_set_room_tile(num_cells, coords, _get_tile_state_from_atlas_x(tile))
+	room.tilemap__tiles.resize(num_cells.x * num_cells.y)
 	# unset previous border tile, and copy tile to new border tile
-	if numCells.x != prevNumCells.x:
-		for y in range(numCells.y):
+	if num_cells.x != prevNumCells.x:
+		for y in range(num_cells.y):
 			var prevCoords := Vector2i(prevNumCells.x - 1, y)
-			var nextCoords := Vector2i(numCells.x - 1, y)
+			var nextCoords := Vector2i(num_cells.x - 1, y)
 			var currentAtlas := get_cell_atlas_coords(prevCoords)
 			var currentTile:Tile = currentAtlas.x as Tile\
 				if currentAtlas.x > -1\
 				else Tile.WallFilled
 			# unset previous border
-			if numCells.x > prevNumCells.x:
-				_set_cell_at(prevCoords, Tile.InnerNoise, numCells)
+			if num_cells.x > prevNumCells.x:
+				_set_cell_at(prevCoords, Tile.InnerNoise, num_cells)
 			else:
-				_erase_cell_at(prevCoords, numCells)
+				_erase_cell_at(prevCoords, num_cells)
 			# copy result to new border
-			_set_cell_at(nextCoords, currentTile, numCells)
-	if prevNumCells.y != numCells.y:
-		for x in range(numCells.x):
+			_set_cell_at(nextCoords, currentTile, num_cells)
+	if prevNumCells.y != num_cells.y:
+		for x in range(num_cells.x):
 			var prevCoords := Vector2i(x, prevNumCells.y - 1)
-			var nextCoords := Vector2i(x, numCells.y - 1)
+			var nextCoords := Vector2i(x, num_cells.y - 1)
 			var currentAtlas := get_cell_atlas_coords(prevCoords)
 			var currentTile:Tile = currentAtlas.x as Tile\
 				if currentAtlas.x > -1\
 				else Tile.WallFilled
 			# unset previous border
-			if numCells.y > prevNumCells.y:
-				_set_cell_at(prevCoords, Tile.InnerNoise, numCells)
+			if num_cells.y > prevNumCells.y:
+				_set_cell_at(prevCoords, Tile.InnerNoise, num_cells)
 			else:
-				_erase_cell_at(prevCoords, numCells)
+				_erase_cell_at(prevCoords, num_cells)
 			# copy result to new border
-			_set_cell_at(nextCoords, currentTile, numCells)
+			_set_cell_at(nextCoords, currentTile, num_cells)
 	# set new inner cells
-	if numCells.x > prevNumCells.x:
-		for y in range(numCells.y):
-			for x in range(prevNumCells.x, numCells.x-1):
-				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-					_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
+	if num_cells.x > prevNumCells.x:
+		for y in range(num_cells.y):
+			for x in range(prevNumCells.x, num_cells.x-1):
+				if x==0 || x==num_cells.x-1 || y==0 || y==num_cells.y-1:
+					_set_cell_at(Vector2i(x, y), Tile.WallFilled, num_cells)
 				else:
-					_set_cell_at(Vector2i(x, y), Tile.InnerNoise, numCells)
-	if numCells.y > prevNumCells.y:
-		for y in range(prevNumCells.y, numCells.y-1):
-			for x in range(numCells.x):
-				if x==0 || x==numCells.x-1 || y==0 || y==numCells.y-1:
-					_set_cell_at(Vector2i(x, y), Tile.WallFilled, numCells)
+					_set_cell_at(Vector2i(x, y), Tile.InnerNoise, num_cells)
+	if num_cells.y > prevNumCells.y:
+		for y in range(prevNumCells.y, num_cells.y-1):
+			for x in range(num_cells.x):
+				if x==0 || x==num_cells.x-1 || y==0 || y==num_cells.y-1:
+					_set_cell_at(Vector2i(x, y), Tile.WallFilled, num_cells)
 				else:
-					_set_cell_at(Vector2i(x, y), Tile.InnerNoise,numCells)
+					_set_cell_at(Vector2i(x, y), Tile.InnerNoise,num_cells)
 	# clear prev outer cells
-	if numCells.x < prevNumCells.x:
-		for y in range(numCells.y):
-			for x in range(numCells.x, prevNumCells.x):
+	if num_cells.x < prevNumCells.x:
+		for y in range(num_cells.y):
+			for x in range(num_cells.x, prevNumCells.x):
 				erase_cell(Vector2i(x, y))
-	if numCells.y < prevNumCells.y:
-		for y in range(numCells.y, prevNumCells.y):
-			for x in range(numCells.x):
+	if num_cells.y < prevNumCells.y:
+		for y in range(num_cells.y, prevNumCells.y):
+			for x in range(num_cells.x):
 				erase_cell(Vector2i(x, y))
 	room.notify_changed()
 	update_internals()
-	prevNumCells = numCells
+	prevNumCells = num_cells
 	processing = false
 
-func set_tilemap_container_size(numCells: Vector2i) -> void:
+func set_tilemap_container_size(num_cells: Vector2i) -> void:
 	assert(tilemapUI)
-	var x := numCells.x * TILEMAP_CELL_SIZE
-	var y := mini(numCells.y, 30) * TILEMAP_CELL_SIZE
+	var x := num_cells.x * TILEMAP_CELL_SIZE
+	var y := mini(num_cells.y, 30) * TILEMAP_CELL_SIZE
 	tilemapScale = 1.0
-	if numCells.x > 30:
-		tilemapScale = 30 / float(numCells.x)
-	if numCells.y > 30 && numCells.y > numCells.x:
-		tilemapScale = 30 / float(numCells.y)
+	if num_cells.x > 30:
+		tilemapScale = 30 / float(num_cells.x)
+	if num_cells.y > 30 && num_cells.y > num_cells.x:
+		tilemapScale = 30 / float(num_cells.y)
 	tilemapUI.custom_minimum_size = Vector2(x, y)
 	tilemapUI.pivot_offset.x = x
 	tilemapUI.pivot_offset.y = 0

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="CaveGenV2"
-config/version="0.0.3"
+config/version="0.0.4"
 run/main_scene="uid://dldu5uhu5swo2"
 config/features=PackedStringArray("4.5", "Forward Plus")
 
