@@ -18,6 +18,7 @@ config/features=PackedStringArray("4.5", "Forward Plus")
 [autoload]
 
 OBJExporter="*res://addons/obj_exporter/OBJExporter.tscn"
+ToastParty="*res://addons/toastparty/toast-autoload.gd"
 
 [display]
 
@@ -27,7 +28,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg")
+enabled=PackedStringArray("res://addons/file_access_web/plugin.cfg", "res://addons/obj_exporter/plugin.cfg", "res://addons/toastparty/plugin.cfg")
 
 [input]
 

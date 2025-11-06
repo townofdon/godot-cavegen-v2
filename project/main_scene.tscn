@@ -189,6 +189,8 @@ shader_parameter/y_min = 0.0
 [node name="CaveGen2" type="Node3D" parent="."]
 script = ExtResource("1_2c62f")
 initial_save_data = SubResource("Resource_5smuj")
+toast_bg = Color(0.015149527, 0.13787875, 0.13481134, 0.7019608)
+toast_success = Color(0.35585317, 0.7912965, 0.6194208, 1)
 metadata/_custom_type_script = "uid://djfffelu7xi37"
 
 [node name="Timer" type="Timer" parent="CaveGen2"]

@@ -361,14 +361,6 @@ func _get_atlas_x_from_tile_state(tile_state:int, is_wall:bool) -> int:
 		return Tile.WallEmpty
 	return Tile.InnerNoise
 
-#func _get_num_cells() -> Vector2i:
-	#if !cfg: return Vector2i(0, 0)
-	#var numCells3dRaw := cfg.get_num_cells()
-	## remove bounds (which is always just empty space)
-	#var numCells3dAdjusted := Vector3i(numCells3dRaw.x - 2, 1, numCells3dRaw.z - 2)
-	#var numCells := Vector2i(numCells3dAdjusted.x, numCells3dAdjusted.z);
-	#return numCells
-
 var initialized:bool = false;
 func initialize(
 	p_cfg: GlobalConfig,

@@ -2,6 +2,8 @@ class_name CaveGen
 extends Node3D
 
 @export var initial_save_data:SaveData
+@export var toast_bg:Color = Color(0, 0, 0, 0.7)
+@export var toast_success:Color = Color(1,1,1,1)
 
 @onready var mesh_container: Node3D = %MeshContainer
 @onready var meshgen:MeshGen = %MeshGen
@@ -72,6 +74,13 @@ func _on_open_file_pressed() -> void:
 
 func _on_save_file_pressed() -> void:
 	ResourceSaver.save(save_data, SaveData.SAVE_PATH)
+	ToastParty.show({
+		"text": "File saved",
+		"bgcolor": toast_bg,
+		"color": toast_success,
+		"direction": "right",
+		"text_size": 18,
+	})
 
 func _on_save_file_as_pressed() -> void:
 	pass
