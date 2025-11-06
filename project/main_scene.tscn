@@ -20,7 +20,7 @@
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="16_7th4q"]
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="17_6jybn"]
 [ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="19_6jybn"]
-[ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://export_dialog.gd" id="19_84odl"]
+[ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://scripts/export_dialog.gd" id="19_84odl"]
 [ext_resource type="Script" uid="uid://dok56cjhi81ur" path="res://scripts/side_toolbar.gd" id="19_ghshe"]
 [ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="21_vimvf"]
 
@@ -82,6 +82,17 @@ arr_room = Array[RoomConfig]([SubResource("RoomConfig_y5ved")])
 arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_5smuj")])
 arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_fv2he")])
 metadata/_custom_type_script = "uid://c3p7qltmi4384"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
+render_priority = 0
+shader = ExtResource("2_gyfs4")
+shader_parameter/light_direction = Vector3(0, 0, 1)
+shader_parameter/color_lit = Color(1, 1, 1, 1)
+shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
+shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
+shader_parameter/y_ceil = 17.429999999999996
+shader_parameter/y_min = 0.0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d5x1h"]
 render_priority = 0
@@ -173,17 +184,6 @@ bg_color = Color(0.03999403, 0.059799403, 0.067012265, 0.23921569)
 shadow_color = Color(0, 0, 0, 0.41568628)
 shadow_size = 1
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
-render_priority = 0
-shader = ExtResource("2_gyfs4")
-shader_parameter/light_direction = Vector3(0, 0, 1)
-shader_parameter/color_lit = Color(1, 1, 1, 1)
-shader_parameter/color_shadow = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/color_ceil = Color(0, 1, 0.2, 1)
-shader_parameter/color_bottom = Color(0.1, 0.1, 0.1, 1)
-shader_parameter/y_ceil = 17.429999999999996
-shader_parameter/y_min = 0.0
-
 [node name="MainScene" type="Node3D"]
 
 [node name="CaveGen2" type="Node3D" parent="."]
@@ -201,6 +201,15 @@ ignore_time_scale = true
 [node name="Cameraman" type="Node3D" parent="CaveGen2"]
 unique_name_in_owner = true
 script = ExtResource("8_66tet")
+
+[node name="TestCube" type="CSGBox3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 10.65, 15)
+size = Vector3(30, 21.3, 30)
+material = SubResource("ShaderMaterial_gyfs4")
+script = ExtResource("3_gyfs4")
+cfg = ExtResource("4_d5x1h")
+metadata/_custom_type_script = "uid://btxqynndstb2p"
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 anchors_preset = 15
@@ -748,11 +757,35 @@ layout_mode = 2
 mouse_default_cursor_shape = 2
 text = "OK"
 
-[node name="TestCube" type="CSGBox3D" parent="."]
+[node name="Dialogs" type="Node3D" parent="."]
+
+[node name="SaveFileDialog" type="FileDialog" parent="Dialogs"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 10.65, 15)
-size = Vector3(30, 21.3, 30)
-material = SubResource("ShaderMaterial_gyfs4")
-script = ExtResource("3_gyfs4")
-cfg = ExtResource("4_d5x1h")
-metadata/_custom_type_script = "uid://btxqynndstb2p"
+oversampling_override = 1.0
+initial_position = 1
+size = Vector2i(900, 360)
+dialog_hide_on_ok = true
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.tres")
+use_native_dialog = true
+hidden_files_toggle_enabled = false
+file_filter_toggle_enabled = false
+favorites_enabled = false
+
+[node name="LoadFileDialog" type="FileDialog" parent="Dialogs"]
+unique_name_in_owner = true
+oversampling_override = 1.0
+title = "Open a File"
+initial_position = 1
+size = Vector2i(900, 360)
+dialog_hide_on_ok = true
+file_mode = 0
+display_mode = 1
+access = 2
+filters = PackedStringArray("*.tres")
+use_native_dialog = true
+hidden_files_toggle_enabled = false
+file_filter_toggle_enabled = false
+folder_creation_enabled = false
+favorites_enabled = false

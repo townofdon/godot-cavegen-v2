@@ -3,7 +3,9 @@ extends Node3D
 
 @export var initial_save_data:SaveData
 @export var toast_bg:Color = Color(0, 0, 0, 0.7)
+@export var toast_bg_error:Color = Color(0, 0, 0, 0.7)
 @export var toast_success:Color = Color(1,1,1,1)
+@export var toast_error:Color = Color.ORANGE_RED
 
 @onready var mesh_container: Node3D = %MeshContainer
 @onready var meshgen:MeshGen = %MeshGen
@@ -18,6 +20,8 @@ extends Node3D
 @onready var tile_editor_tools: HBoxContainer = %TileEditorTools
 @onready var side_toolbar: SideToolbar = %SideToolbar
 @onready var export_dialog: ExportDialog = %ExportDialog
+@onready var save_file_dialog: FileDialog = %SaveFileDialog
+@onready var load_file_dialog: FileDialog = %LoadFileDialog
 
 signal export_started
 signal export_progress(pct: float)
@@ -68,23 +72,68 @@ func _on_new_file_pressed() -> void:
 	_initialize(initial_save_data)
 
 func _on_open_file_pressed() -> void:
-	pass
-	# TODO: SHOW FILEPICKER DIALOG - WEB OR NON-WEB
-	#_initialize(data)
+	if OS.has_feature("web"):
+		tilemap_editor.disable()
+		var ok := await SaveData.import_from_file_web()
+		if ok:
+			_initialize(SaveData.load_data(SaveData.clone(save_data)))
+			_notify_success("File loaded")
+		tilemap_editor.enable()
+	else:
+		tilemap_editor.disable()
+		load_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		load_file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+		load_file_dialog.show()
+
+func _on_open_file(path: String) -> void:
+	tilemap_editor.enable()
+	if SaveData.import_from_file(path):
+		_initialize(SaveData.load_data(SaveData.clone(save_data)))
+		_notify_success("File loaded")
+	else:
+		_notify_error("Failed to load file")
 
 func _on_save_file_pressed() -> void:
 	ResourceSaver.save(save_data, SaveData.SAVE_PATH)
+	_notify_success("File saved")
+
+func _on_save_file_as_pressed() -> void:
+	if OS.has_feature("web"):
+		SaveData.save(save_data)
+		SaveData.download_file_web(cfg.level_name)
+		_notify_success("File saved")
+	else:
+		tilemap_editor.disable()
+		save_file_dialog.access = FileDialog.ACCESS_FILESYSTEM
+		save_file_dialog.current_dir = OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+		save_file_dialog.get_line_edit().text = cfg.level_name
+		save_file_dialog.show()
+
+func _on_save_file_as(path: String) -> void:
+	tilemap_editor.enable()
+	save_file_dialog.hide()
+	SaveData.save(save_data)
+	SaveData.download_file(path)
+	_notify_success("File saved")
+
+func _on_file_dialog_cancel() -> void:
+	tilemap_editor.enable()
+
+func _notify_success(text: String) -> void:
 	ToastParty.show({
-		"text": "File saved",
+		"text": text,
 		"bgcolor": toast_bg,
 		"color": toast_success,
-		"direction": "right",
 		"text_size": 18,
 	})
 
-func _on_save_file_as_pressed() -> void:
-	pass
-	# TODO: OPEN DIALOG TO SAVE AS - TEXT INPUT DIALOG FOR WEB, ELSE FILE DIALOG
+func _notify_error(text: String) -> void:
+	ToastParty.show({
+		"text": text,
+		"bgcolor": toast_bg_error,
+		"color": toast_error,
+		"text_size": 18,
+	})
 
 func _ready() -> void:
 	test_cube.queue_free()
@@ -98,6 +147,12 @@ func _ready() -> void:
 	export_dialog.user_start_export.connect(func(): _save_mesh())
 	export_dialog.dialog_opened.connect(func(): tilemap_editor.disable())
 	export_dialog.dialog_closed.connect(func(): tilemap_editor.enable())
+	save_file_dialog.file_selected.connect(_on_save_file_as)
+	save_file_dialog.visibility_changed.connect(func():save_file_dialog.get_line_edit().grab_focus())
+	save_file_dialog.canceled.connect(_on_file_dialog_cancel)
+	load_file_dialog.file_selected.connect(_on_open_file)
+	load_file_dialog.canceled.connect(_on_file_dialog_cancel)
+
 	# setup notification timer
 	notif_timer.autostart = false
 	notif_timer.one_shot = true
