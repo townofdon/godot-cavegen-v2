@@ -815,4 +815,7 @@ folder_creation_enabled = false
 favorites_enabled = false
 
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm"]
-[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/VBoxContainer/FormHeading"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Base Noise/VBoxContainer/HeadingRoomConfig"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig"]

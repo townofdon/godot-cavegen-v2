@@ -1,7 +1,7 @@
 extends TileMapLayer
 class_name TileMapEditor
 
-@onready var selectionLayer:TileMapLayer = %SelectionLayer
+@onready var selectionLayer:TileMapSelection = %SelectionLayer
 
 @onready var toolDraw:TextureButton = %ToolDraw
 @onready var toolLine:TextureButton = %ToolLine
@@ -88,7 +88,8 @@ func _ready() -> void:
 	toolDraw.pressed.connect(_set_editor_mode_draw)
 	toolLine.pressed.connect(_set_editor_mode_line)
 	toolRect.pressed.connect(_set_editor_mode_rect)
-	toolFill.pressed.connect(_set_editor_mode_fill)	
+	toolFill.pressed.connect(_set_editor_mode_fill)
+	selectionLayer.initialize(self)
 
 func _set_editor_mode_draw() -> void:
 	set_editor_mode(EditorMode.Draw)

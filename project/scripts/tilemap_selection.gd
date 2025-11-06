@@ -4,7 +4,7 @@ class_name TileMapSelection
 @export var fillColor := Color.AZURE
 @export var eraseColor := Color.RED
 
-@onready var editor := %TileMapEditor
+var editor:TileMapEditor
 
 enum SelectTile {
 	Null = -1,
@@ -15,7 +15,11 @@ enum SelectTile {
 
 const SELECT_SOURCE_ID := 3
 
+func initialize(p_editor: TileMapEditor) -> void:
+	editor = p_editor
+
 func _draw() -> void:
+	if !editor: return
 	var anchorCoords:Vector2i = editor.anchorCoords
 	var anchorTile:TileMapEditor.Tile = editor.anchorTile
 	var mode:TileMapEditor.EditorMode = editor.mode
@@ -55,6 +59,7 @@ func _draw() -> void:
 		draw_rect(Rect2(fromLocal, toLocal - fromLocal), color, false, 5)
 
 func _process(_delta: float) -> void:
+	if !editor: return
 	if !enabled || !visible || !is_visible_in_tree():
 		return
 	var mode:TileMapEditor.EditorMode = editor.mode
