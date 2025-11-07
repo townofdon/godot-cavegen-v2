@@ -144,13 +144,13 @@ public:
 	RoomNodes nodes;
 
 	int GetPrecedence();
-	Vector2 GetGridPosition();
+	Vector2i GetGridPosition();
 	Ref<RoomConfig> GetNodeUp();
 	Ref<RoomConfig> GetNodeDown();
 	Ref<RoomConfig> GetNodeLeft();
 	Ref<RoomConfig> GetNodeRight();
 	void SetPrecedence(int p_Precedence);
-	void SetGridPosition(Vector2 p_GridPosition);
+	void SetGridPosition(Vector2i p_GridPosition);
 	void SetNodeUp(const Ref<RoomConfig> &p_room);
 	void SetNodeDown(const Ref<RoomConfig> &p_room);
 	void SetNodeLeft(const Ref<RoomConfig> &p_room);

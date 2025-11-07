@@ -559,14 +559,14 @@ PackedInt32Array RoomConfig::GetTilesExport() {
 int RoomConfig::GetPrecedence() {
 	return Precedence;
 }
-Vector2 RoomConfig::GetGridPosition() {
+Vector2i RoomConfig::GetGridPosition() {
 	return GridPosition;
 }
 void RoomConfig::SetPrecedence(int p_Precedence) {
 	Precedence = p_Precedence;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetGridPosition(Vector2 p_GridPosition) {
+void RoomConfig::SetGridPosition(Vector2i p_GridPosition) {
 	GridPosition = p_GridPosition;
 	emit_signal("on_changed");
 }
