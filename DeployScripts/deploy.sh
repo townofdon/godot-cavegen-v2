@@ -43,6 +43,10 @@ SAFE_VERSION="${VERSION//./$'-'}"
 #
 
 info "WELCOME TO THE ITCHIO DEPLOYMENT SCRIPT!"
+
+warn "Just to double-check - have you downloaded the latest ${CYAN}GDExtension wasm${YELLOW} binaries?"
+prompt "(y/n)"
+
 info "USER=${YELLOW}${USERNAME}"
 info "GAME=${YELLOW}${GAME}"
 info "About to push version ${RED}${VERSION}${CYAN} - proceed?"
