@@ -1,9 +1,9 @@
 [gd_scene load_steps=10 format=3 uid="uid://b2qbmyypnnpmy"]
 
 [ext_resource type="Script" uid="uid://dt1a2nd6b8oob" path="res://scripts/noise_editor_form.gd" id="1_bgtom"]
-[ext_resource type="PackedScene" uid="uid://upsj8hq04i0s" path="res://scenes/ui/form_heading.tscn" id="2_r5ufs"]
-[ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/ui/bool_field.tscn" id="3_bcw72"]
-[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/ui/float_field.tscn" id="3_qr8kv"]
+[ext_resource type="PackedScene" uid="uid://upsj8hq04i0s" path="res://scenes/room_config/form_heading.tscn" id="2_r5ufs"]
+[ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/bool_field.tscn" id="3_bcw72"]
+[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/float_field.tscn" id="3_qr8kv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bgtom"]
 bg_color = Color(0.7581252, 0.606366, 0.62051076, 1)

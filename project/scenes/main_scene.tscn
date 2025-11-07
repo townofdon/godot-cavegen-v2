@@ -1,4 +1,4 @@
-[gd_scene load_steps=45 format=4 uid="uid://dldu5uhu5swo2"]
+[gd_scene load_steps=46 format=4 uid="uid://dldu5uhu5swo2"]
 
 [ext_resource type="Script" uid="uid://djfffelu7xi37" path="res://scripts/cavegen.gd" id="1_58gk3"]
 [ext_resource type="Script" uid="uid://b1aph5h3epjbd" path="res://scripts/cavegen_data.gd" id="2_58gk3"]
@@ -12,7 +12,8 @@
 [ext_resource type="TileSet" uid="uid://b5xqbx8oru3hk" path="res://tiles/grid_tile_set.tres" id="11_lhwp2"]
 [ext_resource type="Script" uid="uid://b7en3d5w6sr4f" path="res://scripts/tilemap_editor.gd" id="12_l40q6"]
 [ext_resource type="Script" uid="uid://dkl7qe68bbs53" path="res://scripts/tilemap_selection.gd" id="13_iav3h"]
-[ext_resource type="PackedScene" uid="uid://b2qbmyypnnpmy" path="res://scenes/ui/room_config_form.tscn" id="14_to7gp"]
+[ext_resource type="PackedScene" uid="uid://b3p3553kpp887" path="res://scenes/room_select/room_select_overlay.tscn" id="13_to7gp"]
+[ext_resource type="PackedScene" uid="uid://b2qbmyypnnpmy" path="res://scenes/room_config/room_config_form.tscn" id="14_to7gp"]
 [ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="14_womr8"]
 [ext_resource type="Script" uid="uid://ckdmum3nhbjx7" path="res://scripts/file_menu.gd" id="15_onjth"]
 [ext_resource type="Texture2D" uid="uid://gqfddyoaj0hy" path="res://assets/edtool-draw-f.png" id="16_xa0eo"]
@@ -208,7 +209,7 @@ mesh = SubResource("QuadMesh_84odl")
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 0.49999997, 0.86602545, 0, -0.86602545, 0.49999997, 15, 30, 23.5)
 environment = SubResource("Environment_nfk4m")
-h_offset = 12.73
+h_offset = -0.15
 v_offset = -0.86
 projection = 1
 size = 40.0
@@ -249,6 +250,7 @@ theme = ExtResource("10_kkokr")
 
 [node name="TileEditorContainer" type="MarginContainer" parent="SubViewportContainer2/UISubViewport/UI"]
 unique_name_in_owner = true
+visible = false
 texture_filter = 1
 material = ExtResource("9_pgk25")
 layout_mode = 1
@@ -293,8 +295,12 @@ collision_enabled = false
 navigation_enabled = false
 script = ExtResource("13_iav3h")
 
+[node name="RoomSelectOverlay" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("13_to7gp")]
+layout_mode = 1
+
 [node name="RoomConfigForm" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("14_to7gp")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -506,14 +512,42 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_right = 8
+metadata/_edit_use_anchors_ = true
 
-[node name="RichTextLabel" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer"]
-custom_minimum_size = Vector2(0, 26)
+[node name="HBoxContainer" type="HBoxContainer" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer"]
 layout_mode = 2
-size_flags_vertical = 4
+
+[node name="RichTextLabel" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 bbcode_enabled = true
 text = "1=Select Room, 2=Config, 3=Tilemap Editor, 3=Preview"
 fit_content = true
+vertical_alignment = 1
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = " [img region=144,0,16,16]res://assets/icons.png[/img][img region=160,0,16,16]res://assets/icons.png[/img][img region=128,0,16,16]res://assets/icons.png[/img][img region=112,0,16,16]res://assets/icons.png[/img] Add / Select Room"
+fit_content = true
+vertical_alignment = 1
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = " [img region=176,0,16,16]res://assets/icons.png[/img] Look"
+fit_content = true
+vertical_alignment = 1
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="SubViewportContainer2/UISubViewport/UI/StatusBar/MarginContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "B - Brush	L - Line	R - Rect	G - Fill"
+fit_content = true
+vertical_alignment = 1
 
 [node name="InfoButton" type="TextureButton" parent="SubViewportContainer2/UISubViewport/UI"]
 layout_mode = 1

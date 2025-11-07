@@ -1,0 +1,715 @@
+[gd_scene load_steps=34 format=3 uid="uid://b3p3553kpp887"]
+
+[ext_resource type="Texture2D" uid="uid://gy3vttp7mp0m" path="res://assets/button.png" id="1_er08q"]
+[ext_resource type="Texture2D" uid="uid://brxkkfmtkoitl" path="res://assets/icons.png" id="2_8ia5j"]
+[ext_resource type="Texture2D" uid="uid://dr1httlvlunnk" path="res://assets/buttons.png" id="3_8ia5j"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iq35h"]
+atlas = ExtResource("3_8ia5j")
+region = Rect2(384, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1amge"]
+texture = SubResource("AtlasTexture_iq35h")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_2cawj"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = ExtResource("1_er08q")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_2cawj"]
+load_path = "res://.godot/imported/button.png-c79155b6e84601a7c5a042250ad77b07.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fcv7r"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("CompressedTexture2D_2cawj")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.8256702, 0.8633313, 0.88541347, 1)
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_fcv7r"]
+load_path = "res://.godot/imported/button.png-c79155b6e84601a7c5a042250ad77b07.ctex"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_h3ek0"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("CompressedTexture2D_fcv7r")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.6064401, 0.62716603, 0.6437366, 0.93333334)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2cawj"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 0.75)
+draw_center = false
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fcv7r"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wim64"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(98, 0, 16, 16)
+margin = Rect2(1, 0, 0, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ay60k"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4bap7"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ff5b0"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pxvkf"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ia5j"]
+atlas = ExtResource("3_8ia5j")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_beoep"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_8ia5j")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8ia5j"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_8ia5j")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.8256702, 0.8633313, 0.88541347, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_h0bxr"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_8ia5j")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_w7qm4"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_8ia5j")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.6064401, 0.62716603, 0.6437366, 0.93333334)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gei2g"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(256, 0, 16, 16)
+margin = Rect2(-1, -1, 0, 0)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_beoep"]
+atlas = ExtResource("3_8ia5j")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_iq35h"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_beoep")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_0ju8l"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_beoep")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.8256702, 0.8633313, 0.88541347, 1)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jktdp"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_beoep")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rqukx"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+texture = SubResource("AtlasTexture_beoep")
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+modulate_color = Color(0.57157385, 0.59605336, 0.6083092, 0.9254902)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h3ek0"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(240, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c7huo"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ju8l"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jktdp"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rqukx"]
+atlas = ExtResource("2_8ia5j")
+region = Rect2(32, 0, 16, 16)
+
+[node name="RoomSelectOverlay" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CurrentRoom" type="Panel" parent="."]
+custom_minimum_size = Vector2(400, 400)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -196.0
+offset_top = -196.0
+offset_right = 204.0
+offset_bottom = 204.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxTexture_1amge")
+
+[node name="Inner" type="MarginContainer" parent="CurrentRoom"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_edit_use_anchors_ = true
+
+[node name="ButtonMove" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_fcv7r")
+alignment = 0
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonDelete" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_wim64")
+alignment = 0
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonMoveUp" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_ay60k")
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonMoveDown" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_4bap7")
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonMoveLeft" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_ff5b0")
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonMoveRight" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_pxvkf")
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="ButtonClose" type="Button" parent="CurrentRoom/Inner"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+tooltip_text = "Delete Room"
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_beoep")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_8ia5j")
+theme_override_styles/hover = SubResource("StyleBoxTexture_h0bxr")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_w7qm4")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+icon = SubResource("AtlasTexture_gei2g")
+alignment = 0
+autowrap_trim_flags = 192
+clip_text = true
+icon_alignment = 1
+expand_icon = true
+
+[node name="North" type="Control" parent="CurrentRoom"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_top = -110.0
+offset_right = 20.0
+offset_bottom = -70.0
+grow_horizontal = 2
+
+[node name="ButtonNorthAddRoom" type="Button" parent="CurrentRoom/North"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -23.5
+offset_right = 62.0
+offset_bottom = 23.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9812558, 0.98788327, 0.9937337, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.413487, 0.47318667, 0.52529496, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_iq35h")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0ju8l")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jktdp")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqukx")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Add Room"
+icon = SubResource("AtlasTexture_h3ek0")
+
+[node name="ButtonNorthSelectRoom" type="Button" parent="CurrentRoom/North"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -37.0
+offset_right = 35.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Select"
+icon = SubResource("AtlasTexture_c7huo")
+autowrap_trim_flags = 192
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="South" type="Control" parent="CurrentRoom"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -20.0
+offset_top = 476.0
+offset_right = 20.0
+offset_bottom = 516.0
+grow_horizontal = 2
+
+[node name="ButtonSouthAddRoom" type="Button" parent="CurrentRoom/South"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -23.5
+offset_right = 62.0
+offset_bottom = 23.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9812558, 0.98788327, 0.9937337, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.413487, 0.47318667, 0.52529496, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_iq35h")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0ju8l")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jktdp")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqukx")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Add Room"
+icon = SubResource("AtlasTexture_h3ek0")
+
+[node name="ButtonSouthSelectRoom" type="Button" parent="CurrentRoom/South"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -37.0
+offset_right = 35.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Select"
+icon = SubResource("AtlasTexture_0ju8l")
+autowrap_trim_flags = 192
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="West" type="Control" parent="CurrentRoom"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -161.0
+offset_top = -20.0
+offset_right = -121.0
+offset_bottom = 20.0
+grow_vertical = 2
+
+[node name="ButtonWestAddRoom" type="Button" parent="CurrentRoom/West"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -23.5
+offset_right = 62.0
+offset_bottom = 23.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9812558, 0.98788327, 0.9937337, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.413487, 0.47318667, 0.52529496, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_iq35h")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0ju8l")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jktdp")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqukx")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Add Room"
+icon = SubResource("AtlasTexture_h3ek0")
+
+[node name="ButtonWestSelectRoom" type="Button" parent="CurrentRoom/West"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -37.0
+offset_right = 35.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Select"
+icon = SubResource("AtlasTexture_jktdp")
+autowrap_trim_flags = 192
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
+
+[node name="East" type="Control" parent="CurrentRoom"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 522.0
+offset_top = -20.0
+offset_right = 562.0
+offset_bottom = 20.0
+grow_vertical = 2
+
+[node name="ButtonEastAddRoom" type="Button" parent="CurrentRoom/East"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -23.5
+offset_right = 62.0
+offset_bottom = 23.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.9812558, 0.98788327, 0.9937337, 1)
+theme_override_colors/font_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.413487, 0.47318667, 0.52529496, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_iq35h")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_0ju8l")
+theme_override_styles/hover = SubResource("StyleBoxTexture_jktdp")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_rqukx")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Add Room"
+icon = SubResource("AtlasTexture_h3ek0")
+
+[node name="ButtonEastSelectRoom" type="Button" parent="CurrentRoom/East"]
+custom_minimum_size = Vector2(47, 47)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -37.0
+offset_right = 35.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_hover_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
+theme_override_colors/font_disabled_color = Color(0.20987993, 0.2513454, 0.28656653, 0.9607843)
+theme_override_styles/normal = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_fcv7r")
+theme_override_styles/hover = SubResource("StyleBoxTexture_2cawj")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_h3ek0")
+theme_override_styles/focus = SubResource("StyleBoxFlat_2cawj")
+text = "Select"
+icon = SubResource("AtlasTexture_rqukx")
+autowrap_trim_flags = 192
+icon_alignment = 1
+vertical_icon_alignment = 0
+expand_icon = true
