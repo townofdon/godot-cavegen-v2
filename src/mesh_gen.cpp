@@ -101,7 +101,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		march_cubes(ctx, noiseSamples);
+		march_cubes(ctx, p_room->GridPosition, noiseSamples);
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -742,7 +742,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 // march cubes
 //
 #pragma region march_cubes
-void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
+void MeshGen::march_cubes(MG::Context ctx, Vector2i roomGridPosition, float noiseSamples[]) {
 	auto ref = get_mesh();
 	auto ptr = *(ref);
 	ArrayMesh *mesh = Object::cast_to<ArrayMesh>(ptr);
@@ -751,6 +751,11 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 	mesh->clear_surfaces();
 	auto surface_array = godot::Array();
 	surface_array.resize(Mesh::ARRAY_MAX);
+
+	Vector3 roomPos = Vector3(
+		(ctx.cfg.RoomWidth - ctx.cfg.CellSize) * roomGridPosition.x,
+		0,
+		(ctx.cfg.RoomDepth - ctx.cfg.CellSize) * roomGridPosition.y);
 
 	auto verts = PackedVector3Array();
 	auto uvs = PackedVector2Array();
@@ -807,7 +812,7 @@ void MeshGen::march_cubes(MG::Context ctx, float noiseSamples[]) {
 							float y = point.y * ctx.cfg.CellSize;
 							float z = point.z * ctx.cfg.CellSize;
 							Vector3 offset = Vector3(0, -(MG::GetActivePlaneYF(ctx) + 1) * int(ctx.cfg.MoveActivePlaneToOrigin), 0);
-							Vector3 vert = get_global_position() + Vector3(x, y, z) + offset;
+							Vector3 vert = roomPos + Vector3(x, y, z) + offset;
 							verts.append(vert);
 							uvs.append(uv);
 							normals.append(normal);

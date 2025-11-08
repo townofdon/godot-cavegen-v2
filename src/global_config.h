@@ -51,4 +51,5 @@ public:
 	SizingData GetSizingData();
 	Vector3i GetNumCells();
 	Vector2i GetNumCells2d();
+	float GetAdjustedCellSize();
 };

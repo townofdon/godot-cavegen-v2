@@ -21,6 +21,7 @@ func _ready() -> void:
 func initialize(field_name: String, p_get_value: Callable) -> void:
 	_get_value = p_get_value
 	assert(_get_value)
+	@warning_ignore("untyped_declaration")
 	var test_value = _get_value.call()
 	assert(test_value is bool, "_get_value must yield a bool. field=%s,value=%s" % [field_name, test_value])
 	label.text = field_name
@@ -28,6 +29,7 @@ func initialize(field_name: String, p_get_value: Callable) -> void:
 
 func update_val() -> void:
 	if !_get_value: return
+	@warning_ignore("untyped_declaration")
 	var newval = _get_value.call()
 	if !(newval is bool): return
 	check_button.button_pressed = newval

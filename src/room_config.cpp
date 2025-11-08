@@ -192,6 +192,7 @@ void RoomConfig::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "tilemap__tiles"), "set_TilesExport", "get_TilesExport");
 
 	ClassDB::bind_method(D_METHOD("init_tiles", "num_cells_2d"), &RoomConfig::InitTiles);
+	ClassDB::bind_method(D_METHOD("init_tiles_for_new_room", "num_cells_2d", "dir", "border_mask"), &RoomConfig::InitTilesForNewRoom);
 	ClassDB::bind_method(D_METHOD("set_tile", "num_cells_2d", "coords", "tile"), &RoomConfig::SetTile);
 	ClassDB::bind_method(D_METHOD("get_tile_at", "num_cells_2d", "coords"), &RoomConfig::GetTileAt);
 	ClassDB::bind_method(D_METHOD("get_num_tiles"), &RoomConfig::GetNumTiles);
@@ -506,6 +507,52 @@ void RoomConfig::InitTiles(Vector2i numCells2d) {
 			} else {
 				SetTile(numCells2d, Vector2i(x, y), TILE_STATE_UNSET);
 			}
+		}
+	}
+	numTiles = numCells2d.x * numCells2d.y;
+}
+void RoomConfig::InitTilesForNewRoom(Vector2i numCells2d, Vector2i dir, int borderMask) {
+	auto up = Vector2i(0, -1);
+	auto down = Vector2i(0, 1);
+	auto left = Vector2i(-1, 0);
+	auto right = Vector2i(1, 0);
+	ERR_FAIL_COND_EDMSG(dir != up && dir != down && dir != left && dir != right, "unacceptable, reclaimer.");
+	ERR_FAIL_INDEX_EDMSG(numCells2d.x * numCells2d.y - 1, MAX_NOISE_NODES_2D, "numcells greater than max allowed");
+	int temp[MAX_NOISE_NODES_2D];
+	int xmax = numCells2d.x - 1;
+	int ymax = numCells2d.y - 1;
+	bool borderUp = (borderMask & BORDER_MASK_UP) > 0;
+	bool borderDown = (borderMask & BORDER_MASK_DOWN) > 0;
+	bool borderLeft = (borderMask & BORDER_MASK_LEFT) > 0;
+	bool borderRight = (borderMask & BORDER_MASK_RIGHT) > 0;
+	for (size_t y = 0; y < numCells2d.y; y++) {
+		for (size_t x = 0; x < numCells2d.x; x++) {
+			int i = x + y * numCells2d.x;
+			if (
+				(x == 0 && borderLeft) ||
+				(x == xmax && borderRight) ||
+				(y == 0 && borderUp) ||
+				(y == ymax && borderDown)) {
+				if (x == 0 && dir == right) {
+					temp[i] = GetTileAt(numCells2d, Vector2i(xmax, y));
+				} else if (x == xmax && dir == left) {
+					temp[i] = GetTileAt(numCells2d, Vector2i(0, y));
+				} else if (y == 0 && dir == down) {
+					temp[i] = GetTileAt(numCells2d, Vector2i(x, ymax));
+				} else if (y == ymax && dir == up) {
+					temp[i] = GetTileAt(numCells2d, Vector2i(x, 0));
+				} else {
+					temp[i] = TILE_STATE_FILLED;
+				}
+			} else {
+				temp[i] = TILE_STATE_UNSET;
+			}
+		}
+	}
+	for (size_t y = 0; y < numCells2d.y; y++) {
+		for (size_t x = 0; x < numCells2d.x; x++) {
+			int i = x + y * numCells2d.x;
+			SetTile(numCells2d, Vector2i(x, y), temp[i]);
 		}
 	}
 	numTiles = numCells2d.x * numCells2d.y;

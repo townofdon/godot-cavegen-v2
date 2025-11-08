@@ -10,7 +10,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	update_test_cube()
 
-func update_test_cube():
+func update_test_cube()->void:
 	if !cfg: return
 	size.x = cfg.room_width
 	size.y = cfg.room_height * cfg.ceiling

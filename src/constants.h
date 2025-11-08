@@ -11,6 +11,11 @@ inline constexpr const int MAX_NOISE_NODES_2D = 2500;
 inline constexpr const int MAX_TILE_ERASE_SIZE = 10;
 inline constexpr const float MAXVAL = FLT_MAX;
 
+inline constexpr const int BORDER_MASK_UP = 1;
+inline constexpr const int BORDER_MASK_DOWN = 2;
+inline constexpr const int BORDER_MASK_LEFT = 4;
+inline constexpr const int BORDER_MASK_RIGHT = 8;
+
 // clang-format off
 inline constexpr const int POINTS[8 * 3] = {
 	0, 0, 0,

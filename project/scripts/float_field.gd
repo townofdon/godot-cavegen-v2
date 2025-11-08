@@ -18,12 +18,13 @@ func _ready() -> void:
 	check_button.hide()
 	spin_box.value_changed.connect(_on_internal_change)
 	h_slider.value_changed.connect(_on_internal_change)
-	reset_button.pressed.connect(func(): _on_internal_change(_default_value))
+	reset_button.pressed.connect(func() -> void: _on_internal_change(_default_value))
 
 func initialize(field_name: String, p_get_value: Callable, p_default_value: float, min_value: float, max_value: float, step: float) -> void:
 	_get_value = p_get_value
 	_default_value = p_default_value
 	assert(_get_value)
+	@warning_ignore("untyped_declaration")
 	var test_value = _get_value.call()
 	assert(test_value is float, "_get_value must yield a float. field=%s,value=%s" % [field_name, test_value])
 	assert(min_value != max_value)
@@ -39,6 +40,7 @@ func initialize(field_name: String, p_get_value: Callable, p_default_value: floa
 
 func update_val() -> void:
 	if !_get_value: return
+	@warning_ignore("untyped_declaration")
 	var newval = _get_value.call()
 	if !(newval is float): return
 	spin_box.set_value_no_signal(newval)

@@ -45,6 +45,7 @@ void GlobalConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_num_cells"), &GlobalConfig::GetNumCells);
 	ClassDB::bind_method(D_METHOD("get_num_cells_2d"), &GlobalConfig::GetNumCells2d);
+	ClassDB::bind_method(D_METHOD("get_adjusted_cell_size"), &GlobalConfig::GetAdjustedCellSize);
 }
 
 GlobalConfig::GlobalConfig() {
@@ -166,4 +167,8 @@ Vector2i GlobalConfig::GetNumCells2d() {
 	// remove bounds (which is always just empty space)
 	Vector2i numCells2d = Vector2i(numCells.x - 2, numCells.z - 2);
 	return numCells2d;
+}
+
+float GlobalConfig::GetAdjustedCellSize() {
+	return GlobalConfig::GetSizingData().cellSize;
 }

@@ -69,7 +69,7 @@ func _tween_to_position(p_offset:Vector3, r_offset:Vector3, c_offset: Vector2, s
 	tween.tween_property(camera, "size", target_size, duration)
 	tween.tween_property(camera, "h_offset", c_offset.x, duration)
 	tween.tween_property(camera, "v_offset", c_offset.y, duration)
-	tween.chain().tween_callback(func(): _initialize_look())
+	tween.chain().tween_callback(func()->void: _initialize_look())
 
 func _on_config_changed(cavegen_mode: CaveGen.Mode) -> void:
 	var target := room_position + _get_target_offset()
@@ -132,14 +132,14 @@ func _handle_fly_movement(delta: float) -> void:
 	camera.global_position = camera.global_position + velocity
 	
 
-func _input(event):
+func _input(event: InputEvent) -> void:
 	if mode == CameraMode.Fly:
 		if (event is InputEventMouseMotion) && looking:
 			look += event.relative
 
 # I think this connects to the SceneTree notifs
 # see: https://www.reddit.com/r/godot/comments/e36zyq/how_can_i_detect_when_the_mouse_cursor_is_inside/
-func _notification(msg):
+func _notification(msg: int) -> void:
 	match msg:
 		NOTIFICATION_WM_MOUSE_EXIT:
 			_is_mouse_in_window = false

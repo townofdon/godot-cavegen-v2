@@ -16,6 +16,7 @@ extends Control
 @onready var float_tilt_z: FloatField = %FloatTiltZ
 
 var default_room: RoomConfig
+var prev_room: RoomConfig
 
 func _ready() -> void:
 	default_room = RoomConfig.new()
@@ -39,6 +40,8 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_tilt_x, room, "room_noise__tilt_x", 0, 2, 0.001)
 	_setup_room_float(float_tilt_z, room, "room_noise__tilt_z", 0, 2, 0.001)
 
+	prev_room = room
+
 func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, minv: float, maxv: float, step: float) -> void:
 	assert(field, fieldname)
 	assert(_room_get(room, fieldname) is float, fieldname)
@@ -52,8 +55,9 @@ func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, m
 		maxv,
 		step,
 	)
-	field.value_changed.connect(func(val: float): _room_set(room, fieldname, val))
-	room.on_changed.connect(func(): field_iso_value.update_val())
+	Utils.Conn.disconnect_all(field.value_changed)
+	field.value_changed.connect(func(val: float)->void: _room_set(room, fieldname, val))
+	room.on_changed.connect(func()->void: field.update_val())
 
 func _setup_room_bool(field: BoolField, room: RoomConfig, fieldname: String) -> void:
 	assert(_room_get(room, fieldname) is bool, fieldname)
@@ -62,13 +66,15 @@ func _setup_room_bool(field: BoolField, room: RoomConfig, fieldname: String) -> 
 		fieldname.get_slice("__", 1),
 		Callable(self, "_room_get").bind(room, fieldname),
 	)
-	field.value_changed.connect(func(val: bool): _room_set(room, fieldname, val))
-	room.on_changed.connect(func(): field.update_val())
+	Utils.Conn.disconnect_all(field.value_changed)
+	field.value_changed.connect(func(val: bool)->void: _room_set(room, fieldname, val))
+	room.on_changed.connect(func()->void: field.update_val())
 
 func _room_get(room: RoomConfig, fieldname: String) -> Variant:
 	assert(fieldname in room, fieldname)
 	return room.get(fieldname)
 
+@warning_ignore("untyped_declaration")
 func _room_set(room: RoomConfig, fieldname: String, val) -> void:
 	assert(typeof(val) == typeof(_room_get(room, fieldname)))
 	room.set(fieldname, val)

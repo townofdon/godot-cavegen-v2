@@ -27,5 +27,5 @@ public:
 
 private:
 	void process_noise(MG::Context ctx, RoomConfig *room);
-	void march_cubes(MG::Context ctx, float noiseSamples[]);
+	void march_cubes(MG::Context ctx, Vector2i roomGridPosition, float noiseSamples[]);
 };

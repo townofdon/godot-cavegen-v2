@@ -33,9 +33,11 @@ static func sanitize(data: CaveGenData) -> CaveGenData:
 		room.init_tiles(num_cells)
 	assert(room.get_num_tiles() > 0)
 	assert(room.get_num_tiles() == expected_num_tiles)
+	data.resource_local_to_scene = true
 	return data
 
 static func clone(data: CaveGenData) -> CaveGenData:
+	data.resource_local_to_scene = true
 	return data.duplicate_deep(Resource.DEEP_DUPLICATE_ALL)
 
 ## save data to SAVE_PATH

@@ -168,6 +168,7 @@ public:
 		_TILE_STATE_MAX_,
 	};
 	void InitTiles(Vector2i numCells2d);
+	void InitTilesForNewRoom(Vector2i numCells2d, Vector2i dir, int borderMask);
 	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
 	int GetTileAt(Vector2i numCells2d, Vector2i coords);
 	int GetNumTiles();

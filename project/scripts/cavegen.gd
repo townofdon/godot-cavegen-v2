@@ -153,6 +153,10 @@ func _ready() -> void:
 	save_file_dialog.canceled.connect(_on_file_dialog_cancel)
 	load_file_dialog.file_selected.connect(_on_open_file)
 	load_file_dialog.canceled.connect(_on_file_dialog_cancel)
+	room_select_overlay.add_neighbor_requested.connect(_add_room)
+	room_select_overlay.select_neighbor_requested.connect(_select_neighbor_room)
+	room_select_overlay.move_room_requested.connect(_move_room)
+	room_select_overlay.delete_room_requested.connect(_delete_room)
 	# setup ui
 	side_toolbar.initialize(self)
 	export_dialog.initialize(self)
@@ -169,13 +173,17 @@ func _ready() -> void:
 	_initialize(data)
 
 func _initialize(data: CaveGenData) -> void:
-	save_data = data
-	save_data.validate(0)
-	arr_meshgen.clear()
-	arr_meshgen.append(root_meshgen)
+	set_mode(Mode.RoomConfig)
 	current_room_idx = 0
 	room_idx_lookup.clear()
-	room_idx_lookup.set(_idx_key(Vector2.ZERO), 0)
+	room_idx_lookup[_idx_key(Vector2i.ZERO)] = 0
+	save_data = data
+	save_data.validate(0, room_idx_lookup)
+	assert(!save_data.cfg.on_changed.is_connected(_notify_change))
+	save_data.cfg.on_changed.connect(_notify_change)
+	_clear_meshes()
+	arr_meshgen.clear()
+	arr_meshgen.append(root_meshgen)
 	_setup_room()
 	initializing = true
 	await _setup_initial_meshes()
@@ -184,20 +192,23 @@ func _initialize(data: CaveGenData) -> void:
 func _setup_room() -> void:
 	if initializing: return
 	assert(save_data)
-	save_data.validate(current_room_idx)
+	save_data.validate(current_room_idx, room_idx_lookup)
 	var cfg := save_data.cfg
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	var noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
 	var border_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
 	var meshgen:MeshGen = arr_meshgen.get(current_room_idx)
 	assert(meshgen)
-	# connect cfg, room signals
-	assert(!cfg.on_changed.is_connected(_notify_change))
+	# connect room signal
 	assert(!room.on_changed.is_connected(_notify_change))
-	cfg.on_changed.connect(_notify_change)
 	room.on_changed.connect(_notify_change)
 	# init UI, camera
-	cameraman.initialize(self, cfg, meshgen.global_position)
+	var coords := room.internal__grid_position
+	var room_position := Vector3(
+		(cfg.room_width - cfg.get_adjusted_cell_size()) * coords.x,
+		0,
+		(cfg.room_depth - cfg.get_adjusted_cell_size()) * coords.y)
+	cameraman.initialize(self, cfg, room_position)
 	file_menu.initialize(cfg)
 	# init tilemap, roomconfig
 	tilemap_editor.initialize(cfg, room)
@@ -210,7 +221,7 @@ func _setup_room() -> void:
 func regenerate(idx: int) -> void:
 	if Engine.is_editor_hint(): return
 	assert(save_data)
-	if !save_data.validate(idx): return
+	if !save_data.validate(idx, room_idx_lookup): return
 	var cfg := save_data.cfg
 	var room:RoomConfig = save_data.arr_room.get(idx)
 	var noise:FastNoiseLite = save_data.arr_noise.get(idx)
@@ -230,41 +241,54 @@ func regenerate(idx: int) -> void:
 		# OBJExporter does not support shader material
 		#meshgen.mesh.surface_set_material(0, meshgen.material_override)
 
+func _clear_meshes()->void:
+	for i in range(1, len(arr_meshgen)):
+		var meshgen:MeshGen = arr_meshgen.get(i)
+		if meshgen: meshgen.queue_free()
+
 func _setup_initial_meshes() -> void:
 	assert(save_data)
-	save_data.validate(0)
-	var cfg := save_data.cfg
+	save_data.validate(0, room_idx_lookup)
+	room_idx_lookup.set(_idx_key(save_data.arr_room.get(0).internal__grid_position), 0)
 	for idx in range(1, len(save_data.arr_room)):
 		var room:RoomConfig = save_data.arr_room.get(idx)
-		var coords := room.internal__grid_position
+		assert(room)
+		room_idx_lookup.set(_idx_key(room.internal__grid_position), idx)
+		save_data.validate(idx, room_idx_lookup)
 		var new_meshgen := root_meshgen.duplicate()
-		new_meshgen.global_position = Vector3(
-			cfg.room_width * coords.x,
-			0,
-			cfg.room_depth * coords.y)
-		arr_meshgen.append(new_meshgen)
+		new_meshgen.mesh = ArrayMesh.new()
 		mesh_container.add_child(new_meshgen)
+		arr_meshgen.append(new_meshgen)
 		regenerate(idx)
 		await get_tree().process_frame
 
-func _add_room(dir: Vector2i) -> void:
+func _add_room(dir: Vector2i, border_mask: int) -> void:
+	print("add room ", dir)
 	assert(dir == Vector2i.UP || dir == Vector2i.DOWN || dir == Vector2i.LEFT || dir == Vector2i.RIGHT, "invalid dir: (%s,%s)" % [dir.x, dir.y])
 	assert(save_data)
-	if !save_data.validate(current_room_idx): return
+	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var cfg := save_data.cfg
 	var existing_room:RoomConfig = save_data.arr_room.get(current_room_idx)
+	Utils.Conn.disconnect_all(existing_room.on_changed)
 	# create new room
-	var new_room := existing_room.duplicate()
+	var new_room := existing_room.duplicate(true)
 	var coords:Vector2i = new_room.internal__grid_position + dir
 	new_room.internal__grid_position = coords
+	new_room.tilemap__tiles = new_room.tilemap__tiles.duplicate()
+	new_room.init_tiles_for_new_room(cfg.get_num_cells_2d(), dir, border_mask)
+	# update neighbor relationships
 	var idx_up:int = room_idx_lookup.get(_idx_key(coords + Vector2i.UP), -1)
 	var idx_down:int = room_idx_lookup.get(_idx_key(coords + Vector2i.DOWN), -1)
 	var idx_left:int = room_idx_lookup.get(_idx_key(coords + Vector2i.LEFT), -1)
 	var idx_right:int = room_idx_lookup.get(_idx_key(coords + Vector2i.RIGHT), -1)
-	new_room.internal__node_up = save_data.arr_room.get(idx_up)
-	new_room.internal__node_down = save_data.arr_room.get(idx_down)
-	new_room.internal__node_left = save_data.arr_room.get(idx_left)
-	new_room.internal__node_right = save_data.arr_room.get(idx_right)
+	new_room.internal__node_up = save_data.arr_room.get(idx_up) if idx_up >= 0 else null
+	new_room.internal__node_down = save_data.arr_room.get(idx_down) if idx_down >= 0 else null
+	new_room.internal__node_left = save_data.arr_room.get(idx_left) if idx_left >= 0 else null
+	new_room.internal__node_right = save_data.arr_room.get(idx_right) if idx_right >= 0 else null
+	if new_room.internal__node_up: new_room.internal__node_up.internal__node_down = new_room
+	if new_room.internal__node_down: new_room.internal__node_down.internal__node_up = new_room
+	if new_room.internal__node_left: new_room.internal__node_left.internal__node_right = new_room
+	if new_room.internal__node_right: new_room.internal__node_right.internal__node_left = new_room
 	## set precedence based on neighbors - see if idx solution works first
 	#new_room.internal__precedence = new_room.internal__precedence + 1
 	#for node:RoomConfig in [node_up, node_down, node_left, node_right]:
@@ -294,36 +318,121 @@ func _add_room(dir: Vector2i) -> void:
 	var existing_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
 	var new_noise := existing_noise.duplicate()
 	new_noise.offset = new_noise.offset + Vector3(
-		cfg.room_width * dir.x,
+		(cfg.room_width - cfg.get_adjusted_cell_size()) * dir.x,
 		0,
-		cfg.room_depth * dir.y)
+		(cfg.room_depth - cfg.get_adjusted_cell_size()) * dir.y)
 	# duplicate border noise
 	var existing_border_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
 	var new_border_noise := existing_border_noise.duplicate()
 	# duplicate meshgen
 	var existing_meshgen:MeshGen = arr_meshgen.get(current_room_idx)
-	var new_meshgen := existing_meshgen.duplicate()
-	new_meshgen.global_position = Vector3(
-			cfg.room_width * coords.x,
-			0,
-			cfg.room_depth * coords.y)
+	var flags := 0
+	flags = flags << DuplicateFlags.DUPLICATE_GROUPS
+	flags = flags << DuplicateFlags.DUPLICATE_SCRIPTS
+	flags = flags << DuplicateFlags.DUPLICATE_USE_INSTANTIATION
+	var new_meshgen := existing_meshgen.duplicate(flags)
+	new_meshgen.mesh = ArrayMesh.new()
 	mesh_container.add_child(new_meshgen)
 	# update state to reflect everything
 	save_data.arr_room.append(new_room)
 	save_data.arr_noise.append(new_noise)
 	save_data.arr_border_noise.append(new_border_noise)
 	arr_meshgen.append(new_meshgen)
-	save_data.validate(new_idx)
-	current_room_idx = new_idx
 	room_idx_lookup.set(_idx_key(coords), new_idx)
+	save_data.validate(new_idx, room_idx_lookup)
+	current_room_idx = new_idx
+	_setup_room()
+
+func _delete_room() -> void:
+	assert(save_data)
+	if !save_data.validate(current_room_idx, room_idx_lookup): return
+	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
+	Utils.Conn.disconnect_all(room.on_changed)
+	var node_up:RoomConfig = room.internal__node_up
+	var node_down:RoomConfig = room.internal__node_down
+	var node_left:RoomConfig = room.internal__node_left
+	var node_right:RoomConfig = room.internal__node_right	
+	if node_up: node_up.internal__node_down = null
+	if node_down: node_down.internal__node_up = null
+	if node_left: node_left.internal__node_right = null
+	if node_right: node_right.internal__node_left = null
+	# remove mesh
+	var meshgen:MeshGen = arr_meshgen.get(current_room_idx)
+	if meshgen: meshgen.queue_free()
+	# update save data
+	room_idx_lookup.erase(_idx_key(room.internal__grid_position))
+	save_data.arr_room.remove_at(current_room_idx)
+	save_data.arr_noise.remove_at(current_room_idx)
+	save_data.arr_border_noise.remove_at(current_room_idx)
+	arr_meshgen.remove_at(current_room_idx)
+	# update all room indices
+	for i in range(len(save_data.arr_room)):
+		var r:RoomConfig = save_data.arr_room[i]
+		r.internal__precedence = i
+	# update current room idx
+	current_room_idx = 0
+	for node:RoomConfig in [node_up, node_down, node_left, node_right]:
+		if node && node.internal__precedence > current_room_idx:
+			current_room_idx = node.internal__precedence
+	save_data.validate(current_room_idx, room_idx_lookup)
+	_setup_room()
+
+func _move_room(dir: Vector2i) -> void:
+	assert(dir == Vector2i.UP || dir == Vector2i.DOWN || dir == Vector2i.LEFT || dir == Vector2i.RIGHT, "invalid dir: (%s,%s)" % [dir.x, dir.y])
+	assert(save_data)
+	if !save_data.validate(current_room_idx, room_idx_lookup): return
+	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
+	Utils.Conn.disconnect_all(room.on_changed)
+	if dir == Vector2i.UP: assert(!room.internal__node_up)
+	if dir == Vector2i.DOWN: assert(!room.internal__node_down)
+	if dir == Vector2i.LEFT: assert(!room.internal__node_left)
+	if dir == Vector2i.RIGHT: assert(!room.internal__node_right)
+	# update old neighbors
+	if room.internal__node_up: room.internal__node_up.internal__node_down = null
+	if room.internal__node_down: room.internal__node_down.internal__node_up = null
+	if room.internal__node_left: room.internal__node_left.internal__node_right = null
+	if room.internal__node_right: room.internal__node_right.internal__node_left = null
+	var old_coords:Vector2i = room.internal__grid_position
+	var new_coords:Vector2i = room.internal__grid_position + dir
+	# set new neighbors
+	room_idx_lookup.erase(_idx_key(old_coords))
+	var new_node_up:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.UP), -1))
+	var new_node_down:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.DOWN), -1))
+	var new_node_left:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.LEFT), -1))
+	var new_node_right:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.RIGHT), -1))
+	if new_node_up: new_node_up.internal__node_down = room
+	if new_node_down: new_node_down.internal__node_up = room
+	if new_node_left: new_node_left.internal__node_right = room
+	if new_node_right: new_node_right.internal__node_left = room
+	room.internal__node_up = new_node_up
+	room.internal__node_down = new_node_down
+	room.internal__node_left = new_node_left
+	room.internal__node_right = new_node_right
+	room.internal__grid_position = new_coords
+	# update self
+	room_idx_lookup.set(_idx_key(new_coords), current_room_idx)
+	_setup_room()
+
+func _select_neighbor_room(dir: Vector2i) -> void:
+	print("select room ", dir)
+	assert(dir == Vector2i.UP || dir == Vector2i.DOWN || dir == Vector2i.LEFT || dir == Vector2i.RIGHT, "invalid dir: (%s,%s)" % [dir.x, dir.y])
+	assert(save_data)
+	if !save_data.validate(current_room_idx, room_idx_lookup): return
+	var existing_room:RoomConfig = save_data.arr_room.get(current_room_idx)
+	Utils.Conn.disconnect_all(existing_room.on_changed)
+	var coords:Vector2i = existing_room.internal__grid_position + dir
+	var new_idx:int = room_idx_lookup.get(_idx_key(coords), -1)
+	var new_room:RoomConfig = save_data.arr_room.get(new_idx)
+	assert(new_room, "no room found at new_coords: %s - old_coords=%s" % [_idx_key(coords), _idx_key(existing_room.internal__grid_position)])
+	current_room_idx = new_idx
 	_setup_room()
 
 func _idx_key(coords: Vector2i) -> String:
-	return "%s_%s" % [coords.x, coords.y]
+	return CaveGenData.room_idx_key(coords)
 
 func _get_active_plane_y() -> float:
 	assert(save_data)
-	save_data.validate(current_room_idx)
+	save_data.validate(current_room_idx, room_idx_lookup)
 	var cfg := save_data.cfg
 	var ceiling_y := cfg.room_height * cfg.ceiling
 	var active_y := ceiling_y - cfg.active_plane_offset

@@ -2,7 +2,7 @@ class_name RoomSelectOverlay
 extends Control
 
 signal select_neighbor_requested(dir: Vector2i)
-signal add_neighbor_requested(dir: Vector2i)
+signal add_neighbor_requested(dir: Vector2i, border_mask: int)
 signal move_room_requested(dir: Vector2i)
 signal delete_room_requested
 
@@ -21,6 +21,16 @@ signal delete_room_requested
 @onready var button_west_select_room: Button = %ButtonWestSelectRoom
 @onready var button_east_add_room: Button = %ButtonEastAddRoom
 @onready var button_east_select_room: Button = %ButtonEastSelectRoom
+
+@onready var button_border_toggle_full: Button = %ButtonBorderToggleFull
+@onready var border_indicator_up: TextureRect = %BorderIndicatorUp
+@onready var border_indicator_down: TextureRect = %BorderIndicatorDown
+@onready var border_indicator_left: TextureRect = %BorderIndicatorLeft
+@onready var border_indicator_right: TextureRect = %BorderIndicatorRight
+@onready var button_border_toggle_left: TextureButton = %ButtonBorderToggleLeft
+@onready var button_border_toggle_right: TextureButton = %ButtonBorderToggleRight
+@onready var button_border_toggle_up: TextureButton = %ButtonBorderToggleUp
+@onready var button_border_toggle_down: TextureButton = %ButtonBorderToggleDown
 
 @onready var buttons: Array[Button] = [
 	button_move,
@@ -44,9 +54,16 @@ enum Mode {
 	Select,
 	Move,
 }
+enum BorderMask {
+	UP = 1,
+	DOWN = 2,
+	LEFT = 4,
+	RIGHT = 8,
+}
 
 var mode: Mode = Mode.Select
 var room: RoomConfig = RoomConfig.new()
+var border_mask := 0
 
 func set_room(p_room: RoomConfig)->void:
 	room = p_room
@@ -55,6 +72,27 @@ func set_room(p_room: RoomConfig)->void:
 func _set_mode(p_mode: Mode, should_rerender: bool = true)->void:
 	mode = p_mode
 	if should_rerender: _rerender()
+
+func _set_full_mask(p_mask: int) -> void:
+	border_mask = p_mask
+	_rerender_mask_buttons()
+
+func _set_mask_on(p_mask: int) -> void:
+	border_mask = border_mask | p_mask
+	_rerender_mask_buttons()
+
+func _set_mask_off(p_mask: int) -> void:
+	border_mask = border_mask & (~p_mask)
+	_rerender_mask_buttons()
+
+func _toggle_mask(p_mask: int) -> void:
+	assert(
+		p_mask == BorderMask.UP ||
+		p_mask == BorderMask.DOWN ||
+		p_mask == BorderMask.LEFT ||
+		p_mask == BorderMask.RIGHT
+	)
+	border_mask = border_mask ^ p_mask
 
 func _ready() -> void:
 	button_move.pressed.connect(_set_mode.bind(Mode.Move))
@@ -72,12 +110,34 @@ func _ready() -> void:
 	button_south_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.DOWN))
 	button_west_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.LEFT))
 	button_east_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.RIGHT))
+
+	button_border_toggle_full.pressed.connect(_on_toggle_full_mask)
+	button_border_toggle_up.toggled.connect(_on_toggle_edge_mask.bind(BorderMask.UP))
+	button_border_toggle_down.toggled.connect(_on_toggle_edge_mask.bind(BorderMask.DOWN))
+	button_border_toggle_left.toggled.connect(_on_toggle_edge_mask.bind(BorderMask.LEFT))
+	button_border_toggle_right.toggled.connect(_on_toggle_edge_mask.bind(BorderMask.RIGHT))
+
 	visibility_changed.connect(_on_visibility_changed)
 	_rerender()
+	_rerender_mask_buttons()
+
+func _on_toggle_full_mask() -> void:
+	if border_mask < 15:
+		_set_full_mask(15)
+	else:
+		_set_full_mask(0)
+
+func _on_toggle_edge_mask(toggled_on: bool, p_mask: int) -> void:
+	if toggled_on:
+		_set_mask_on(p_mask)
+	else:
+		_set_mask_off(p_mask)
+	_rerender_mask_buttons()
 
 func _on_visibility_changed()->void:
 	_set_mode(Mode.Select, false)
 	call_deferred("_rerender")
+	call_deferred("_rerender_mask_buttons")
 
 func _on_delete_room_requested()->void:
 	delete_room_requested.emit()
@@ -92,8 +152,30 @@ func _on_select_neighbor(dir: Vector2i)->void:
 	_disable_all_buttons()
 
 func _on_add_neighbor(dir: Vector2i)->void:
-	add_neighbor_requested.emit(dir)
+	add_neighbor_requested.emit(dir, border_mask)
 	_disable_all_buttons()
+
+func _rerender_mask_buttons() -> void:
+	border_indicator_up.hide()
+	border_indicator_down.hide()
+	border_indicator_left.hide()
+	border_indicator_right.hide()
+	button_border_toggle_up.set_pressed_no_signal(false)
+	button_border_toggle_down.set_pressed_no_signal(false)
+	button_border_toggle_left.set_pressed_no_signal(false)
+	button_border_toggle_right.set_pressed_no_signal(false)
+	if (border_mask & BorderMask.UP) > 0:
+		border_indicator_up.show()
+		button_border_toggle_up.set_pressed_no_signal(true)
+	if (border_mask & BorderMask.DOWN) > 0:
+		border_indicator_down.show()
+		button_border_toggle_down.set_pressed_no_signal(true)
+	if (border_mask & BorderMask.LEFT) > 0:
+		border_indicator_left.show()
+		button_border_toggle_left.set_pressed_no_signal(true)
+	if (border_mask & BorderMask.RIGHT) > 0:
+		border_indicator_right.show()
+		button_border_toggle_right.set_pressed_no_signal(true)
 
 func _rerender() -> void:
 	_enable_all_buttons()

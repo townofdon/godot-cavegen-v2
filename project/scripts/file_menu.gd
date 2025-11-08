@@ -44,11 +44,11 @@ func _ready() -> void:
 	for menu_idx in range(num_children):
 		var popup := get_child(menu_idx)
 		if popup is PopupMenu:
-			popup.index_pressed.connect(func(item_idx: int):
+			popup.index_pressed.connect(func(item_idx: int) -> void:
 				_on_menu_item_press(menu_idx, item_idx)
 			)
 
-func _on_menu_item_press(menu: int, item: int):
+func _on_menu_item_press(menu: int, item: int) -> void:
 	if menu == Menu.File:
 		if item == FileItem.New:
 			_on_new()
@@ -71,7 +71,7 @@ func _on_menu_item_press(menu: int, item: int):
 		if item == OptionsItem.MoveActivePlaneToOrigin:
 			_on_toggle_move_active_plane_to_origin()
 
-func _set_menu_item_checked(menu: int, item: int, checked: bool):
+func _set_menu_item_checked(menu: int, item: int, checked: bool) -> void:
 	var popup := get_child(menu)
 	if popup is PopupMenu:
 		pass
@@ -93,7 +93,7 @@ func _on_save_as() -> void:
 	save_file_as_pressed.emit()
 
 func _on_quit() -> void:
-	var data := ConfirmDialogData.new(func():
+	var data := ConfirmDialogData.new(func() -> void:
 		get_tree().quit(0))
 	data.title = "Quit Application?"
 	data.text_body = "All unsaved data will be lost."
