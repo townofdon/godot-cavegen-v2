@@ -200,13 +200,15 @@ func _rerender() -> void:
 	button_move_right.disabled = true
 	if !room:
 		return
+	var is_root: bool = room.internal__grid_position == Vector2i.ZERO
 	var has_neighbor_north: bool = !!room.internal__node_up
 	var has_neighbor_south: bool = !!room.internal__node_down
 	var has_neighbor_west: bool = !!room.internal__node_left
 	var has_neighbor_east: bool = !!room.internal__node_right
 	if mode == Mode.Select:
 		button_move.show()
-		button_delete.show()
+		if !is_root:
+			button_delete.show()
 		if has_neighbor_north:
 			button_north_select_room.show()
 		else:

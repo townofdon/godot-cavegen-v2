@@ -261,6 +261,10 @@ func _setup_initial_meshes() -> void:
 		arr_meshgen.append(new_meshgen)
 		regenerate(idx)
 		await get_tree().process_frame
+	# regenerate all rooms so that neighbor blend is correct
+	for idx in range(0, len(save_data.arr_room)):
+		regenerate(idx)
+		await get_tree().process_frame
 
 func _add_room(dir: Vector2i, border_mask: int) -> void:
 	print("add room ", dir)
@@ -289,11 +293,6 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	if new_room.internal__node_down: new_room.internal__node_down.internal__node_up = new_room
 	if new_room.internal__node_left: new_room.internal__node_left.internal__node_right = new_room
 	if new_room.internal__node_right: new_room.internal__node_right.internal__node_left = new_room
-	## set precedence based on neighbors - see if idx solution works first
-	#new_room.internal__precedence = new_room.internal__precedence + 1
-	#for node:RoomConfig in [node_up, node_down, node_left, node_right]:
-		#if node && node.internal__precedence >= new_room.internal__precedence:
-			#new_room.internal__precedence = node.internal__precedence + 1
 	# set precedence based on idx
 	var new_idx := len(save_data.arr_room)
 	new_room.internal__precedence = new_idx
@@ -344,6 +343,7 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	_setup_room()
 
 func _delete_room() -> void:
+	if current_room_idx == 0: return
 	assert(save_data)
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
@@ -351,7 +351,7 @@ func _delete_room() -> void:
 	var node_up:RoomConfig = room.internal__node_up
 	var node_down:RoomConfig = room.internal__node_down
 	var node_left:RoomConfig = room.internal__node_left
-	var node_right:RoomConfig = room.internal__node_right	
+	var node_right:RoomConfig = room.internal__node_right
 	if node_up: node_up.internal__node_down = null
 	if node_down: node_down.internal__node_up = null
 	if node_left: node_left.internal__node_right = null

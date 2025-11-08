@@ -170,25 +170,29 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
 			neighborNoiseSamples[i] = MAXVAL;
 		}
-		if (nodes.up.is_valid() && nodes.up->Precedence < room->Precedence) {
+		// if (nodes.up.is_valid() && nodes.up->Precedence < room->Precedence) {
+		if (nodes.up.is_valid()) {
 			auto raw = nodes.up->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 0; i < MAX_NOISE_NODES * 1; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		if (nodes.down.is_valid() && nodes.down->Precedence < room->Precedence) {
+		// if (nodes.down.is_valid() && nodes.down->Precedence < room->Precedence) {
+		if (nodes.down.is_valid()) {
 			auto raw = nodes.down->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 1; i < MAX_NOISE_NODES * 2; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		if (nodes.left.is_valid() && nodes.left->Precedence < room->Precedence) {
+		// if (nodes.left.is_valid() && nodes.left->Precedence < room->Precedence) {
+		if (nodes.left.is_valid()) {
 			auto raw = nodes.left->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 2; i < MAX_NOISE_NODES * 3; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		if (nodes.right.is_valid() && nodes.right->Precedence < room->Precedence) {
+		// if (nodes.right.is_valid() && nodes.right->Precedence < room->Precedence) {
+		if (nodes.right.is_valid()) {
 			auto raw = nodes.right->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 3; i < MAX_NOISE_NODES * 4; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
@@ -215,6 +219,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					if (cfg.ShowNoise) {
 						// typically, noise output is in range [-1,1]
 						float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
+						rawSamples[i] = val;
 						// mix in neighbor noise
 						if (blend > 0) {
 							int xinv = numx - 1 - x;
@@ -240,7 +245,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							maxV = val;
 						}
 						noiseBuffer[i] = val;
-						rawSamples[i] = val;
 					}
 				}
 			}
@@ -286,7 +290,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (size_t y = 0; y < numCells.y; y++) {
 			for (size_t x = 0; x < numCells.x; x++) {
 				float val = noiseBuffer[MG::NoiseIndex(ctx, x, y, z)];
-				if (!MG::IsAtBorderEdge(ctx, x, z)) {
+				if (!MG::IsAtBorderEdge(ctx, x, z) || MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
 					// apply tilt x/z - sample different xyz
 					float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
 					float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
@@ -327,7 +331,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
 					// apply xz bounds
 					val = zeroValue;
-				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && !MG::IsAtBorderEdge(ctx, x, z) && cfg.ShowFloor) {
+				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && cfg.ShowFloor) {
 					// apply floor
 					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
@@ -379,7 +383,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	}
 	// - fourth pass - adjust areas around action y plane to improve readability
 	{
-		int activeY = int(MG::GetActivePlaneY(ctx));
+		int activeY = int(MG::GetActivePlaneY(ctx)) + 1;
 		float activeYSmoothing = cfg.ActiveYSmoothing;
 		if (activeY > 1 && activeY + 1 < numCells.y - 1) {
 			for (size_t z = 0; z < numCells.z; z++) {

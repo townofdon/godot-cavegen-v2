@@ -417,13 +417,13 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 
 inline Vector3 ClampMeshBorderPoint(Context ctx, Vector3 point) {
 	Vector3 min = Vector3(
-		1,
-		1,
-		1);
+		1 - CMP_EPSILON,
+		1 - CMP_EPSILON,
+		1 - CMP_EPSILON);
 	Vector3 max = Vector3(
-		ctx.numCells.x - 2,
-		ctx.numCells.y - 2,
-		ctx.numCells.z - 2);
+		ctx.numCells.x - 2 + CMP_EPSILON,
+		ctx.numCells.y - 2 + CMP_EPSILON,
+		ctx.numCells.z - 2 + CMP_EPSILON);
 	// clang-format off
 	if (point.x < min.x) point.x = min.x;
 	if (point.y < min.y) point.y = min.y;

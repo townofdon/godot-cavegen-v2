@@ -21,6 +21,7 @@ tile_apply__tile_smoothing = 0.72
 tile_apply__tile_ceiling = 1.0
 tile_apply__tile_ceil_blend = 0.23
 tile_apply__tile_floor = 0.56
+tile_apply__tile_erase_size = nan
 neighbors__neighbor_blend = 0.0
 internal__precedence = 5
 internal__node_up = ExtResource("1_a1lhk")

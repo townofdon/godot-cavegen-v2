@@ -15,3 +15,4 @@ room_border__smooth_border_noise = 0.6
 tile_apply__tile_strength = 2.0
 tile_apply__tile_ceiling = 0.72
 tile_apply__tile_floor = 0.53
+tile_apply__tile_erase_size = nan
