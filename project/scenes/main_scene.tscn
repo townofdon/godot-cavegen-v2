@@ -164,6 +164,13 @@ metadata/_custom_type_script = "uid://djfffelu7xi37"
 [node name="Timer" type="Timer" parent="CaveGen2"]
 unique_name_in_owner = true
 wait_time = 0.1
+one_shot = true
+ignore_time_scale = true
+
+[node name="DirtyTimer" type="Timer" parent="CaveGen2"]
+unique_name_in_owner = true
+wait_time = 0.2
+one_shot = true
 ignore_time_scale = true
 
 [node name="Cameraman" type="Node3D" parent="CaveGen2"]

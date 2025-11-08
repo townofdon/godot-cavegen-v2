@@ -153,6 +153,9 @@ void RoomConfig::_bind_methods() {
 
 	ADD_GROUP("Internal", "internal__");
 
+	ClassDB::bind_method(D_METHOD("get_dirty"), &RoomConfig::GetDirty);
+	ClassDB::bind_method(D_METHOD("set_dirty", "p_dirty"), &RoomConfig::SetDirty);
+
 	ClassDB::bind_method(D_METHOD("get_room_idx"), &RoomConfig::GetRoomIdx);
 	ClassDB::bind_method(D_METHOD("set_room_idx", "p_room_idx"), &RoomConfig::SetRoomIdx);
 
@@ -173,6 +176,7 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_node_right", "p_room"), &RoomConfig::SetNodeRight);
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
+	ADD_SIGNAL(MethodInfo("dirtied"));
 
 	ClassDB::bind_method(D_METHOD("notify_changed"), &RoomConfig::NotifyChanged);
 
@@ -239,7 +243,7 @@ RoomConfig::RoomConfig() {
 	InitTiles(Vector2i(30, 30));
 	numTiles = 0;
 	// initialize internal vars
-	RoomIdx = 0;
+	roomIdx = 0;
 	GridPosition = Vector2i(0, 0);
 }
 
@@ -594,31 +598,14 @@ PackedInt32Array RoomConfig::GetTilesExport() {
 //
 // INTERNAL
 //
+bool RoomConfig::GetDirty() {
+	return dirty;
+}
 int RoomConfig::GetRoomIdx() {
-	return RoomIdx;
+	return roomIdx;
 }
 Vector2i RoomConfig::GetGridPosition() {
 	return GridPosition;
-}
-void RoomConfig::SetRoomIdx(int p_RoomIdx) {
-	RoomIdx = p_RoomIdx;
-	emit_signal("on_changed");
-}
-void RoomConfig::SetGridPosition(Vector2i p_GridPosition) {
-	GridPosition = p_GridPosition;
-	emit_signal("on_changed");
-}
-void RoomConfig::SetNodeUp(const Ref<RoomConfig> &p_room) {
-	nodes.up = p_room;
-}
-void RoomConfig::SetNodeDown(const Ref<RoomConfig> &p_room) {
-	nodes.down = p_room;
-}
-void RoomConfig::SetNodeLeft(const Ref<RoomConfig> &p_room) {
-	nodes.left = p_room;
-}
-void RoomConfig::SetNodeRight(const Ref<RoomConfig> &p_room) {
-	nodes.right = p_room;
 }
 Ref<RoomConfig> RoomConfig::GetNodeUp() {
 	return nodes.up;
@@ -631,4 +618,52 @@ Ref<RoomConfig> RoomConfig::GetNodeLeft() {
 }
 Ref<RoomConfig> RoomConfig::GetNodeRight() {
 	return nodes.right;
+}
+void RoomConfig::SetDirty(bool p_dirty) {
+	dirty = p_dirty;
+	if (p_dirty) {
+		if (nodes.up.is_valid()) {
+			nodes.up->dirty = true;
+		}
+		if (nodes.down.is_valid()) {
+			nodes.down->dirty = true;
+		}
+		if (nodes.left.is_valid()) {
+			nodes.left->dirty = true;
+		}
+		if (nodes.right.is_valid()) {
+			nodes.right->dirty = true;
+		}
+		emit_signal("dirtied");
+	}
+}
+void RoomConfig::SetRoomIdx(int p_roomIdx) {
+	roomIdx = p_roomIdx;
+}
+void RoomConfig::SetGridPosition(Vector2i p_GridPosition) {
+	GridPosition = p_GridPosition;
+}
+void RoomConfig::SetNodeUp(const Ref<RoomConfig> &p_room) {
+	if (p_room != nodes.up) {
+		SetDirty(true);
+	}
+	nodes.up = p_room;
+}
+void RoomConfig::SetNodeDown(const Ref<RoomConfig> &p_room) {
+	if (p_room != nodes.down) {
+		SetDirty(true);
+	}
+	nodes.down = p_room;
+}
+void RoomConfig::SetNodeLeft(const Ref<RoomConfig> &p_room) {
+	if (p_room != nodes.left) {
+		SetDirty(true);
+	}
+	nodes.left = p_room;
+}
+void RoomConfig::SetNodeRight(const Ref<RoomConfig> &p_room) {
+	if (p_room != nodes.right) {
+		SetDirty(true);
+	}
+	nodes.right = p_room;
 }

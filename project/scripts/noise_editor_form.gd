@@ -44,9 +44,8 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 
 func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, minv: float, maxv: float, step: float) -> void:
 	assert(field, fieldname)
+	assert(fieldname in room, fieldname)
 	assert(_room_get(room, fieldname) is float, fieldname)
-	_room_get(room, fieldname)
-	_room_set(room, fieldname, _room_get(room, fieldname))
 	field.initialize(
 		fieldname.get_slice("__", 1),
 		Callable(self, "_room_get").bind(room, fieldname),
@@ -60,8 +59,9 @@ func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, m
 	room.on_changed.connect(func()->void: field.update_val())
 
 func _setup_room_bool(field: BoolField, room: RoomConfig, fieldname: String) -> void:
+	assert(field, fieldname)
+	assert(fieldname in room, fieldname)
 	assert(_room_get(room, fieldname) is bool, fieldname)
-	_room_set(room, fieldname, _room_get(room, fieldname))
 	field.initialize(
 		fieldname.get_slice("__", 1),
 		Callable(self, "_room_get").bind(room, fieldname),
@@ -76,5 +76,7 @@ func _room_get(room: RoomConfig, fieldname: String) -> Variant:
 
 @warning_ignore("untyped_declaration")
 func _room_set(room: RoomConfig, fieldname: String, val) -> void:
+	assert(fieldname in room, fieldname)
 	assert(typeof(val) == typeof(_room_get(room, fieldname)))
 	room.set(fieldname, val)
+	room.set_dirty(true)

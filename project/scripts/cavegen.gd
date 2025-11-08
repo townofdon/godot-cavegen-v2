@@ -11,6 +11,7 @@ extends Node3D
 @onready var mesh_container: Node3D = %MeshContainer
 @onready var root_meshgen:MeshGen = %MeshGen
 @onready var notif_timer:Timer = %Timer
+@onready var dirty_timer:Timer = %DirtyTimer
 @onready var test_cube:CSGBox3D = %TestCube
 @onready var tilemap_editor:TileMapEditor = %TileMapEditor
 @onready var cameraman: CameraMan = %Cameraman
@@ -160,11 +161,15 @@ func _ready() -> void:
 	# setup ui
 	side_toolbar.initialize(self)
 	export_dialog.initialize(self)
-	# setup notification timer
+	# setup timers
 	notif_timer.autostart = false
 	notif_timer.one_shot = true
 	notif_timer.timeout.connect(func()->void: regenerate(current_room_idx))
 	notif_timer.stop()
+	dirty_timer.autostart = false
+	dirty_timer.one_shot = true
+	dirty_timer.timeout.connect(_regen_dirty_rooms)
+	dirty_timer.stop()
 	# setup meshsaver
 	OBJExporter.export_progress_updated.connect(_on_export_progress_updated)
 	OBJExporter.export_completed.connect(_on_export_completed)
@@ -179,8 +184,8 @@ func _initialize(data: CaveGenData) -> void:
 	room_idx_lookup.clear()
 	room_idx_lookup[_idx_key(Vector2i.ZERO)] = 0
 	save_data.validate(0, room_idx_lookup)
-	assert(!save_data.cfg.on_changed.is_connected(_notify_change))
-	save_data.cfg.on_changed.connect(_notify_change)
+	assert(!save_data.cfg.on_changed.is_connected(_on_global_config_changed))
+	save_data.cfg.on_changed.connect(_on_global_config_changed)
 	_clear_meshes()
 	arr_meshgen.clear()
 	arr_meshgen.append(root_meshgen)
@@ -200,8 +205,10 @@ func _setup_room() -> void:
 	var meshgen:MeshGen = arr_meshgen.get(current_room_idx)
 	assert(meshgen)
 	# connect room signal
-	assert(!room.on_changed.is_connected(_notify_change))
-	room.on_changed.connect(_notify_change)
+	assert(!room.on_changed.is_connected(_on_room_config_changed))
+	assert(!room.dirtied.is_connected(_on_dirtied))
+	room.on_changed.connect(_on_room_config_changed)
+	room.dirtied.connect(_on_dirtied)
 	# init UI, camera
 	var coords := room.internal__grid_position
 	var room_position := Vector3(
@@ -217,6 +224,7 @@ func _setup_room() -> void:
 	# init meshgen
 	notif_timer.stop()
 	regenerate(current_room_idx)
+	dirty_timer.start()
 
 func regenerate(idx: int) -> void:
 	if Engine.is_editor_hint(): return
@@ -229,6 +237,7 @@ func regenerate(idx: int) -> void:
 	var meshgen:MeshGen = arr_meshgen.get(idx)
 	assert(meshgen)
 	meshgen.generate(cfg, room, noise, border_noise)
+	room.set_dirty(false)
 	assert(meshgen.mesh is ArrayMesh)
 	# apply mesh material
 	if meshgen.mesh is ArrayMesh:
@@ -240,6 +249,16 @@ func regenerate(idx: int) -> void:
 			mat.set_shader_parameter("y_min", 0.0 + offset)
 		# OBJExporter does not support shader material
 		#meshgen.mesh.surface_set_material(0, meshgen.material_override)
+
+func _regen_dirty_rooms() -> void:
+	await get_tree().process_frame
+	for room:RoomConfig in save_data.arr_room:
+		if initializing: return
+		if !dirty_timer.is_stopped: return
+		if !notif_timer.is_stopped(): return
+		if room.get_dirty():
+			regenerate(room.get_room_idx())
+			await get_tree().process_frame
 
 func _clear_meshes()->void:
 	for i in range(1, len(arr_meshgen)):
@@ -270,13 +289,13 @@ func _setup_initial_meshes() -> void:
 		await get_tree().process_frame
 
 func _add_room(dir: Vector2i, border_mask: int) -> void:
-	print("add room ", dir)
 	assert(dir == Vector2i.UP || dir == Vector2i.DOWN || dir == Vector2i.LEFT || dir == Vector2i.RIGHT, "invalid dir: (%s,%s)" % [dir.x, dir.y])
 	assert(save_data)
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var cfg := save_data.cfg
 	var existing_room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(existing_room.on_changed)
+	Utils.Conn.disconnect_all(existing_room.dirtied)
 	# create new room
 	var new_idx := len(save_data.arr_room)
 	var new_room := existing_room.duplicate(true)
@@ -321,7 +340,10 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	save_data.arr_noise.append(new_noise)
 	save_data.arr_border_noise.append(new_border_noise)
 	arr_meshgen.append(new_meshgen)
+	existing_room.set_dirty(true)
+	new_room.set_dirty(true)
 	_recalculate_room_mappings()
+	new_room.set_dirty(true)
 	save_data.validate(new_idx, room_idx_lookup)
 	current_room_idx = new_idx
 	_setup_room()
@@ -332,6 +354,7 @@ func _delete_room() -> void:
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(room.on_changed)
+	Utils.Conn.disconnect_all(room.dirtied)
 	var node_up:RoomConfig = room.get_node_up()
 	var node_down:RoomConfig = room.get_node_down()
 	var node_left:RoomConfig = room.get_node_left()
@@ -350,6 +373,7 @@ func _delete_room() -> void:
 	for node:RoomConfig in [node_up, node_down, node_left, node_right]:
 		if node && node.get_room_idx() > current_room_idx:
 			current_room_idx = node.get_room_idx()
+			node.set_dirty(true)
 	save_data.validate(current_room_idx, room_idx_lookup)
 	_setup_room()
 
@@ -359,21 +383,24 @@ func _move_room(dir: Vector2i) -> void:
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(room.on_changed)
+	Utils.Conn.disconnect_all(room.dirtied)
 	if dir == Vector2i.UP: assert(!room.get_node_up())
 	if dir == Vector2i.DOWN: assert(!room.get_node_down())
 	if dir == Vector2i.LEFT: assert(!room.get_node_left())
 	if dir == Vector2i.RIGHT: assert(!room.get_node_right())
 	room.internal__grid_position = room.internal__grid_position + dir
+	room.set_dirty(true)
 	_recalculate_room_mappings()
+	room.set_dirty(true)
 	_setup_room()
 
 func _select_neighbor_room(dir: Vector2i) -> void:
-	print("select room ", dir)
 	assert(dir == Vector2i.UP || dir == Vector2i.DOWN || dir == Vector2i.LEFT || dir == Vector2i.RIGHT, "invalid dir: (%s,%s)" % [dir.x, dir.y])
 	assert(save_data)
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var existing_room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(existing_room.on_changed)
+	Utils.Conn.disconnect_all(existing_room.dirtied)
 	var coords:Vector2i = existing_room.internal__grid_position + dir
 	var new_idx:int = room_idx_lookup.get(_idx_key(coords), -1)
 	var new_room:RoomConfig = save_data.arr_room.get(new_idx)
@@ -381,9 +408,8 @@ func _select_neighbor_room(dir: Vector2i) -> void:
 	current_room_idx = new_idx
 	_setup_room()
 
+# this method takes 0.5-5ms.
 func _recalculate_room_mappings() -> void:
-	var start := Time.get_unix_time_from_system()
-	
 	room_idx_lookup.clear()
 	for idx in range(len(save_data.arr_room)):
 		var room:RoomConfig = save_data.arr_room.get(idx)
@@ -391,10 +417,6 @@ func _recalculate_room_mappings() -> void:
 		var coords := room.internal__grid_position
 		room.set_room_idx(idx)
 		room_idx_lookup[_idx_key(coords)] = idx
-		room.set_node_up(null)
-		room.set_node_down(null)
-		room.set_node_left(null)
-		room.set_node_right(null)
 	for idx in range(len(save_data.arr_room)):
 		var room:RoomConfig = save_data.arr_room.get(idx)
 		assert(room)
@@ -413,10 +435,6 @@ func _recalculate_room_mappings() -> void:
 		if room.get_node_right(): room.get_node_right().set_node_left(room)
 		save_data.validate(idx, room_idx_lookup)
 
-	# TODO: REMOVE
-	var end := Time.get_unix_time_from_system()
-	print("recalculate_room_mappings took %sms" % [(end - start) * 1000])
-
 func _idx_key(coords: Vector2i) -> String:
 	return CaveGenData.room_idx_key(coords)
 
@@ -428,19 +446,18 @@ func _get_active_plane_y() -> float:
 	var active_y := ceiling_y - cfg.active_plane_offset
 	return maxf(active_y, 2)
 
-# TODO: REMOVE
-#func _process(_delta: float) -> void:
-	#if _did_noise_change(noise, noise_b):
-		#_notify_change()
-		#noise_b = noise.duplicate()
-	#if _did_noise_change(border_noise, border_noise_b):
-		#_notify_change()
-		#border_noise_b = border_noise.duplicate()
-
-func _notify_change() -> void:
+func _on_global_config_changed() -> void:
 	if initializing: return
 	tilemap_editor.handle_room_size_change()
 	if notif_timer.is_stopped(): notif_timer.start()
+
+func _on_room_config_changed() -> void:
+	if initializing: return
+	if notif_timer.is_stopped(): notif_timer.start()
+
+func _on_dirtied() -> void:
+	if initializing: return
+	dirty_timer.start()
 
 var time_export_started:float = 0
 var exporting:bool = false

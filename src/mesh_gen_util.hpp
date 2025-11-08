@@ -104,12 +104,60 @@ struct Context {
 		// neighbors
 		float NeighborBlend;
 	};
+	struct NeighborConfig {
+		bool Active;
+		float IsoValue;
+		float NoiseFloor;
+		float NoiseCeil;
+		float Curve;
+		float TiltY;
+		float TiltX;
+		float TiltZ;
+		float OffsetY;
+		float Smoothing;
+		float FalloffAboveCeiling;
+		float FalloffNearBorder;
+		float Interpolate;
+		float ActiveYSmoothing;
+		float FloorLevel;
+	};
 	Config cfg;
+	NeighborConfig cfg_node_up;
+	NeighborConfig cfg_node_down;
+	NeighborConfig cfg_node_left;
+	NeighborConfig cfg_node_right;
 	Noise noise;
 	Noise borderNoise;
 	Vector3i numCells;
 	int *tiles;
 };
+
+inline MG::Context::NeighborConfig SetupNeighborConfig(Ref<RoomConfig> p_room) {
+	if (!p_room.is_valid()) {
+		struct MG::Context::NeighborConfig ncfg = {
+			false,
+		};
+		return ncfg;
+	}
+	struct MG::Context::NeighborConfig ncfg = {
+		true,
+		p_room->IsoValue,
+		p_room->NoiseFloor,
+		p_room->NoiseCeil,
+		p_room->Curve,
+		p_room->TiltY,
+		p_room->TiltX,
+		p_room->TiltZ,
+		p_room->OffsetY,
+		p_room->Smoothing,
+		p_room->FalloffAboveCeiling,
+		p_room->FalloffNearBorder,
+		p_room->Interpolate,
+		p_room->ActiveYSmoothing,
+		p_room->FloorLevel,
+	};
+	return ncfg;
+}
 
 inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_noise, Noise *p_border_noise) {
 	struct Vector3i numCells;
@@ -169,6 +217,10 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 	};
 	struct MG::Context ctx = {
 		ctxCfg,
+		SetupNeighborConfig(p_room->nodes.up),
+		SetupNeighborConfig(p_room->nodes.down),
+		SetupNeighborConfig(p_room->nodes.left),
+		SetupNeighborConfig(p_room->nodes.right),
 		*p_noise,
 		*p_border_noise,
 		sizing.numCells,

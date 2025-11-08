@@ -139,24 +139,25 @@ public:
 		Ref<RoomConfig> left;
 		Ref<RoomConfig> right;
 	};
+	bool dirty;
+	int roomIdx;
 	Vector2i GridPosition;
-	int RoomIdx;
 	RoomNodes nodes;
 
+	bool GetDirty();
 	int GetRoomIdx();
 	Vector2i GetGridPosition();
 	Ref<RoomConfig> GetNodeUp();
 	Ref<RoomConfig> GetNodeDown();
 	Ref<RoomConfig> GetNodeLeft();
 	Ref<RoomConfig> GetNodeRight();
-	void SetRoomIdx(int p_RoomIdx);
+	void SetDirty(bool p_dirty);
+	void SetRoomIdx(int p_roomIdx);
 	void SetGridPosition(Vector2i p_GridPosition);
 	void SetNodeUp(const Ref<RoomConfig> &p_room);
 	void SetNodeDown(const Ref<RoomConfig> &p_room);
 	void SetNodeLeft(const Ref<RoomConfig> &p_room);
 	void SetNodeRight(const Ref<RoomConfig> &p_room);
-
-	// bool ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare);
 
 	//
 	// Tilemap Data
