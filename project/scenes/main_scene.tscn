@@ -296,6 +296,8 @@ navigation_enabled = false
 script = ExtResource("13_iav3h")
 
 [node name="RoomSelectOverlay" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("13_to7gp")]
+unique_name_in_owner = true
+visible = false
 layout_mode = 1
 
 [node name="RoomConfigForm" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("14_to7gp")]

@@ -1,5 +1,6 @@
-[gd_scene load_steps=34 format=3 uid="uid://b3p3553kpp887"]
+[gd_scene load_steps=35 format=3 uid="uid://b3p3553kpp887"]
 
+[ext_resource type="Script" uid="uid://dthpsjtiaadau" path="res://scripts/room_select_overlay.gd" id="1_beoep"]
 [ext_resource type="Texture2D" uid="uid://gy3vttp7mp0m" path="res://assets/button.png" id="1_er08q"]
 [ext_resource type="Texture2D" uid="uid://brxkkfmtkoitl" path="res://assets/icons.png" id="2_8ia5j"]
 [ext_resource type="Texture2D" uid="uid://dr1httlvlunnk" path="res://assets/buttons.png" id="3_8ia5j"]
@@ -236,6 +237,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_beoep")
 
 [node name="CurrentRoom" type="Panel" parent="."]
 custom_minimum_size = Vector2(400, 400)
@@ -267,11 +269,12 @@ theme_override_constants/margin_bottom = 10
 metadata/_edit_use_anchors_ = true
 
 [node name="ButtonMove" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-tooltip_text = "Delete Room"
+tooltip_text = "Move Room"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -291,6 +294,7 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonDelete" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -315,11 +319,12 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonMoveUp" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 0
-tooltip_text = "Delete Room"
+tooltip_text = "Move Up"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -338,11 +343,12 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonMoveDown" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
-tooltip_text = "Delete Room"
+tooltip_text = "Move Down"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -361,11 +367,12 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonMoveLeft" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
-tooltip_text = "Delete Room"
+tooltip_text = "Move Left"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -384,11 +391,12 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonMoveRight" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 4
-tooltip_text = "Delete Room"
+tooltip_text = "Move Right"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -407,11 +415,12 @@ icon_alignment = 1
 expand_icon = true
 
 [node name="ButtonClose" type="Button" parent="CurrentRoom/Inner"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-tooltip_text = "Delete Room"
+tooltip_text = "Cancel"
 theme_override_colors/font_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_focus_color = Color(0.18431373, 0.29411766, 0.38431373, 1)
 theme_override_colors/font_pressed_color = Color(0.17254902, 0.2509804, 0.35686275, 1)
@@ -442,6 +451,7 @@ offset_bottom = -70.0
 grow_horizontal = 2
 
 [node name="ButtonNorthAddRoom" type="Button" parent="CurrentRoom/North"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -470,6 +480,7 @@ text = "Add Room"
 icon = SubResource("AtlasTexture_h3ek0")
 
 [node name="ButtonNorthSelectRoom" type="Button" parent="CurrentRoom/North"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -513,6 +524,7 @@ offset_bottom = 516.0
 grow_horizontal = 2
 
 [node name="ButtonSouthAddRoom" type="Button" parent="CurrentRoom/South"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -541,6 +553,7 @@ text = "Add Room"
 icon = SubResource("AtlasTexture_h3ek0")
 
 [node name="ButtonSouthSelectRoom" type="Button" parent="CurrentRoom/South"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -584,6 +597,7 @@ offset_bottom = 20.0
 grow_vertical = 2
 
 [node name="ButtonWestAddRoom" type="Button" parent="CurrentRoom/West"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -612,6 +626,7 @@ text = "Add Room"
 icon = SubResource("AtlasTexture_h3ek0")
 
 [node name="ButtonWestSelectRoom" type="Button" parent="CurrentRoom/West"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -655,6 +670,7 @@ offset_bottom = 20.0
 grow_vertical = 2
 
 [node name="ButtonEastAddRoom" type="Button" parent="CurrentRoom/East"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8
@@ -683,6 +699,7 @@ text = "Add Room"
 icon = SubResource("AtlasTexture_h3ek0")
 
 [node name="ButtonEastSelectRoom" type="Button" parent="CurrentRoom/East"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(47, 47)
 layout_mode = 1
 anchors_preset = 8

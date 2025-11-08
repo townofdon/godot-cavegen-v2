@@ -1,0 +1,165 @@
+class_name RoomSelectOverlay
+extends Control
+
+signal select_neighbor_requested(dir: Vector2i)
+signal add_neighbor_requested(dir: Vector2i)
+signal move_room_requested(dir: Vector2i)
+signal delete_room_requested
+
+@onready var button_move: Button = %ButtonMove
+@onready var button_delete: Button = %ButtonDelete
+@onready var button_move_up: Button = %ButtonMoveUp
+@onready var button_move_down: Button = %ButtonMoveDown
+@onready var button_move_left: Button = %ButtonMoveLeft
+@onready var button_move_right: Button = %ButtonMoveRight
+@onready var button_close: Button = %ButtonClose
+@onready var button_north_add_room: Button = %ButtonNorthAddRoom
+@onready var button_north_select_room: Button = %ButtonNorthSelectRoom
+@onready var button_south_add_room: Button = %ButtonSouthAddRoom
+@onready var button_south_select_room: Button = %ButtonSouthSelectRoom
+@onready var button_west_add_room: Button = %ButtonWestAddRoom
+@onready var button_west_select_room: Button = %ButtonWestSelectRoom
+@onready var button_east_add_room: Button = %ButtonEastAddRoom
+@onready var button_east_select_room: Button = %ButtonEastSelectRoom
+
+@onready var buttons: Array[Button] = [
+	button_move,
+	button_delete,
+	button_move_up,
+	button_move_down,
+	button_move_left,
+	button_move_right,
+	button_close,
+	button_north_add_room,
+	button_north_select_room,
+	button_south_add_room,
+	button_south_select_room,
+	button_west_add_room,
+	button_west_select_room,
+	button_east_add_room,
+	button_east_select_room,
+]
+
+enum Mode {
+	Select,
+	Move,
+}
+
+var mode: Mode = Mode.Select
+var room: RoomConfig = RoomConfig.new()
+
+func set_room(p_room: RoomConfig)->void:
+	room = p_room
+	call_deferred("_rerender")
+
+func _set_mode(p_mode: Mode, should_rerender: bool = true)->void:
+	mode = p_mode
+	if should_rerender: _rerender()
+
+func _ready() -> void:
+	button_move.pressed.connect(_set_mode.bind(Mode.Move))
+	button_close.pressed.connect(_set_mode.bind(Mode.Select))
+	button_delete.pressed.connect(_on_delete_room_requested)
+	button_move_up.pressed.connect(_on_move_room_requested.bind(Vector2i.UP))
+	button_move_down.pressed.connect(_on_move_room_requested.bind(Vector2i.DOWN))
+	button_move_left.pressed.connect(_on_move_room_requested.bind(Vector2i.LEFT))
+	button_move_right.pressed.connect(_on_move_room_requested.bind(Vector2i.RIGHT))
+	button_north_select_room.pressed.connect(_on_select_neighbor.bind(Vector2i.UP))
+	button_south_select_room.pressed.connect(_on_select_neighbor.bind(Vector2i.DOWN))
+	button_west_select_room.pressed.connect(_on_select_neighbor.bind(Vector2i.LEFT))
+	button_east_select_room.pressed.connect(_on_select_neighbor.bind(Vector2i.RIGHT))
+	button_north_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.UP))
+	button_south_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.DOWN))
+	button_west_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.LEFT))
+	button_east_add_room.pressed.connect(_on_add_neighbor.bind(Vector2i.RIGHT))
+	visibility_changed.connect(_on_visibility_changed)
+	_rerender()
+
+func _on_visibility_changed()->void:
+	_set_mode(Mode.Select, false)
+	call_deferred("_rerender")
+
+func _on_delete_room_requested()->void:
+	delete_room_requested.emit()
+	_disable_all_buttons()
+
+func _on_move_room_requested(dir: Vector2i)->void:
+	move_room_requested.emit(dir)
+	_disable_all_buttons()
+
+func _on_select_neighbor(dir: Vector2i)->void:
+	select_neighbor_requested.emit(dir)
+	_disable_all_buttons()
+
+func _on_add_neighbor(dir: Vector2i)->void:
+	add_neighbor_requested.emit(dir)
+	_disable_all_buttons()
+
+func _rerender() -> void:
+	_enable_all_buttons()
+	button_move.hide()
+	button_delete.hide()
+	button_move_up.hide()
+	button_move_down.hide()
+	button_move_left.hide()
+	button_move_right.hide()
+	button_close.hide()
+	button_north_add_room.hide()
+	button_north_select_room.hide()
+	button_south_add_room.hide()
+	button_south_select_room.hide()
+	button_west_add_room.hide()
+	button_west_select_room.hide()
+	button_east_add_room.hide()
+	button_east_select_room.hide()
+	button_move_up.disabled = true
+	button_move_down.disabled = true
+	button_move_left.disabled = true
+	button_move_right.disabled = true
+	if !room:
+		return
+	var has_neighbor_north: bool = !!room.internal__node_up
+	var has_neighbor_south: bool = !!room.internal__node_down
+	var has_neighbor_west: bool = !!room.internal__node_left
+	var has_neighbor_east: bool = !!room.internal__node_right
+	if mode == Mode.Select:
+		button_move.show()
+		button_delete.show()
+		if has_neighbor_north:
+			button_north_select_room.show()
+		else:
+			button_north_add_room.show()
+		if has_neighbor_south:
+			button_south_select_room.show()
+		else:
+			button_south_add_room.show()
+		if has_neighbor_west:
+			button_west_select_room.show()
+		else:
+			button_west_add_room.show()
+		if has_neighbor_east:
+			button_east_select_room.show()
+		else:
+			button_east_add_room.show()
+	elif mode == Mode.Move:
+		button_close.show()
+		button_move_up.show()
+		button_move_down.show()
+		button_move_left.show()
+		button_move_right.show()
+		if !has_neighbor_north:
+			button_move_up.disabled = false
+		if !has_neighbor_south:
+			button_move_down.disabled = false
+		if !has_neighbor_west:
+			button_move_left.disabled = false
+		if !has_neighbor_east:
+			button_move_right.disabled = false
+
+func _disable_all_buttons()->void:
+	for button:Button in buttons:
+		button.disabled = true
+
+func _enable_all_buttons()->void:
+	for button:Button in buttons:
+		button.disabled = false

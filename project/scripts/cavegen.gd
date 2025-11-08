@@ -19,6 +19,7 @@ extends Node3D
 @onready var file_menu: FileMenu = %FileMenu
 @onready var tile_editor_container: Control = %TileEditorContainer
 @onready var tile_editor_tools: HBoxContainer = %TileEditorTools
+@onready var room_select_overlay: RoomSelectOverlay = %RoomSelectOverlay
 @onready var room_config_form: RoomConfigForm = %RoomConfigForm
 @onready var side_toolbar: SideToolbar = %SideToolbar
 @onready var export_dialog: ExportDialog = %ExportDialog
@@ -49,11 +50,14 @@ func set_mode(p_mode: Mode) -> void:
 	tile_editor_container.hide()
 	tile_editor_tools.hide()
 	room_config_form.hide()
+	room_select_overlay.hide()
 	if mode == Mode.TileEditor:
 		tile_editor_container.show()
 		tile_editor_tools.show()
 	elif mode == Mode.RoomConfig:
 		room_config_form.show()
+	elif mode == Mode.RoomSelect:
+		room_select_overlay.show()
 	call_deferred("notify_mode_changed", mode)
 
 func notify_mode_changed(p_mode: Mode) -> void:
@@ -135,6 +139,7 @@ func _notify_error(text: String) -> void:
 
 func _ready() -> void:
 	test_cube.queue_free()
+	set_mode(Mode.RoomConfig)
 	# setup signals
 	file_menu.new_file_pressed.connect(_on_new_file_pressed)
 	file_menu.open_file_pressed.connect(_on_open_file_pressed)
@@ -197,7 +202,7 @@ func _setup_room() -> void:
 	# init tilemap, roomconfig
 	tilemap_editor.initialize(cfg, room)
 	room_config_form.initialize(room, noise, border_noise)
-	set_mode(Mode.RoomConfig)
+	room_select_overlay.set_room(room)
 	# init meshgen
 	notif_timer.stop()
 	regenerate(current_room_idx)
