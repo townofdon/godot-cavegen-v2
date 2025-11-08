@@ -140,16 +140,16 @@ public:
 		Ref<RoomConfig> right;
 	};
 	Vector2i GridPosition;
-	int Precedence;
+	int RoomIdx;
 	RoomNodes nodes;
 
-	int GetPrecedence();
+	int GetRoomIdx();
 	Vector2i GetGridPosition();
 	Ref<RoomConfig> GetNodeUp();
 	Ref<RoomConfig> GetNodeDown();
 	Ref<RoomConfig> GetNodeLeft();
 	Ref<RoomConfig> GetNodeRight();
-	void SetPrecedence(int p_Precedence);
+	void SetRoomIdx(int p_RoomIdx);
 	void SetGridPosition(Vector2i p_GridPosition);
 	void SetNodeUp(const Ref<RoomConfig> &p_room);
 	void SetNodeDown(const Ref<RoomConfig> &p_room);

@@ -175,9 +175,9 @@ func _ready() -> void:
 func _initialize(data: CaveGenData) -> void:
 	set_mode(Mode.RoomConfig)
 	current_room_idx = 0
+	save_data = data
 	room_idx_lookup.clear()
 	room_idx_lookup[_idx_key(Vector2i.ZERO)] = 0
-	save_data = data
 	save_data.validate(0, room_idx_lookup)
 	assert(!save_data.cfg.on_changed.is_connected(_notify_change))
 	save_data.cfg.on_changed.connect(_notify_change)
@@ -246,16 +246,19 @@ func _clear_meshes()->void:
 		var meshgen:MeshGen = arr_meshgen.get(i)
 		if meshgen: meshgen.queue_free()
 
+func _clone_meshgen() -> MeshGen:
+	var flags := 0
+	flags = flags << DuplicateFlags.DUPLICATE_GROUPS
+	flags = flags << DuplicateFlags.DUPLICATE_SCRIPTS
+	flags = flags << DuplicateFlags.DUPLICATE_USE_INSTANTIATION
+	return root_meshgen.duplicate(flags)
+
 func _setup_initial_meshes() -> void:
 	assert(save_data)
-	save_data.validate(0, room_idx_lookup)
-	room_idx_lookup.set(_idx_key(save_data.arr_room.get(0).internal__grid_position), 0)
+	_recalculate_room_mappings()
+	arr_meshgen.resize(1)
 	for idx in range(1, len(save_data.arr_room)):
-		var room:RoomConfig = save_data.arr_room.get(idx)
-		assert(room)
-		room_idx_lookup.set(_idx_key(room.internal__grid_position), idx)
-		save_data.validate(idx, room_idx_lookup)
-		var new_meshgen := root_meshgen.duplicate()
+		var new_meshgen := _clone_meshgen()
 		new_meshgen.mesh = ArrayMesh.new()
 		mesh_container.add_child(new_meshgen)
 		arr_meshgen.append(new_meshgen)
@@ -275,27 +278,13 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	var existing_room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(existing_room.on_changed)
 	# create new room
+	var new_idx := len(save_data.arr_room)
 	var new_room := existing_room.duplicate(true)
 	var coords:Vector2i = new_room.internal__grid_position + dir
 	new_room.internal__grid_position = coords
 	new_room.tilemap__tiles = new_room.tilemap__tiles.duplicate()
 	new_room.init_tiles_for_new_room(cfg.get_num_cells_2d(), dir, border_mask)
-	# update neighbor relationships
-	var idx_up:int = room_idx_lookup.get(_idx_key(coords + Vector2i.UP), -1)
-	var idx_down:int = room_idx_lookup.get(_idx_key(coords + Vector2i.DOWN), -1)
-	var idx_left:int = room_idx_lookup.get(_idx_key(coords + Vector2i.LEFT), -1)
-	var idx_right:int = room_idx_lookup.get(_idx_key(coords + Vector2i.RIGHT), -1)
-	new_room.internal__node_up = save_data.arr_room.get(idx_up) if idx_up >= 0 else null
-	new_room.internal__node_down = save_data.arr_room.get(idx_down) if idx_down >= 0 else null
-	new_room.internal__node_left = save_data.arr_room.get(idx_left) if idx_left >= 0 else null
-	new_room.internal__node_right = save_data.arr_room.get(idx_right) if idx_right >= 0 else null
-	if new_room.internal__node_up: new_room.internal__node_up.internal__node_down = new_room
-	if new_room.internal__node_down: new_room.internal__node_down.internal__node_up = new_room
-	if new_room.internal__node_left: new_room.internal__node_left.internal__node_right = new_room
-	if new_room.internal__node_right: new_room.internal__node_right.internal__node_left = new_room
-	# set precedence based on idx
-	var new_idx := len(save_data.arr_room)
-	new_room.internal__precedence = new_idx
+	# TODO: move this to c++
 	# set new offset, tilt based on dir
 	if absi(dir.x) == 1:
 		if dir.x == Vector2i.RIGHT.x && new_room.room_noise__tilt_x > 1:
@@ -324,12 +313,7 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	var existing_border_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
 	var new_border_noise := existing_border_noise.duplicate()
 	# duplicate meshgen
-	var existing_meshgen:MeshGen = arr_meshgen.get(current_room_idx)
-	var flags := 0
-	flags = flags << DuplicateFlags.DUPLICATE_GROUPS
-	flags = flags << DuplicateFlags.DUPLICATE_SCRIPTS
-	flags = flags << DuplicateFlags.DUPLICATE_USE_INSTANTIATION
-	var new_meshgen := existing_meshgen.duplicate(flags)
+	var new_meshgen := _clone_meshgen()
 	new_meshgen.mesh = ArrayMesh.new()
 	mesh_container.add_child(new_meshgen)
 	# update state to reflect everything
@@ -337,7 +321,7 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	save_data.arr_noise.append(new_noise)
 	save_data.arr_border_noise.append(new_border_noise)
 	arr_meshgen.append(new_meshgen)
-	room_idx_lookup.set(_idx_key(coords), new_idx)
+	_recalculate_room_mappings()
 	save_data.validate(new_idx, room_idx_lookup)
 	current_room_idx = new_idx
 	_setup_room()
@@ -348,32 +332,24 @@ func _delete_room() -> void:
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(room.on_changed)
-	var node_up:RoomConfig = room.internal__node_up
-	var node_down:RoomConfig = room.internal__node_down
-	var node_left:RoomConfig = room.internal__node_left
-	var node_right:RoomConfig = room.internal__node_right
-	if node_up: node_up.internal__node_down = null
-	if node_down: node_down.internal__node_up = null
-	if node_left: node_left.internal__node_right = null
-	if node_right: node_right.internal__node_left = null
+	var node_up:RoomConfig = room.get_node_up()
+	var node_down:RoomConfig = room.get_node_down()
+	var node_left:RoomConfig = room.get_node_left()
+	var node_right:RoomConfig = room.get_node_right()
 	# remove mesh
 	var meshgen:MeshGen = arr_meshgen.get(current_room_idx)
 	if meshgen: meshgen.queue_free()
 	# update save data
-	room_idx_lookup.erase(_idx_key(room.internal__grid_position))
 	save_data.arr_room.remove_at(current_room_idx)
 	save_data.arr_noise.remove_at(current_room_idx)
 	save_data.arr_border_noise.remove_at(current_room_idx)
 	arr_meshgen.remove_at(current_room_idx)
-	# update all room indices
-	for i in range(len(save_data.arr_room)):
-		var r:RoomConfig = save_data.arr_room[i]
-		r.internal__precedence = i
+	_recalculate_room_mappings()
 	# update current room idx
 	current_room_idx = 0
 	for node:RoomConfig in [node_up, node_down, node_left, node_right]:
-		if node && node.internal__precedence > current_room_idx:
-			current_room_idx = node.internal__precedence
+		if node && node.get_room_idx() > current_room_idx:
+			current_room_idx = node.get_room_idx()
 	save_data.validate(current_room_idx, room_idx_lookup)
 	_setup_room()
 
@@ -383,34 +359,12 @@ func _move_room(dir: Vector2i) -> void:
 	if !save_data.validate(current_room_idx, room_idx_lookup): return
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	Utils.Conn.disconnect_all(room.on_changed)
-	if dir == Vector2i.UP: assert(!room.internal__node_up)
-	if dir == Vector2i.DOWN: assert(!room.internal__node_down)
-	if dir == Vector2i.LEFT: assert(!room.internal__node_left)
-	if dir == Vector2i.RIGHT: assert(!room.internal__node_right)
-	# update old neighbors
-	if room.internal__node_up: room.internal__node_up.internal__node_down = null
-	if room.internal__node_down: room.internal__node_down.internal__node_up = null
-	if room.internal__node_left: room.internal__node_left.internal__node_right = null
-	if room.internal__node_right: room.internal__node_right.internal__node_left = null
-	var old_coords:Vector2i = room.internal__grid_position
-	var new_coords:Vector2i = room.internal__grid_position + dir
-	# set new neighbors
-	room_idx_lookup.erase(_idx_key(old_coords))
-	var new_node_up:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.UP), -1))
-	var new_node_down:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.DOWN), -1))
-	var new_node_left:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.LEFT), -1))
-	var new_node_right:RoomConfig = save_data.arr_room.get(room_idx_lookup.get(_idx_key(new_coords + Vector2i.RIGHT), -1))
-	if new_node_up: new_node_up.internal__node_down = room
-	if new_node_down: new_node_down.internal__node_up = room
-	if new_node_left: new_node_left.internal__node_right = room
-	if new_node_right: new_node_right.internal__node_left = room
-	room.internal__node_up = new_node_up
-	room.internal__node_down = new_node_down
-	room.internal__node_left = new_node_left
-	room.internal__node_right = new_node_right
-	room.internal__grid_position = new_coords
-	# update self
-	room_idx_lookup.set(_idx_key(new_coords), current_room_idx)
+	if dir == Vector2i.UP: assert(!room.get_node_up())
+	if dir == Vector2i.DOWN: assert(!room.get_node_down())
+	if dir == Vector2i.LEFT: assert(!room.get_node_left())
+	if dir == Vector2i.RIGHT: assert(!room.get_node_right())
+	room.internal__grid_position = room.internal__grid_position + dir
+	_recalculate_room_mappings()
 	_setup_room()
 
 func _select_neighbor_room(dir: Vector2i) -> void:
@@ -426,6 +380,42 @@ func _select_neighbor_room(dir: Vector2i) -> void:
 	assert(new_room, "no room found at new_coords: %s - old_coords=%s" % [_idx_key(coords), _idx_key(existing_room.internal__grid_position)])
 	current_room_idx = new_idx
 	_setup_room()
+
+func _recalculate_room_mappings() -> void:
+	var start := Time.get_unix_time_from_system()
+	
+	room_idx_lookup.clear()
+	for idx in range(len(save_data.arr_room)):
+		var room:RoomConfig = save_data.arr_room.get(idx)
+		assert(room)
+		var coords := room.internal__grid_position
+		room.set_room_idx(idx)
+		room_idx_lookup[_idx_key(coords)] = idx
+		room.set_node_up(null)
+		room.set_node_down(null)
+		room.set_node_left(null)
+		room.set_node_right(null)
+	for idx in range(len(save_data.arr_room)):
+		var room:RoomConfig = save_data.arr_room.get(idx)
+		assert(room)
+		var coords := room.internal__grid_position
+		var idx_up:int = room_idx_lookup.get(_idx_key(coords + Vector2i.UP), -1)
+		var idx_down:int = room_idx_lookup.get(_idx_key(coords + Vector2i.DOWN), -1)
+		var idx_left:int = room_idx_lookup.get(_idx_key(coords + Vector2i.LEFT), -1)
+		var idx_right:int = room_idx_lookup.get(_idx_key(coords + Vector2i.RIGHT), -1)
+		room.set_node_up(save_data.arr_room.get(idx_up) if idx_up >= 0 else null)
+		room.set_node_down(save_data.arr_room.get(idx_down) if idx_down >= 0 else null)
+		room.set_node_left(save_data.arr_room.get(idx_left) if idx_left >= 0 else null)
+		room.set_node_right(save_data.arr_room.get(idx_right) if idx_right >= 0 else null)
+		if room.get_node_up(): room.get_node_up().set_node_down(room)
+		if room.get_node_down(): room.get_node_down().set_node_up(room)
+		if room.get_node_left(): room.get_node_left().set_node_right(room)
+		if room.get_node_right(): room.get_node_right().set_node_left(room)
+		save_data.validate(idx, room_idx_lookup)
+
+	# TODO: REMOVE
+	var end := Time.get_unix_time_from_system()
+	print("recalculate_room_mappings took %sms" % [(end - start) * 1000])
 
 func _idx_key(coords: Vector2i) -> String:
 	return CaveGenData.room_idx_key(coords)

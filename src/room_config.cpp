@@ -153,29 +153,24 @@ void RoomConfig::_bind_methods() {
 
 	ADD_GROUP("Internal", "internal__");
 
-	ClassDB::bind_method(D_METHOD("get_Precedence"), &RoomConfig::GetPrecedence);
-	ClassDB::bind_method(D_METHOD("set_Precedence", "p_Precedence"), &RoomConfig::SetPrecedence);
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "internal__precedence"), "set_Precedence", "get_Precedence");
+	ClassDB::bind_method(D_METHOD("get_room_idx"), &RoomConfig::GetRoomIdx);
+	ClassDB::bind_method(D_METHOD("set_room_idx", "p_room_idx"), &RoomConfig::SetRoomIdx);
 
 	ClassDB::bind_method(D_METHOD("get_GridPosition"), &RoomConfig::GetGridPosition);
 	ClassDB::bind_method(D_METHOD("set_GridPosition", "p_GridPosition"), &RoomConfig::SetGridPosition);
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR2I, "internal__grid_position"), "set_GridPosition", "get_GridPosition");
 
-	ClassDB::bind_method(D_METHOD("get_NodeUp"), &RoomConfig::GetNodeUp);
-	ClassDB::bind_method(D_METHOD("set_NodeUp", "p_room"), &RoomConfig::SetNodeUp);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_up", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeUp", "get_NodeUp");
+	ClassDB::bind_method(D_METHOD("get_node_up"), &RoomConfig::GetNodeUp);
+	ClassDB::bind_method(D_METHOD("set_node_up", "p_room"), &RoomConfig::SetNodeUp);
 
-	ClassDB::bind_method(D_METHOD("get_NodeDown"), &RoomConfig::GetNodeDown);
-	ClassDB::bind_method(D_METHOD("set_NodeDown", "p_room"), &RoomConfig::SetNodeDown);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_down", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeDown", "get_NodeDown");
+	ClassDB::bind_method(D_METHOD("get_node_down"), &RoomConfig::GetNodeDown);
+	ClassDB::bind_method(D_METHOD("set_node_down", "p_room"), &RoomConfig::SetNodeDown);
 
-	ClassDB::bind_method(D_METHOD("get_NodeLeft"), &RoomConfig::GetNodeLeft);
-	ClassDB::bind_method(D_METHOD("set_NodeLeft", "p_room"), &RoomConfig::SetNodeLeft);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_left", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeLeft", "get_NodeLeft");
+	ClassDB::bind_method(D_METHOD("get_node_left"), &RoomConfig::GetNodeLeft);
+	ClassDB::bind_method(D_METHOD("set_node_left", "p_room"), &RoomConfig::SetNodeLeft);
 
-	ClassDB::bind_method(D_METHOD("get_NodeRight"), &RoomConfig::GetNodeRight);
-	ClassDB::bind_method(D_METHOD("set_NodeRight", "p_room"), &RoomConfig::SetNodeRight);
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "internal__node_right", PROPERTY_HINT_RESOURCE_TYPE, "RoomConfig"), "set_NodeRight", "get_NodeRight");
+	ClassDB::bind_method(D_METHOD("get_node_right"), &RoomConfig::GetNodeRight);
+	ClassDB::bind_method(D_METHOD("set_node_right", "p_room"), &RoomConfig::SetNodeRight);
 
 	ADD_SIGNAL(MethodInfo("on_changed"));
 
@@ -244,7 +239,7 @@ RoomConfig::RoomConfig() {
 	InitTiles(Vector2i(30, 30));
 	numTiles = 0;
 	// initialize internal vars
-	Precedence = 0;
+	RoomIdx = 0;
 	GridPosition = Vector2i(0, 0);
 }
 
@@ -502,11 +497,7 @@ void RoomConfig::NotifyChanged() {
 void RoomConfig::InitTiles(Vector2i numCells2d) {
 	for (size_t y = 0; y < numCells2d.y; y++) {
 		for (size_t x = 0; x < numCells2d.x; x++) {
-			if (x == 0 || x == numCells2d.x - 1 || y == 0 || y == numCells2d.y - 1) {
-				SetTile(numCells2d, Vector2i(x, y), TILE_STATE_FILLED);
-			} else {
-				SetTile(numCells2d, Vector2i(x, y), TILE_STATE_UNSET);
-			}
+			SetTile(numCells2d, Vector2i(x, y), TILE_STATE_UNSET);
 		}
 	}
 	numTiles = numCells2d.x * numCells2d.y;
@@ -603,14 +594,14 @@ PackedInt32Array RoomConfig::GetTilesExport() {
 //
 // INTERNAL
 //
-int RoomConfig::GetPrecedence() {
-	return Precedence;
+int RoomConfig::GetRoomIdx() {
+	return RoomIdx;
 }
 Vector2i RoomConfig::GetGridPosition() {
 	return GridPosition;
 }
-void RoomConfig::SetPrecedence(int p_Precedence) {
-	Precedence = p_Precedence;
+void RoomConfig::SetRoomIdx(int p_RoomIdx) {
+	RoomIdx = p_RoomIdx;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetGridPosition(Vector2i p_GridPosition) {
@@ -641,18 +632,3 @@ Ref<RoomConfig> RoomConfig::GetNodeLeft() {
 Ref<RoomConfig> RoomConfig::GetNodeRight() {
 	return nodes.right;
 }
-
-// bool RoomConfig::ValidateSetNode(const Ref<RoomConfig> &p_room, Ref<RoomConfig> &compare) {
-// 	if (!p_room.is_valid()) {
-// 		return true;
-// 	}
-// 	if (!compare.is_valid()) {
-// 		return true;
-// 	}
-// 	String name = p_room->get_name();
-// 	if (name.is_empty()) {
-// 		name = p_room->get_path();
-// 	}
-// 	ERR_FAIL_COND_V_EDMSG(p_room->get_rid() == compare->get_rid(), false, "node already in use: " + name);
-// 	return true;
-// }

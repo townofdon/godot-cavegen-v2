@@ -20,6 +20,9 @@ func initialize(p_editor: TileMapEditor) -> void:
 
 func _draw() -> void:
 	if !editor: return
+	if !editor.cfg: return
+	if !enabled || !visible || !is_visible_in_tree():
+		return
 	var anchorCoords:Vector2i = editor.anchorCoords
 	var anchorTile:TileMapEditor.Tile = editor.anchorTile
 	var mode:TileMapEditor.EditorMode = editor.mode
@@ -60,6 +63,7 @@ func _draw() -> void:
 
 func _process(_delta: float) -> void:
 	if !editor: return
+	if !editor.cfg: return
 	if !enabled || !visible || !is_visible_in_tree():
 		return
 	var mode:TileMapEditor.EditorMode = editor.mode

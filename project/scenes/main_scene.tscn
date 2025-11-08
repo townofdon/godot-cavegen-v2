@@ -32,6 +32,7 @@ resource_local_to_scene = true
 resource_local_to_scene = true
 
 [sub_resource type="RoomConfig" id="RoomConfig_58gk3"]
+tile_apply__tile_erase_size = nan
 resource_local_to_scene = true
 
 [sub_resource type="GlobalConfig" id="GlobalConfig_58gk3"]

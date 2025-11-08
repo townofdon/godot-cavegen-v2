@@ -1,7 +1,4 @@
-[gd_resource type="RoomConfig" load_steps=3 format=3 uid="uid://b0amjm0lwfuce"]
-
-[ext_resource type="RoomConfig" uid="uid://cvkmfv6npj6pt" path="res://data/room3test.tres" id="1_a1lhk"]
-[ext_resource type="RoomConfig" uid="uid://bdxnsdmut1pnp" path="res://data/room2test.tres" id="1_rknpu"]
+[gd_resource type="RoomConfig" format=3 uid="uid://b0amjm0lwfuce"]
 
 [resource]
 room_noise__iso_value = 0.6
@@ -23,6 +20,3 @@ tile_apply__tile_ceil_blend = 0.23
 tile_apply__tile_floor = 0.56
 tile_apply__tile_erase_size = nan
 neighbors__neighbor_blend = 0.0
-internal__precedence = 5
-internal__node_up = ExtResource("1_a1lhk")
-internal__node_left = ExtResource("1_rknpu")

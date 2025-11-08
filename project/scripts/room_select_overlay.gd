@@ -201,10 +201,10 @@ func _rerender() -> void:
 	if !room:
 		return
 	var is_root: bool = room.internal__grid_position == Vector2i.ZERO
-	var has_neighbor_north: bool = !!room.internal__node_up
-	var has_neighbor_south: bool = !!room.internal__node_down
-	var has_neighbor_west: bool = !!room.internal__node_left
-	var has_neighbor_east: bool = !!room.internal__node_right
+	var has_neighbor_north: bool = !!room.get_node_up()
+	var has_neighbor_south: bool = !!room.get_node_down()
+	var has_neighbor_west: bool = !!room.get_node_left()
+	var has_neighbor_east: bool = !!room.get_node_right()
 	if mode == Mode.Select:
 		button_move.show()
 		if !is_root:

@@ -170,28 +170,28 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
 			neighborNoiseSamples[i] = MAXVAL;
 		}
-		// if (nodes.up.is_valid() && nodes.up->Precedence < room->Precedence) {
+		// if (nodes.up.is_valid() && nodes.up->RoomIdx < room->RoomIdx) {
 		if (nodes.up.is_valid()) {
 			auto raw = nodes.up->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 0; i < MAX_NOISE_NODES * 1; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		// if (nodes.down.is_valid() && nodes.down->Precedence < room->Precedence) {
+		// if (nodes.down.is_valid() && nodes.down->RoomIdx < room->RoomIdx) {
 		if (nodes.down.is_valid()) {
 			auto raw = nodes.down->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 1; i < MAX_NOISE_NODES * 2; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		// if (nodes.left.is_valid() && nodes.left->Precedence < room->Precedence) {
+		// if (nodes.left.is_valid() && nodes.left->RoomIdx < room->RoomIdx) {
 		if (nodes.left.is_valid()) {
 			auto raw = nodes.left->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 2; i < MAX_NOISE_NODES * 3; i++) {
 				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
 			}
 		}
-		// if (nodes.right.is_valid() && nodes.right->Precedence < room->Precedence) {
+		// if (nodes.right.is_valid() && nodes.right->RoomIdx < room->RoomIdx) {
 		if (nodes.right.is_valid()) {
 			auto raw = nodes.right->rawSamples;
 			for (size_t i = MAX_NOISE_NODES * 3; i < MAX_NOISE_NODES * 4; i++) {
