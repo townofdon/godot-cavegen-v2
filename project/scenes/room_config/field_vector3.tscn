@@ -1,0 +1,73 @@
+[gd_scene load_steps=3 format=3 uid="uid://c1kw61nkqlaic"]
+
+[ext_resource type="Script" uid="uid://6cg1wmso1bbq" path="res://scripts/field_vector_3.gd" id="1_454x1"]
+[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/field_float.tscn" id="1_p1cnl"]
+
+[node name="Vector3Field" type="Control"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 120.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_454x1")
+
+[node name="FloatFieldX" parent="." instance=ExtResource("1_p1cnl")]
+unique_name_in_owner = true
+layout_mode = 1
+
+[node name="Label" parent="FloatFieldX/BaseField/MarginContainer/HBoxContainer" index="0"]
+custom_minimum_size = Vector2(170, 0)
+
+[node name="Label2" type="Label" parent="FloatFieldX/BaseField/MarginContainer/HBoxContainer" index="1"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
+text = "x"
+vertical_alignment = 1
+
+[node name="FloatFieldY" parent="." instance=ExtResource("1_p1cnl")]
+unique_name_in_owner = true
+layout_mode = 1
+offset_top = 40.0
+offset_bottom = 80.0
+
+[node name="Label" parent="FloatFieldY/BaseField/MarginContainer/HBoxContainer" index="0"]
+custom_minimum_size = Vector2(170, 0)
+text = ""
+
+[node name="Label2" type="Label" parent="FloatFieldY/BaseField/MarginContainer/HBoxContainer" index="1"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
+text = "y"
+vertical_alignment = 1
+
+[node name="FloatFieldZ" parent="." instance=ExtResource("1_p1cnl")]
+unique_name_in_owner = true
+layout_mode = 1
+offset_top = 80.0
+offset_bottom = 120.0
+
+[node name="Label" parent="FloatFieldZ/BaseField/MarginContainer/HBoxContainer" index="0"]
+custom_minimum_size = Vector2(170, 0)
+text = ""
+
+[node name="Label2" type="Label" parent="FloatFieldZ/BaseField/MarginContainer/HBoxContainer" index="1"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_colors/font_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
+text = "z"
+vertical_alignment = 1
+
+[editable path="FloatFieldX"]
+[editable path="FloatFieldX/BaseField"]
+[editable path="FloatFieldY"]
+[editable path="FloatFieldY/BaseField"]
+[editable path="FloatFieldZ"]
+[editable path="FloatFieldZ/BaseField"]

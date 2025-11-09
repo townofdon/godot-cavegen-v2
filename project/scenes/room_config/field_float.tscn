@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://dhuv0i3csm0jw"]
 
 [ext_resource type="PackedScene" uid="uid://bupf60vnbq063" path="res://scenes/room_config/base_field.tscn" id="1_2b3e5"]
-[ext_resource type="Script" uid="uid://cbmmmrqoik83p" path="res://scripts/float_field.gd" id="1_7v3hf"]
+[ext_resource type="Script" uid="uid://cbmmmrqoik83p" path="res://scripts/field_float.gd" id="1_7v3hf"]
 
 [node name="FloatField" type="Control"]
 custom_minimum_size = Vector2(0, 40)

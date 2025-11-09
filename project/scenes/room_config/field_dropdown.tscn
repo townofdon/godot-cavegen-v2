@@ -1,0 +1,32 @@
+[gd_scene load_steps=3 format=3 uid="uid://bknud0ydahkkf"]
+
+[ext_resource type="PackedScene" uid="uid://bupf60vnbq063" path="res://scenes/room_config/base_field.tscn" id="1_cdthu"]
+[ext_resource type="Script" uid="uid://c4c0weexhp7sj" path="res://scripts/field_dropdown.gd" id="1_j7v4r"]
+
+[node name="FieldDropdown" type="Control"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+script = ExtResource("1_j7v4r")
+
+[node name="BaseField" parent="." instance=ExtResource("1_cdthu")]
+layout_mode = 1
+
+[node name="CheckButton" parent="BaseField/MarginContainer/HBoxContainer" index="1"]
+visible = false
+
+[node name="LineEdit" parent="BaseField/MarginContainer/HBoxContainer" index="2"]
+visible = false
+
+[node name="SpinBox" parent="BaseField/MarginContainer/HBoxContainer" index="3"]
+visible = false
+
+[node name="HSlider" parent="BaseField/MarginContainer/HBoxContainer" index="4"]
+visible = false
+
+[node name="OptionButton" parent="BaseField/MarginContainer/HBoxContainer" index="5"]
+visible = true
+
+[editable path="BaseField"]

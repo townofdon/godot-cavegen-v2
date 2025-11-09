@@ -1,0 +1,124 @@
+[gd_scene load_steps=8 format=3 uid="uid://hma4qpwg5r0a"]
+
+[ext_resource type="Script" uid="uid://cgffl1tgr8hdo" path="res://scripts/edit_noise_form.gd" id="1_lkv51"]
+[ext_resource type="PackedScene" uid="uid://upsj8hq04i0s" path="res://scenes/room_config/form_heading.tscn" id="1_vgrvt"]
+[ext_resource type="PackedScene" uid="uid://bknud0ydahkkf" path="res://scenes/room_config/field_dropdown.tscn" id="3_moq78"]
+[ext_resource type="PackedScene" uid="uid://cpt4mhjhdulyg" path="res://scenes/room_config/field_int.tscn" id="4_doofq"]
+[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/field_float.tscn" id="5_8pgfn"]
+[ext_resource type="PackedScene" uid="uid://c1kw61nkqlaic" path="res://scenes/room_config/field_vector3.tscn" id="6_ey7w4"]
+[ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/field_bool.tscn" id="6_m4evb"]
+
+[node name="EditNoiseForm" type="VBoxContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 36.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+script = ExtResource("1_lkv51")
+
+[node name="EnumNoiseType" parent="." instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="IntSeed" parent="." instance=ExtResource("4_doofq")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatFrequency" parent="." instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Vector3Offset" parent="." instance=ExtResource("6_ey7w4")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeadingCellular" parent="." instance=ExtResource("1_vgrvt")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" parent="HeadingCellular" index="0"]
+text = "CELLULAR"
+
+[node name="EnumCellDistanceFn" parent="." instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatCellJitter" parent="." instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EnumCellReturnType" parent="." instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeadingFractal" parent="." instance=ExtResource("1_vgrvt")]
+layout_mode = 2
+
+[node name="Label" parent="HeadingFractal" index="0"]
+text = "FRACTAL"
+
+[node name="EnumFracType" parent="." instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="IntFracOctaves" parent="." instance=ExtResource("4_doofq")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatFracLacunarity" parent="." instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatFracGain" parent="." instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatFracWStrength" parent="." instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeadingDomainWarp" parent="." instance=ExtResource("1_vgrvt")]
+layout_mode = 2
+
+[node name="Label" parent="HeadingDomainWarp" index="0"]
+text = "DOMAIN WARP"
+
+[node name="BoolWarpEnabled" parent="." instance=ExtResource("6_m4evb")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="DomainWarpFields" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="EnumWarpType" parent="DomainWarpFields" instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatWarpAmplitude" parent="DomainWarpFields" instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatWarpFrequency" parent="DomainWarpFields" instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="EnumWarpFracType" parent="DomainWarpFields" instance=ExtResource("3_moq78")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="IntWarpFracOctaves" parent="DomainWarpFields" instance=ExtResource("4_doofq")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatWarpFracLacunarity" parent="DomainWarpFields" instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatWarpFracGain" parent="DomainWarpFields" instance=ExtResource("5_8pgfn")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[editable path="HeadingCellular"]
+[editable path="HeadingFractal"]
+[editable path="HeadingDomainWarp"]

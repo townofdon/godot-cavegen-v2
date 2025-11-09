@@ -115,7 +115,7 @@ background_color = Color(0.047942862, 0.06816868, 0.096691035, 1)
 sky = SubResource("Sky_7ycvg")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_to7gp"]
-bg_color = Color(0.6617701, 0.7072231, 0.6713199, 1)
+bg_color = Color(0.6666667, 0.7058824, 0.7411765, 1)
 shadow_size = 2
 shadow_offset = Vector2(0, 15)
 
@@ -310,7 +310,6 @@ layout_mode = 1
 
 [node name="RoomConfigForm" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("14_to7gp")]
 unique_name_in_owner = true
-visible = false
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -821,5 +820,4 @@ favorites_enabled = false
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm"]
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]
-[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Base Noise/VBoxContainer/HeadingRoomConfig"]
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig"]

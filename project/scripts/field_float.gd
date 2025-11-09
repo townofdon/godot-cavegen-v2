@@ -9,6 +9,7 @@ signal value_changed(val: float)
 @onready var spin_box: SpinBox = $BaseField/MarginContainer/HBoxContainer/SpinBox
 @onready var h_slider: HSlider = $BaseField/MarginContainer/HBoxContainer/HSlider
 @onready var reset_button: Button = $BaseField/MarginContainer/HBoxContainer/Label/ResetButton
+@onready var option_button: OptionButton = $BaseField/MarginContainer/HBoxContainer/OptionButton
 
 var _get_value: Callable
 var _default_value: float
@@ -16,6 +17,7 @@ var _default_value: float
 func _ready() -> void:
 	line_edit.hide()
 	check_button.hide()
+	option_button.hide()
 	spin_box.value_changed.connect(_on_internal_change)
 	h_slider.value_changed.connect(_on_internal_change)
 	reset_button.pressed.connect(func() -> void: _on_internal_change(_default_value))
@@ -38,6 +40,9 @@ func initialize(field_name: String, p_get_value: Callable, p_default_value: floa
 	spin_box.step = step
 	update_val()
 
+func set_exponential_edit(exp_edit: bool) -> void:
+	h_slider.exp_edit = exp_edit
+
 func update_val() -> void:
 	if !_get_value: return
 	@warning_ignore("untyped_declaration")
@@ -45,7 +50,7 @@ func update_val() -> void:
 	if !(newval is float): return
 	spin_box.set_value_no_signal(newval)
 	h_slider.set_value_no_signal(newval)
-	_render_reset_button(newval != _default_value)
+	_render_reset_button(!is_equal_approx(newval, _default_value))
 
 func _on_internal_change(newval: float) -> void:
 	spin_box.set_value_no_signal(newval)

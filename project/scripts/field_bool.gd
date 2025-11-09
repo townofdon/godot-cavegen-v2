@@ -8,6 +8,7 @@ signal value_changed(val: bool)
 @onready var line_edit: LineEdit = $BaseField/MarginContainer/HBoxContainer/LineEdit
 @onready var spin_box: SpinBox = $BaseField/MarginContainer/HBoxContainer/SpinBox
 @onready var h_slider: HSlider = $BaseField/MarginContainer/HBoxContainer/HSlider
+@onready var option_button: OptionButton = $BaseField/MarginContainer/HBoxContainer/OptionButton
 
 var _get_value: Callable
 
@@ -16,6 +17,7 @@ func _ready() -> void:
 	line_edit.hide()
 	spin_box.hide()
 	h_slider.hide()
+	option_button.hide()
 	check_button.toggled.connect(_on_internal_change)
 
 func initialize(field_name: String, p_get_value: Callable) -> void:

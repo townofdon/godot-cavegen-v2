@@ -1,9 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://b2qbmyypnnpmy"]
+[gd_scene load_steps=12 format=3 uid="uid://b2qbmyypnnpmy"]
 
-[ext_resource type="Script" uid="uid://dt1a2nd6b8oob" path="res://scripts/noise_editor_form.gd" id="1_bgtom"]
+[ext_resource type="Script" uid="uid://dt1a2nd6b8oob" path="res://scripts/room_config_form.gd" id="1_bgtom"]
+[ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="2_7shhj"]
 [ext_resource type="PackedScene" uid="uid://upsj8hq04i0s" path="res://scenes/room_config/form_heading.tscn" id="2_r5ufs"]
-[ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/bool_field.tscn" id="3_bcw72"]
-[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/float_field.tscn" id="3_qr8kv"]
+[ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/field_bool.tscn" id="3_bcw72"]
+[ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/field_float.tscn" id="3_qr8kv"]
+[ext_resource type="PackedScene" uid="uid://hma4qpwg5r0a" path="res://scenes/room_config/edit_noise_form.tscn" id="5_p11vx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bgtom"]
 bg_color = Color(0.7581252, 0.606366, 0.62051076, 1)
@@ -108,6 +110,8 @@ current_tab = 0
 
 [node name="Room Config" type="ScrollContainer" parent="Panel/MarginContainer/TabContainer"]
 layout_mode = 2
+theme = ExtResource("2_7shhj")
+horizontal_scroll_mode = 3
 metadata/_tab_index = 0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TabContainer/Room Config"]
@@ -178,22 +182,19 @@ layout_mode = 2
 [node name="Base Noise" type="ScrollContainer" parent="Panel/MarginContainer/TabContainer"]
 visible = false
 layout_mode = 2
+theme = ExtResource("2_7shhj")
+horizontal_scroll_mode = 3
 metadata/_tab_index = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TabContainer/Base Noise"]
+[node name="BaseNoiseForm" parent="Panel/MarginContainer/TabContainer/Base Noise" instance=ExtResource("5_p11vx")]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-
-[node name="HeadingRoomConfig" parent="Panel/MarginContainer/TabContainer/Base Noise/VBoxContainer" instance=ExtResource("2_r5ufs")]
-layout_mode = 2
-
-[node name="Label" parent="Panel/MarginContainer/TabContainer/Base Noise/VBoxContainer/HeadingRoomConfig" index="0"]
-text = "BASE NOISE"
 
 [node name="Border Noise" type="ScrollContainer" parent="Panel/MarginContainer/TabContainer"]
 visible = false
 layout_mode = 2
+theme = ExtResource("2_7shhj")
+horizontal_scroll_mode = 3
 metadata/_tab_index = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TabContainer/Border Noise"]
@@ -209,5 +210,4 @@ text = "BORDER NOISE"
 
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]
-[editable path="Panel/MarginContainer/TabContainer/Base Noise/VBoxContainer/HeadingRoomConfig"]
 [editable path="Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig"]

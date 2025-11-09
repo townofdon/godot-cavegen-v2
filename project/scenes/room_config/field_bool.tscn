@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bn5k1xeydqtad"]
 
-[ext_resource type="Script" uid="uid://b7ot7kdcti6ag" path="res://scripts/bool_field.gd" id="1_onst4"]
+[ext_resource type="Script" uid="uid://b7ot7kdcti6ag" path="res://scripts/field_bool.gd" id="1_onst4"]
 [ext_resource type="PackedScene" uid="uid://bupf60vnbq063" path="res://scenes/room_config/base_field.tscn" id="2_2krvq"]
 
 [node name="BoolField" type="Control"]

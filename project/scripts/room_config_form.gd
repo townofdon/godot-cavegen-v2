@@ -15,8 +15,9 @@ extends Control
 @onready var float_tilt_x: FloatField = %FloatTiltX
 @onready var float_tilt_z: FloatField = %FloatTiltZ
 
+@onready var base_noise_form: EditNoiseForm = %BaseNoiseForm
+
 var default_room: RoomConfig
-var prev_room: RoomConfig
 
 func _ready() -> void:
 	default_room = RoomConfig.new()
@@ -40,7 +41,15 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_tilt_x, room, "room_noise__tilt_x", 0, 2, 0.001)
 	_setup_room_float(float_tilt_z, room, "room_noise__tilt_z", 0, 2, 0.001)
 
-	prev_room = room
+	_setup_noise_form(base_noise_form, noise, room)
+
+func _setup_noise_form(form: EditNoiseForm, noise: FastNoiseLite, room: RoomConfig) -> void:
+	form.initialize(noise)
+	Utils.Conn.disconnect_all(form.noise_changed)
+	form.noise_changed.connect(func()->void:
+		room.notify_changed()
+		room.set_dirty(true)
+	)
 
 func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, minv: float, maxv: float, step: float) -> void:
 	assert(field, fieldname)

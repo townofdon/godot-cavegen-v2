@@ -1,4 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://upsj8hq04i0s"]
+[gd_scene load_steps=7 format=3 uid="uid://upsj8hq04i0s"]
+
+[ext_resource type="Texture2D" uid="uid://cxu52nlfyoqhl" path="res://assets/modes.png" id="1_h8qjb"]
+[ext_resource type="Script" uid="uid://da218u8yvb2um" path="res://scripts/form_heading.gd" id="1_xbfnu"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_eaarr"]
 content_margin_left = 4.0
@@ -7,6 +10,17 @@ content_margin_right = 4.0
 content_margin_bottom = 0.0
 color = Color(0.02745098, 0.03529412, 0.039215688, 1)
 
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_h8qjb"]
+load_path = "res://.godot/imported/modes.png-b1267abaf6d5138c5ab5d35a08f3866f.ctex"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hbsya"]
+atlas = SubResource("CompressedTexture2D_h8qjb")
+region = Rect2(432, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xbfnu"]
+atlas = ExtResource("1_h8qjb")
+region = Rect2(456, 0, 24, 24)
+
 [node name="FormHeading" type="Control"]
 custom_minimum_size = Vector2(200, 32)
 layout_mode = 3
@@ -14,6 +28,7 @@ anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
 size_flags_vertical = 0
+script = ExtResource("1_xbfnu")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
@@ -25,11 +40,32 @@ text = "heading"
 
 [node name="HSeparator" type="HSeparator" parent="."]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -4.0
+offset_right = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/separator = SubResource("StyleBoxLine_eaarr")
+
+[node name="CollapseButton" type="TextureButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -43.0
+offset_top = -14.0
+offset_right = -19.0
+offset_bottom = 10.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_default_cursor_shape = 2
+toggle_mode = true
+button_pressed = true
+texture_normal = SubResource("AtlasTexture_hbsya")
+texture_pressed = SubResource("AtlasTexture_xbfnu")
