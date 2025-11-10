@@ -2,6 +2,9 @@ class_name EditNoiseForm
 extends VBoxContainer
 
 signal noise_changed
+signal show_preview_changed(should_show: bool)
+
+@onready var bool_show_preview: BoolField = %BoolShowPreview
 
 @onready var enum_noise_type: DropdownField = %EnumNoiseType
 @onready var int_seed: IntField = %IntSeed
@@ -84,12 +87,32 @@ const LABEL_OVERRIDES: Dictionary[String, String] = {
 }
 
 var default_noise: FastNoiseLite
+var show_preview: bool = false
 
 func _ready() -> void:
 	default_noise = FastNoiseLite.new()
 	default_noise.reset_state()
 
+func hide_preview() -> void:
+	show_preview = false
+	bool_show_preview.update_val()
+	show_preview_changed.emit(false)
+
 func initialize(noise: FastNoiseLite) -> void:
+	Utils.Conn.disconnect_all(visibility_changed)
+	visibility_changed.connect(func()->void:
+		if visible && is_visible_in_tree():
+			show_preview_changed.emit(show_preview)
+		else:
+			show_preview_changed.emit(false)
+	)
+	bool_show_preview.initialize("show preview", func()->bool: return show_preview)
+	bool_show_preview.value_changed.connect(func(val: bool)->void:
+		show_preview = val
+		show_preview_changed.emit(val)
+	)
+	show_preview_changed.emit(show_preview && visible && is_visible_in_tree())
+
 	_setup_noise_enum(enum_noise_type, noise, "noise_type", NOISE_TYPE_DICT)
 	_setup_noise_int(int_seed, noise, "seed", 0, 999999, 1)
 	_setup_noise_float(float_frequency, noise, "frequency", 0.001, 1, 0.001)

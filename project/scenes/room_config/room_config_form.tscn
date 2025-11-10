@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://b2qbmyypnnpmy"]
+[gd_scene load_steps=22 format=3 uid="uid://b2qbmyypnnpmy"]
 
 [ext_resource type="Script" uid="uid://dt1a2nd6b8oob" path="res://scripts/room_config_form.gd" id="1_bgtom"]
 [ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="2_7shhj"]
@@ -6,6 +6,10 @@
 [ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/field_bool.tscn" id="3_bcw72"]
 [ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/field_float.tscn" id="3_qr8kv"]
 [ext_resource type="PackedScene" uid="uid://hma4qpwg5r0a" path="res://scenes/room_config/edit_noise_form.tscn" id="5_p11vx"]
+[ext_resource type="Texture2D" uid="uid://dr1httlvlunnk" path="res://assets/buttons.png" id="7_g4x3x"]
+[ext_resource type="Script" uid="uid://dtu5wd7nmvxn" path="res://scripts/movable_window.gd" id="8_alpvi"]
+[ext_resource type="Texture2D" uid="uid://gy3vttp7mp0m" path="res://assets/button.png" id="8_f8ag3"]
+[ext_resource type="Texture2D" uid="uid://brxkkfmtkoitl" path="res://assets/icons.png" id="8_twy0m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bgtom"]
 bg_color = Color(0.7581252, 0.606366, 0.62051076, 1)
@@ -68,6 +72,40 @@ expand_margin_left = 4.0
 expand_margin_top = 4.0
 expand_margin_right = 4.0
 expand_margin_bottom = 4.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_twy0m"]
+atlas = ExtResource("7_g4x3x")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f8ag3"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+texture = SubResource("AtlasTexture_twy0m")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_f8ag3"]
+frequency = 0.1209
+metadata/_preview_in_3d_space_ = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_g4x3x"]
+width = 600
+height = 600
+noise = SubResource("FastNoiseLite_f8ag3")
+in_3d_space = true
+normalize = false
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_atutr"]
+texture = ExtResource("8_f8ag3")
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f8ag3"]
+atlas = ExtResource("8_twy0m")
+region = Rect2(224, 0, 16, 16)
+margin = Rect2(-1, 0, 0, 0)
 
 [node name="RoomConfigForm" type="Control"]
 custom_minimum_size = Vector2(960, 960)
@@ -207,6 +245,175 @@ layout_mode = 2
 
 [node name="Label" parent="Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig" index="0"]
 text = "BORDER NOISE"
+
+[node name="NoisePreviewWindow" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -208.0
+offset_top = -200.0
+offset_right = -8.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxTexture_f8ag3")
+script = ExtResource("8_alpvi")
+
+[node name="MarginContainer" type="MarginContainer" parent="NoisePreviewWindow"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="NoisePreviewWindow/MarginContainer"]
+layout_mode = 2
+
+[node name="NoisePreview" type="TextureRect" parent="NoisePreviewWindow/MarginContainer/AspectRatioContainer"]
+texture_filter = 2
+layout_mode = 2
+texture = SubResource("NoiseTexture2D_g4x3x")
+expand_mode = 2
+
+[node name="Control" type="Control" parent="NoisePreviewWindow/MarginContainer"]
+layout_mode = 2
+
+[node name="ButtonMove" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 6
+action_mode = 0
+flat = true
+
+[node name="ButtonResizeLeft" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = -11.0
+offset_right = -3.0
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 10
+flat = true
+
+[node name="ButtonResizeRight" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_right = 12.0
+grow_horizontal = 0
+grow_vertical = 2
+focus_mode = 0
+mouse_default_cursor_shape = 10
+flat = true
+
+[node name="ButtonResizeTop" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = -12.0
+offset_bottom = -4.0
+grow_horizontal = 2
+focus_mode = 0
+mouse_default_cursor_shape = 9
+flat = true
+
+[node name="ButtonResizeBottom" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = 12.0
+grow_horizontal = 2
+grow_vertical = 0
+focus_mode = 0
+mouse_default_cursor_shape = 9
+flat = true
+
+[node name="ButtonResizeTopLeft" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+offset_left = -12.0
+offset_top = -12.0
+offset_right = 4.0
+offset_bottom = 4.0
+focus_mode = 0
+mouse_default_cursor_shape = 12
+flat = true
+
+[node name="ButtonResizeBottomLeft" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -12.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 12.0
+grow_vertical = 0
+focus_mode = 0
+mouse_default_cursor_shape = 11
+flat = true
+
+[node name="ButtonResizeBottomRight" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 12.0
+offset_bottom = 12.0
+grow_horizontal = 0
+grow_vertical = 0
+focus_mode = 0
+mouse_default_cursor_shape = 12
+flat = true
+
+[node name="ButtonCloseNoisePreview" type="Button" parent="NoisePreviewWindow/MarginContainer/Control"]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -20.0
+offset_top = -4.0
+offset_right = 4.0
+offset_bottom = 20.0
+grow_horizontal = 0
+pivot_offset = Vector2(12, 12)
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_styles/normal = SubResource("StyleBoxTexture_atutr")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_atutr")
+theme_override_styles/hover = SubResource("StyleBoxTexture_atutr")
+theme_override_styles/hover_pressed = SubResource("StyleBoxTexture_atutr")
+icon = SubResource("AtlasTexture_f8ag3")
+icon_alignment = 1
 
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]

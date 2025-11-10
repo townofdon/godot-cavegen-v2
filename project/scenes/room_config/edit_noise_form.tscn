@@ -17,6 +17,40 @@ size_flags_horizontal = 3
 size_flags_vertical = 0
 script = ExtResource("1_lkv51")
 
+[node name="BoolShowPreview" parent="." instance=ExtResource("6_m4evb")]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+
+[node name="BaseField" parent="BoolShowPreview" index="0"]
+custom_minimum_size = Vector2(160, 40)
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -20.0
+offset_bottom = 20.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="MarginContainer" parent="BoolShowPreview/BaseField" index="0"]
+theme_override_constants/margin_right = 10
+
+[node name="HBoxContainer" parent="BoolShowPreview/BaseField/MarginContainer" index="0"]
+alignment = 2
+
+[node name="Label" parent="BoolShowPreview/BaseField/MarginContainer/HBoxContainer" index="0"]
+custom_minimum_size = Vector2(60, 0)
+text = "show preview"
+
+[node name="HeadingParameters" parent="." instance=ExtResource("1_vgrvt")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" parent="HeadingParameters" index="0"]
+text = "PARAMETERS"
+
 [node name="EnumNoiseType" parent="." instance=ExtResource("3_moq78")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -119,6 +153,9 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
+[editable path="BoolShowPreview"]
+[editable path="BoolShowPreview/BaseField"]
+[editable path="HeadingParameters"]
 [editable path="HeadingCellular"]
 [editable path="HeadingFractal"]
 [editable path="HeadingDomainWarp"]

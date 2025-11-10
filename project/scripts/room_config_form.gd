@@ -15,6 +15,8 @@ extends Control
 @onready var float_tilt_x: FloatField = %FloatTiltX
 @onready var float_tilt_z: FloatField = %FloatTiltZ
 
+@onready var noise_preview_window: MovableWindow = $NoisePreviewWindow
+@onready var noise_preview: TextureRect = $NoisePreviewWindow/MarginContainer/AspectRatioContainer/NoisePreview
 @onready var base_noise_form: EditNoiseForm = %BaseNoiseForm
 
 var default_room: RoomConfig
@@ -22,6 +24,7 @@ var default_room: RoomConfig
 func _ready() -> void:
 	default_room = RoomConfig.new()
 	default_room.reset_state()
+	noise_preview_window.hide()
 
 func initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoiseLite) -> void:
 	call_deferred("_initialize", room, noise, border_noise)
@@ -44,12 +47,24 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_noise_form(base_noise_form, noise, room)
 
 func _setup_noise_form(form: EditNoiseForm, noise: FastNoiseLite, room: RoomConfig) -> void:
-	form.initialize(noise)
 	Utils.Conn.disconnect_all(form.noise_changed)
+	Utils.Conn.disconnect_all(form.show_preview_changed)
+	Utils.Conn.disconnect_all(noise_preview_window.closed)
 	form.noise_changed.connect(func()->void:
 		room.notify_changed()
 		room.set_dirty(true)
 	)
+	form.show_preview_changed.connect(func(showing: bool)->void:
+		if showing:
+			if noise_preview.texture is NoiseTexture2D:
+				(noise_preview.texture as NoiseTexture2D).in_3d_space = true
+				(noise_preview.texture as NoiseTexture2D).noise = noise
+			noise_preview_window.show()
+		else:
+			noise_preview_window.hide()
+	)
+	form.initialize(noise)
+	noise_preview_window.closed.connect(func()->void: form.hide_preview())
 
 func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, minv: float, maxv: float, step: float) -> void:
 	assert(field, fieldname)
