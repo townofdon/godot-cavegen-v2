@@ -554,6 +554,25 @@ inline float GetActivePlaneYF(Context ctx) {
 	return maxf(activeY, 2);
 }
 
+inline float GetNeighborWeightedField(Context ctx, int x, int y, int z, float val, float fromUp, float fromDn, float fromLf, float fromRt) {
+	float blend = clamp01(ctx.cfg.NeighborBlend);
+	int numx = ctx.numCells.x;
+	int numy = ctx.numCells.y;
+	int numz = ctx.numCells.z;
+	int xinv = numx - 1 - x;
+	int zinv = numz - 1 - z;
+	// calc percentage progression for x,z
+	float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 0, x));
+	float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 0, z));
+	float px1 = clamp01(inverse_lerpf((numx - 1) - (numx - 1) * blend, numx - 1, x));
+	float pz1 = clamp01(inverse_lerpf((numz - 1) - (numz - 1) * blend, numz - 1, z));
+	val = lerpf(val, fromUp, pz0 * int(fromUp != MAXVAL));
+	val = lerpf(val, fromDn, pz1 * int(fromDn != MAXVAL));
+	val = lerpf(val, fromLf, px0 * int(fromLf != MAXVAL));
+	val = lerpf(val, fromRt, px1 * int(fromRt != MAXVAL));
+	return val;
+}
+
 } //namespace MG
 
 } //namespace godot

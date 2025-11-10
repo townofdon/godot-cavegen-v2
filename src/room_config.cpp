@@ -179,6 +179,18 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_node_right"), &RoomConfig::GetNodeRight);
 	ClassDB::bind_method(D_METHOD("set_node_right", "p_room"), &RoomConfig::SetNodeRight);
 
+	ClassDB::bind_method(D_METHOD("get_noise_node_up"), &RoomConfig::GetNoiseNodeUp);
+	ClassDB::bind_method(D_METHOD("set_noise_node_up", "p_noise"), &RoomConfig::SetNoiseNodeUp);
+
+	ClassDB::bind_method(D_METHOD("get_noise_node_down"), &RoomConfig::GetNoiseNodeDown);
+	ClassDB::bind_method(D_METHOD("set_noise_node_down", "p_noise"), &RoomConfig::SetNoiseNodeDown);
+
+	ClassDB::bind_method(D_METHOD("get_noise_node_left"), &RoomConfig::GetNoiseNodeLeft);
+	ClassDB::bind_method(D_METHOD("set_noise_node_left", "p_noise"), &RoomConfig::SetNoiseNodeLeft);
+
+	ClassDB::bind_method(D_METHOD("get_noise_node_right"), &RoomConfig::GetNoiseNodeRight);
+	ClassDB::bind_method(D_METHOD("set_noise_node_right", "p_noise"), &RoomConfig::SetNoiseNodeRight);
+
 	ADD_SIGNAL(MethodInfo("on_changed"));
 	ADD_SIGNAL(MethodInfo("dirtied"));
 
@@ -250,6 +262,7 @@ RoomConfig::RoomConfig() {
 	numTiles = 0;
 	// initialize internal vars
 	roomIdx = 0;
+	noiseCached = false;
 	GridPosition = Vector2i(0, 0);
 }
 
@@ -632,8 +645,21 @@ Ref<RoomConfig> RoomConfig::GetNodeLeft() {
 Ref<RoomConfig> RoomConfig::GetNodeRight() {
 	return nodes.right;
 }
+Ref<Noise> RoomConfig::GetNoiseNodeUp() {
+	return noiseNodes.up;
+}
+Ref<Noise> RoomConfig::GetNoiseNodeDown() {
+	return noiseNodes.down;
+}
+Ref<Noise> RoomConfig::GetNoiseNodeLeft() {
+	return noiseNodes.left;
+}
+Ref<Noise> RoomConfig::GetNoiseNodeRight() {
+	return noiseNodes.right;
+}
 void RoomConfig::SetDirty(bool p_dirty) {
 	dirty = p_dirty;
+	noiseCached = false;
 	if (p_dirty) {
 		if (nodes.up.is_valid()) {
 			nodes.up->dirty = true;
@@ -679,4 +705,28 @@ void RoomConfig::SetNodeRight(const Ref<RoomConfig> &p_room) {
 		SetDirty(true);
 	}
 	nodes.right = p_room;
+}
+void RoomConfig::SetNoiseNodeUp(const Ref<Noise> &p_noise) {
+	if (p_noise != noiseNodes.up) {
+		SetDirty(true);
+	}
+	noiseNodes.up = p_noise;
+}
+void RoomConfig::SetNoiseNodeDown(const Ref<Noise> &p_noise) {
+	if (p_noise != noiseNodes.down) {
+		SetDirty(true);
+	}
+	noiseNodes.down = p_noise;
+}
+void RoomConfig::SetNoiseNodeLeft(const Ref<Noise> &p_noise) {
+	if (p_noise != noiseNodes.left) {
+		SetDirty(true);
+	}
+	noiseNodes.left = p_noise;
+}
+void RoomConfig::SetNoiseNodeRight(const Ref<Noise> &p_noise) {
+	if (p_noise != noiseNodes.right) {
+		SetDirty(true);
+	}
+	noiseNodes.right = p_noise;
 }

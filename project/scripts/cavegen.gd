@@ -250,15 +250,26 @@ func regenerate(idx: int) -> void:
 		# OBJExporter does not support shader material
 		#meshgen.mesh.surface_set_material(0, meshgen.material_override)
 
+# iterate through dirty rooms in order to blend rooms
 func _regen_dirty_rooms() -> void:
 	await get_tree().process_frame
+	if !dirty_timer.is_stopped: return
+	if !notif_timer.is_stopped(): return
+	if initializing: return
+	var dirty_rooms:Array[RoomConfig] = []
 	for room:RoomConfig in save_data.arr_room:
-		if initializing: return
-		if !dirty_timer.is_stopped: return
-		if !notif_timer.is_stopped(): return
 		if room.get_dirty():
+			dirty_rooms.append(room)
+	if len(dirty_rooms) == 0: return
+	for i in range(4):
+		for room:RoomConfig in dirty_rooms:
+			if initializing: return
+			if !dirty_timer.is_stopped: return
+			if !notif_timer.is_stopped(): return
 			regenerate(room.get_room_idx())
 			await get_tree().process_frame
+		regenerate(current_room_idx)
+		await get_tree().process_frame
 
 func _clear_meshes()->void:
 	for i in range(1, len(arr_meshgen)):
@@ -429,6 +440,10 @@ func _recalculate_room_mappings() -> void:
 		room.set_node_down(save_data.arr_room.get(idx_down) if idx_down >= 0 else null)
 		room.set_node_left(save_data.arr_room.get(idx_left) if idx_left >= 0 else null)
 		room.set_node_right(save_data.arr_room.get(idx_right) if idx_right >= 0 else null)
+		room.set_noise_node_up(save_data.arr_noise.get(idx_up) if idx_up >= 0 else null)
+		room.set_noise_node_down(save_data.arr_noise.get(idx_down) if idx_down >= 0 else null)
+		room.set_noise_node_left(save_data.arr_noise.get(idx_left) if idx_left >= 0 else null)
+		room.set_noise_node_right(save_data.arr_noise.get(idx_right) if idx_right >= 0 else null)
 		if room.get_node_up(): room.get_node_up().set_node_down(room)
 		if room.get_node_down(): room.get_node_down().set_node_up(room)
 		if room.get_node_left(): room.get_node_left().set_node_right(room)

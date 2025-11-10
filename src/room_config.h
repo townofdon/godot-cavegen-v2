@@ -1,6 +1,7 @@
 #pragma once
 
 #include "constants.h"
+#include "godot_cpp/classes/noise.hpp"
 #include "godot_cpp/classes/resource.hpp"
 
 using namespace godot;
@@ -58,6 +59,10 @@ public:
 	float TileEraseSize;
 	// neighbors
 	float NeighborBlend;
+	float NeighborBlendUp;
+	float NeighborBlendDn;
+	float NeighborBlendLf;
+	float NeighborBlendRt;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -94,6 +99,10 @@ public:
 	float GetTileFloorFalloff();
 	float GetTileEraseSize();
 	float GetNeighborBlend();
+	float GetNeighborBlendUp();
+	float GetNeighborBlendDn();
+	float GetNeighborBlendLf();
+	float GetNeighborBlendRt();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -130,6 +139,10 @@ public:
 	void SetTileFloorFalloff(float p_TileFloorFalloff);
 	void SetTileEraseSize(float p_TileEraseSize);
 	void SetNeighborBlend(float p_NeighborBlend);
+	void SetNeighborBlendUp(float p_NeighborBlendUp);
+	void SetNeighborBlendDn(float p_NeighborBlendDn);
+	void SetNeighborBlendLf(float p_NeighborBlendLf);
+	void SetNeighborBlendRt(float p_NeighborBlendRt);
 
 	void NotifyChanged();
 
@@ -142,10 +155,17 @@ public:
 		Ref<RoomConfig> left;
 		Ref<RoomConfig> right;
 	};
+	struct NoiseNodes {
+		Ref<Noise> up;
+		Ref<Noise> down;
+		Ref<Noise> left;
+		Ref<Noise> right;
+	};
 	bool dirty;
 	int roomIdx;
 	Vector2i GridPosition;
 	RoomNodes nodes;
+	NoiseNodes noiseNodes;
 
 	bool GetDirty();
 	int GetRoomIdx();
@@ -154,6 +174,10 @@ public:
 	Ref<RoomConfig> GetNodeDown();
 	Ref<RoomConfig> GetNodeLeft();
 	Ref<RoomConfig> GetNodeRight();
+	Ref<Noise> GetNoiseNodeUp();
+	Ref<Noise> GetNoiseNodeDown();
+	Ref<Noise> GetNoiseNodeLeft();
+	Ref<Noise> GetNoiseNodeRight();
 	void SetDirty(bool p_dirty);
 	void SetRoomIdx(int p_roomIdx);
 	void SetGridPosition(Vector2i p_GridPosition);
@@ -161,6 +185,10 @@ public:
 	void SetNodeDown(const Ref<RoomConfig> &p_room);
 	void SetNodeLeft(const Ref<RoomConfig> &p_room);
 	void SetNodeRight(const Ref<RoomConfig> &p_room);
+	void SetNoiseNodeUp(const Ref<Noise> &p_noise);
+	void SetNoiseNodeDown(const Ref<Noise> &p_noise);
+	void SetNoiseNodeLeft(const Ref<Noise> &p_noise);
+	void SetNoiseNodeRight(const Ref<Noise> &p_noise);
 
 	//
 	// Tilemap Data
@@ -184,10 +212,10 @@ public:
 	// Noise
 	//
 
+	bool noiseCached;
 	// processed room noise data
 	float noiseSamples[MAX_NOISE_NODES];
-
-	// unprocessed noise data to be shared with other rooms for mixing purposes
+	// unprocessed noise data - used for caching purposes
 	float rawSamples[MAX_NOISE_NODES];
 
 protected:

@@ -29,7 +29,6 @@ float *MeshGen::time_marchCubes = new float[100]{
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static inline float *neighborNoiseSamples = new float[MAX_NOISE_NODES * 4];
 static inline float *noiseSamples = new float[MAX_NOISE_NODES];
 static inline float *rawSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
@@ -155,57 +154,13 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		rawSamples[i] = room->rawSamples[i];
 	}
 
-	// setup neighbor rooms multiarray
-	// idx 0*max => UP
-	// idx 1*max => DOWN
-	// idx 2*max => LEFT
-	// idx 3*max => RIGHT
-	{
-		RoomConfig::RoomNodes nodes = {
-			room->nodes.up,
-			room->nodes.down,
-			room->nodes.left,
-			room->nodes.right,
-		};
-		for (size_t i = 0; i < MAX_NOISE_NODES * 4; i++) {
-			neighborNoiseSamples[i] = MAXVAL;
-		}
-		// if (nodes.up.is_valid() && nodes.up->roomIdx < room->roomIdx) {
-		if (nodes.up.is_valid()) {
-			auto raw = nodes.up->rawSamples;
-			for (size_t i = MAX_NOISE_NODES * 0; i < MAX_NOISE_NODES * 1; i++) {
-				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
-			}
-		}
-		// if (nodes.down.is_valid() && nodes.down->roomIdx < room->roomIdx) {
-		if (nodes.down.is_valid()) {
-			auto raw = nodes.down->rawSamples;
-			for (size_t i = MAX_NOISE_NODES * 1; i < MAX_NOISE_NODES * 2; i++) {
-				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
-			}
-		}
-		// if (nodes.left.is_valid() && nodes.left->roomIdx < room->roomIdx) {
-		if (nodes.left.is_valid()) {
-			auto raw = nodes.left->rawSamples;
-			for (size_t i = MAX_NOISE_NODES * 2; i < MAX_NOISE_NODES * 3; i++) {
-				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
-			}
-		}
-		// if (nodes.right.is_valid() && nodes.right->roomIdx < room->roomIdx) {
-		if (nodes.right.is_valid()) {
-			auto raw = nodes.right->rawSamples;
-			for (size_t i = MAX_NOISE_NODES * 3; i < MAX_NOISE_NODES * 4; i++) {
-				neighborNoiseSamples[i] = raw[i % MAX_NOISE_NODES];
-			}
-		}
-	}
-
 	//
 	// base noise
 	//
 	// - first pass - initialize && sample all noise values in grid
 	{
 		float blend = clamp01(ctx.cfg.NeighborBlend);
+		bool noiseCached = room->noiseCached;
 		int numx = numCells.x;
 		int numy = numCells.y;
 		int numz = numCells.z;
@@ -213,30 +168,68 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			for (size_t y = 0; y < numy; y++) {
 				for (size_t x = 0; x < numx; x++) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
-					noiseBuffer[i] = 0.0f;
 					noiseSamples[i] = 0.0f;
 					rawSamples[i] = 0.0f;
-					if (cfg.ShowNoise) {
+					noiseBuffer[i] = 0.0f;
+				}
+			}
+		}
+		// this might seem like unnecessary repetition, but this cuts down on branching and allows compiler inlining perf gains
+		if (cfg.ShowNoise && noiseCached) {
+			for (size_t z = 0; z < numz; z++) {
+				for (size_t y = 0; y < numy; y++) {
+					for (size_t x = 0; x < numx; x++) {
+						int i = MG::NoiseIndex(ctx, x, y, z);
+						float val = rawSamples[i];
+						// record min/max for normalization
+						if (val < minV) {
+							minV = val;
+						}
+						if (val > maxV) {
+							maxV = val;
+						}
+						noiseBuffer[i] = val;
+					}
+				}
+			}
+		}
+		RoomConfig::RoomNodes nodes = {
+			room->nodes.up,
+			room->nodes.down,
+			room->nodes.left,
+			room->nodes.right,
+		};
+		RoomConfig::NoiseNodes noiseNodes = {
+			room->noiseNodes.up,
+			room->noiseNodes.down,
+			room->noiseNodes.left,
+			room->noiseNodes.right,
+		};
+		if (cfg.ShowNoise && !noiseCached) {
+			for (size_t z = 0; z < numz; z++) {
+				for (size_t y = 0; y < numy; y++) {
+					for (size_t x = 0; x < numx; x++) {
+						int i = MG::NoiseIndex(ctx, x, y, z);
+						noiseBuffer[i] = 0.0f;
+						noiseSamples[i] = 0.0f;
+						rawSamples[i] = 0.0f;
 						// typically, noise output is in range [-1,1]
 						float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
-						rawSamples[i] = val;
 						// mix in neighbor noise
-						if (blend > 0) {
-							int xinv = numx - 1 - x;
-							int zinv = numz - 1 - z;
-							float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 0, x));
-							float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 0, z));
-							float px1 = clamp01(inverse_lerpf(numx - 1 - (numx - 1) * blend, numx - 1, x));
-							float pz1 = clamp01(inverse_lerpf(numz - 1 - (numz - 1) * blend, numz - 1, z));
-							float nUp = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 0];
-							float nDn = neighborNoiseSamples[MG::NoiseIndex(ctx, x, y, zinv) + MAX_NOISE_NODES * 1];
-							float nLf = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 2];
-							float nRt = neighborNoiseSamples[MG::NoiseIndex(ctx, xinv, y, z) + MAX_NOISE_NODES * 3];
-							val = lerpf(val, nUp, pz0 * int(nUp != MAXVAL));
-							val = lerpf(val, nDn, pz1 * int(nDn != MAXVAL));
-							val = lerpf(val, nLf, px0 * int(nLf != MAXVAL));
-							val = lerpf(val, nRt, px1 * int(nRt != MAXVAL));
-						}
+						float nUp = noiseNodes.up.is_valid() && nodes.up.is_valid() && nodes.up->roomIdx < room->roomIdx
+							? noiseNodes.up->get_noise_3d(x * cellSize, y * cellSize, z * cellSize - cfg.RoomWidth - cellSize)
+							: MAXVAL;
+						float nDn = noiseNodes.down.is_valid() && nodes.down.is_valid() && nodes.down->roomIdx < room->roomIdx
+							? noiseNodes.down->get_noise_3d(x * cellSize, y * cellSize, z * cellSize + cfg.RoomWidth - cellSize)
+							: MAXVAL;
+						float nLf = noiseNodes.left.is_valid() && nodes.left.is_valid() && nodes.left->roomIdx < room->roomIdx
+							? noiseNodes.left->get_noise_3d(x * cellSize + cfg.RoomWidth - cellSize, y * cellSize, z * cellSize)
+							: MAXVAL;
+						float nRt = noiseNodes.right.is_valid() && nodes.right.is_valid() && nodes.right->roomIdx < room->roomIdx
+							? noiseNodes.right->get_noise_3d(x * cellSize - cfg.RoomWidth - cellSize, y * cellSize, z * cellSize)
+							: MAXVAL;
+						val = MG::GetNeighborWeightedField(ctx, x, y, z, val, nUp, nDn, nLf, nRt);
+						rawSamples[i] = val;
 						// record min/max for normalization
 						if (val < minV) {
 							minV = val;
@@ -780,6 +773,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		room->noiseSamples[i] = noiseSamples[i];
 		room->rawSamples[i] = rawSamples[i];
 	}
+	room->noiseCached = true;
 }
 #pragma endregion // process_noise
 

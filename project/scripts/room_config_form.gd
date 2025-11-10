@@ -64,7 +64,6 @@ func _ready() -> void:
 	_on_tab_selected(tab_container.current_tab)
 
 func _on_tab_selected(tab: int) -> void:
-	print(tab)
 	_rerender_noise_preview(tab == Tab.BASE_NOISE || tab == Tab.BORDER_NOISE)
 
 func initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoiseLite) -> void:
