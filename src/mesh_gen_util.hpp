@@ -179,6 +179,19 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 	return ctx;
 }
 
+struct NeighborPropertyBool {
+	bool up;
+	bool down;
+	bool left;
+	bool right;
+};
+struct NeighborPropertyFloat {
+	float up;
+	float down;
+	float left;
+	float right;
+};
+
 inline int NoiseIndex(Context ctx, int x, int y, int z) {
 	int numx = ctx.numCells.x;
 	int numy = ctx.numCells.y;
@@ -212,6 +225,24 @@ inline int ClampedNoiseIndex(Context ctx, int x, int y, int z, int offset = 0) {
 	int i = x + y * numx + z * numy * numx;
 	ERR_FAIL_INDEX_V_EDMSG(i, (numx * numy * numz), 0, "noise index out of bounds");
 	return i;
+}
+
+inline float GetNeighborWeightedField(Context ctx, int x, int y, int z, float valSelf, NeighborPropertyFloat valOther) {
+	float blend = clamp01(ctx.cfg.NeighborBlend);
+	int numx = ctx.numCells.x - 1;
+	int numy = ctx.numCells.y - 1;
+	int numz = ctx.numCells.z - 1;
+	// calc percentage progression for x,z
+	// subtract 1 so that we are evaluating, for example, x=1 evaluates to 100%
+	float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 1, x));
+	float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 1, z));
+	float px1 = clamp01(inverse_lerpf(numx - (numx - 1) * blend, numx - 1, x));
+	float pz1 = clamp01(inverse_lerpf(numz - (numz - 1) * blend, numz - 1, z));
+	valSelf = lerpf(valSelf, valOther.up, pz0 * int(valOther.up != MAXVAL));
+	valSelf = lerpf(valSelf, valOther.down, pz1 * int(valOther.down != MAXVAL));
+	valSelf = lerpf(valSelf, valOther.left, px0 * int(valOther.left != MAXVAL));
+	valSelf = lerpf(valSelf, valOther.right, px1 * int(valOther.right != MAXVAL));
+	return valSelf;
 }
 
 inline float GetCeiling(Context ctx) {
@@ -361,27 +392,28 @@ inline bool IsBelowCeiling(Context ctx, int y) {
 	return ctx.cfg.Ceiling >= 1 || y <= GetCeiling(ctx);
 }
 
-inline bool IsPointActive(Context ctx, float noiseSamples[], int x, int y, int z) {
+inline bool IsPointActive(Context ctx, NeighborPropertyFloat neighborIsoValue, float noiseSamples[], int x, int y, int z) {
+	float isoValue = GetNeighborWeightedField(ctx, x, y, z, ctx.cfg.IsoValue, neighborIsoValue);
 	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
-	auto active = val >= ctx.cfg.IsoValue;
+	auto active = val >= isoValue;
 	return active;
 }
 
-inline int GetTriangulation(Context ctx, float noiseSamples[], int x, int y, int z) {
+inline int GetTriangulation(Context ctx, NeighborPropertyFloat neighborIsoValue, float noiseSamples[], int x, int y, int z) {
 	int idx = 0;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 0, z + 0) ? 1 : 0) << 0;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 0, z + 1) ? 1 : 0) << 1;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 0, z + 1) ? 1 : 0) << 2;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 0, z + 0) ? 1 : 0) << 3;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 1, z + 0) ? 1 : 0) << 4;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 0, y + 1, z + 1) ? 1 : 0) << 5;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 1, z + 1) ? 1 : 0) << 6;
-	idx |= (IsPointActive(ctx, noiseSamples, x + 1, y + 1, z + 0) ? 1 : 0) << 7;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 0, y + 0, z + 0) ? 1 : 0) << 0;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 0, y + 0, z + 1) ? 1 : 0) << 1;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 1, y + 0, z + 1) ? 1 : 0) << 2;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 1, y + 0, z + 0) ? 1 : 0) << 3;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 0, y + 1, z + 0) ? 1 : 0) << 4;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 0, y + 1, z + 1) ? 1 : 0) << 5;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 1, y + 1, z + 1) ? 1 : 0) << 6;
+	idx |= (IsPointActive(ctx, neighborIsoValue, noiseSamples, x + 1, y + 1, z + 0) ? 1 : 0) << 7;
 	return idx;
 }
 
 // source: https://cs.stackexchange.com/a/71116
-inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i a, Vector3i b) {
+inline Vector3 InterpolateMeshPoints(Context ctx, NeighborPropertyFloat neighborIsoValue, float noiseSamples[], Vector3i a, Vector3i b) {
 	// if one of the points is on a boundary plane, return that point so that our room meshes line up perfectly.
 	// note that a and b here are corners of the cube.
 	// bool aBound = IsAtBoundaryXZ(ctx, a.x, a.z);
@@ -395,7 +427,9 @@ inline Vector3 InterpolateMeshPoints(Context ctx, float noiseSamples[], Vector3i
 	// 	return (Vector3(a) + Vector3(b)) * 0.5f;
 	// 	return Vector3(b);
 	// }
-	float isovalue = ctx.cfg.IsoValue;
+	float isoValueA = GetNeighborWeightedField(ctx, a.x, a.y, a.z, ctx.cfg.IsoValue, neighborIsoValue);
+	float isoValueB = GetNeighborWeightedField(ctx, b.x, b.y, b.z, ctx.cfg.IsoValue, neighborIsoValue);
+	float isovalue = (isoValueA + isoValueB) * 0.5;
 	float noise_a = noiseSamples[NoiseIndex(ctx, a.x, a.y, a.z)];
 	float noise_b = noiseSamples[NoiseIndex(ctx, b.x, b.y, b.z)];
 	if (Math::is_zero_approx(absf(isovalue - noise_a))) {
@@ -552,25 +586,6 @@ inline float GetActivePlaneYF(Context ctx) {
 	float ceiling = GetCeiling(ctx) + 1;
 	float activeY = ceiling - ctx.cfg.ActivePlaneOffset;
 	return maxf(activeY, 2);
-}
-
-inline float GetNeighborWeightedField(Context ctx, int x, int y, int z, float val, float fromUp, float fromDn, float fromLf, float fromRt) {
-	float blend = clamp01(ctx.cfg.NeighborBlend);
-	int numx = ctx.numCells.x;
-	int numy = ctx.numCells.y;
-	int numz = ctx.numCells.z;
-	int xinv = numx - 1 - x;
-	int zinv = numz - 1 - z;
-	// calc percentage progression for x,z
-	float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 0, x));
-	float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 0, z));
-	float px1 = clamp01(inverse_lerpf((numx - 1) - (numx - 1) * blend, numx - 1, x));
-	float pz1 = clamp01(inverse_lerpf((numz - 1) - (numz - 1) * blend, numz - 1, z));
-	val = lerpf(val, fromUp, pz0 * int(fromUp != MAXVAL));
-	val = lerpf(val, fromDn, pz1 * int(fromDn != MAXVAL));
-	val = lerpf(val, fromLf, px0 * int(fromLf != MAXVAL));
-	val = lerpf(val, fromRt, px1 * int(fromRt != MAXVAL));
-	return val;
 }
 
 } //namespace MG

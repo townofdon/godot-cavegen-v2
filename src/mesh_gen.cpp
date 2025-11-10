@@ -100,7 +100,7 @@ void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_
 	//
 	{
 		auto t0 = std::chrono::high_resolution_clock::now();
-		march_cubes(ctx, p_room->GridPosition, noiseSamples);
+		march_cubes(ctx, p_room, noiseSamples);
 		auto t1 = std::chrono::high_resolution_clock::now();
 		// benchmark
 		float millis = (float)std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count() / 1000.0;
@@ -148,6 +148,19 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	float maxV = -INFINITY;
 	float cellSize = ctx.cfg.CellSize;
 
+	RoomConfig::RoomNodes nodes = {
+		room->nodes.up,
+		room->nodes.down,
+		room->nodes.left,
+		room->nodes.right,
+	};
+	MG::NeighborPropertyBool shouldBlendFrom = {
+		room->nodes.up.is_valid() && nodes.up->roomIdx < room->roomIdx,
+		room->nodes.down.is_valid() && nodes.down->roomIdx < room->roomIdx,
+		room->nodes.left.is_valid() && nodes.left->roomIdx < room->roomIdx,
+		room->nodes.right.is_valid() && nodes.right->roomIdx < room->roomIdx,
+	};
+
 	// setup noise
 	for (size_t i = 0; i < MAX_NOISE_NODES; i++) {
 		noiseSamples[i] = room->noiseSamples[i];
@@ -193,12 +206,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 				}
 			}
 		}
-		RoomConfig::RoomNodes nodes = {
-			room->nodes.up,
-			room->nodes.down,
-			room->nodes.left,
-			room->nodes.right,
-		};
 		RoomConfig::NoiseNodes noiseNodes = {
 			room->noiseNodes.up,
 			room->noiseNodes.down,
@@ -217,18 +224,24 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 						float val = noise.get_noise_3d(x * cellSize, y * cellSize, z * cellSize);
 						// mix in neighbor noise
 						float nUp = noiseNodes.up.is_valid() && nodes.up.is_valid() && nodes.up->roomIdx < room->roomIdx
-							? noiseNodes.up->get_noise_3d(x * cellSize, y * cellSize, z * cellSize - cfg.RoomWidth - cellSize)
+							? noiseNodes.up->get_noise_3d(x * cellSize, y * cellSize, z * cellSize + (cfg.RoomDepth - cellSize))
 							: MAXVAL;
 						float nDn = noiseNodes.down.is_valid() && nodes.down.is_valid() && nodes.down->roomIdx < room->roomIdx
-							? noiseNodes.down->get_noise_3d(x * cellSize, y * cellSize, z * cellSize + cfg.RoomWidth - cellSize)
+							? noiseNodes.down->get_noise_3d(x * cellSize, y * cellSize, z * cellSize - (cfg.RoomDepth - cellSize))
 							: MAXVAL;
 						float nLf = noiseNodes.left.is_valid() && nodes.left.is_valid() && nodes.left->roomIdx < room->roomIdx
-							? noiseNodes.left->get_noise_3d(x * cellSize + cfg.RoomWidth - cellSize, y * cellSize, z * cellSize)
+							? noiseNodes.left->get_noise_3d(x * cellSize + (cfg.RoomWidth - cellSize), y * cellSize, z * cellSize)
 							: MAXVAL;
 						float nRt = noiseNodes.right.is_valid() && nodes.right.is_valid() && nodes.right->roomIdx < room->roomIdx
-							? noiseNodes.right->get_noise_3d(x * cellSize - cfg.RoomWidth - cellSize, y * cellSize, z * cellSize)
+							? noiseNodes.right->get_noise_3d(x * cellSize - (cfg.RoomWidth - cellSize), y * cellSize, z * cellSize)
 							: MAXVAL;
-						val = MG::GetNeighborWeightedField(ctx, x, y, z, val, nUp, nDn, nLf, nRt);
+						MG::NeighborPropertyFloat otherNoise = {
+							nUp,
+							nDn,
+							nLf,
+							nRt,
+						};
+						val = MG::GetNeighborWeightedField(ctx, x, y, z, val, otherNoise);
 						rawSamples[i] = val;
 						// record min/max for normalization
 						if (val < minV) {
@@ -245,6 +258,36 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	}
 	// - second pass - normalize noise values, apply mods
 	if (cfg.ShowNoise) {
+		MG::NeighborPropertyFloat neighborNoiseFloor = {
+			shouldBlendFrom.up ? nodes.up->NoiseFloor : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->NoiseFloor : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->NoiseFloor : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->NoiseFloor : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborNoiseCeil = {
+			shouldBlendFrom.up ? nodes.up->NoiseCeil : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->NoiseCeil : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->NoiseCeil : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->NoiseCeil : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborCurve = {
+			shouldBlendFrom.up ? nodes.up->Curve : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->Curve : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->Curve : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->Curve : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborTiltY = {
+			shouldBlendFrom.up ? nodes.up->TiltY : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->TiltY : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->TiltY : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->TiltY : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+		};
 		for (size_t z = 0; z < numCells.z; z++) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t x = 0; x < numCells.x; x++) {
@@ -256,121 +299,142 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					} else {
 						val = inverse_lerpf(-1, 1, noiseBuffer[i]);
 					}
+					float noiseFloor = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.NoiseFloor, neighborNoiseFloor);
+					float noiseCeil = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.NoiseCeil, neighborNoiseCeil);
+					float curve = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.Curve, neighborCurve);
+					float tiltY = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.TiltY, neighborTiltY);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.TiltY, neighborTiltY);
 					val = clamp01(val);
-					val = lerpf(cfg.NoiseFloor, cfg.NoiseCeil, val);
+					val = lerpf(noiseFloor, noiseCeil, val);
 					// apply noise curve
 					float valEaseIn = Easing::InCubic(val);
 					float valEaseOut = Easing::OutCubic(val);
-					val = lerpf(valEaseIn, val, clamp01(cfg.Curve));
-					val = lerpf(val, valEaseOut, clamp01(cfg.Curve - 1));
+					val = lerpf(valEaseIn, val, clamp01(curve));
+					val = lerpf(val, valEaseOut, clamp01(curve - 1));
 					// apply falloff above ceiling (gradual, flattening happens below)
-					float zeroValue = minf(noiseBuffer[i], cfg.IsoValue - 0.001f);
+					float zeroValue = minf(noiseBuffer[i], isoValue - 0.001f);
 					val = lerpf(val, zeroValue, Easing::InQuint(MG::GetAboveCeilAmount(ctx, y, 1)));
 					// apply tilt y
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);
 					float valTiltBottom = val * lerpf(1.0f, 0.0f, yPct);
-					val = lerpf(valTiltTop, val, clamp01(cfg.TiltY));
-					val = lerpf(val, valTiltBottom, clamp01(cfg.TiltY - 1));
+					val = lerpf(valTiltTop, val, clamp01(tiltY));
+					val = lerpf(val, valTiltBottom, clamp01(tiltY - 1));
 					noiseBuffer[i] = val;
 				}
 			}
 		}
 	}
 	// - third pass - apply bounds, borders, offsets/tilt, smoothing
-	float ceiling = MG::GetCeiling(ctx);
-	for (size_t z = 0; z < numCells.z; z++) {
-		for (size_t y = 0; y < numCells.y; y++) {
-			for (size_t x = 0; x < numCells.x; x++) {
-				float val = noiseBuffer[MG::NoiseIndex(ctx, x, y, z)];
-				if (!MG::IsAtBorderEdge(ctx, x, z) || MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
-					// apply tilt x/z - sample different xyz
-					float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
-					float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
-					float px = x / float(numCells.x - 1);
-					float pz = z / float(numCells.z - 1);
-					float y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
-					float y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
-					// apply offsetY
-					float y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, cfg.OffsetY);
-					// interpolate
-					int i0 = MG::ClampedNoiseIndex(ctx, x, floor(y2), z);
-					int i1 = MG::ClampedNoiseIndex(ctx, x, ceil(y2), z);
-					float t_offsetInterp = y2 - int(y2);
-					val = lerpf(noiseBuffer[i0], noiseBuffer[i1], clamp01(t_offsetInterp));
-					// apply smoothing - in a kernel fashion
-					float tSmooth = ctx.cfg.Smoothing;
-					if (tSmooth != 0) {
-						val = 0;
-						for (int k = -1; k <= 1; k++) {
-							for (int j = -1; j <= 1; j++) {
-								int i2 = MG::ClampedNoiseIndex(ctx, x + j, floor(y2), z + k);
-								int i3 = MG::ClampedNoiseIndex(ctx, x + j, ceil(y2), z + k);
-								float temp = lerpf(noiseBuffer[i2], noiseBuffer[i3], clamp01(t_offsetInterp));
-								// 1/9 = 0.1111111111
-								val += temp * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+	{
+		MG::NeighborPropertyFloat neighborOffsetY = {
+			shouldBlendFrom.up ? nodes.up->OffsetY : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->OffsetY : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->OffsetY : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->OffsetY : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+		};
+		float ceiling = MG::GetCeiling(ctx);
+		for (size_t z = 0; z < numCells.z; z++) {
+			for (size_t y = 0; y < numCells.y; y++) {
+				for (size_t x = 0; x < numCells.x; x++) {
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
+					float val = noiseBuffer[MG::NoiseIndex(ctx, x, y, z)];
+					if (!MG::IsAtBorderEdge(ctx, x, z) || MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
+						// apply tilt x/z - sample different xyz
+						float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
+						float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
+						float px = x / float(numCells.x - 1);
+						float pz = z / float(numCells.z - 1);
+						float y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
+						float y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
+						// apply offsetY
+						float offsetY = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.OffsetY, neighborOffsetY);
+						float y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, offsetY);
+						// interpolate
+						int i0 = MG::ClampedNoiseIndex(ctx, x, floor(y2), z);
+						int i1 = MG::ClampedNoiseIndex(ctx, x, ceil(y2), z);
+						float t_offsetInterp = y2 - int(y2);
+						val = lerpf(noiseBuffer[i0], noiseBuffer[i1], clamp01(t_offsetInterp));
+						// apply smoothing - in a kernel fashion
+						float tSmooth = ctx.cfg.Smoothing;
+						if (tSmooth != 0) {
+							val = 0;
+							for (int k = -1; k <= 1; k++) {
+								for (int j = -1; j <= 1; j++) {
+									int i2 = MG::ClampedNoiseIndex(ctx, x + j, floor(y2), z + k);
+									int i3 = MG::ClampedNoiseIndex(ctx, x + j, ceil(y2), z + k);
+									float temp = lerpf(noiseBuffer[i2], noiseBuffer[i3], clamp01(t_offsetInterp));
+									// 1/9 = 0.1111111111
+									val += temp * lerpf(int(j == 0 && k == 0), 0.1111111111f, tSmooth);
+								}
 							}
 						}
+						// apply falloff (flattening) above ceiling
+						float zeroValue = minf(val, isoValue - 0.1f);
+						zeroValue = lerpf(0.0f, zeroValue, 1 - cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
+						val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, 1 - cfg.FalloffAboveCeiling)));
 					}
-					// apply falloff (flattening) above ceiling
-					float zeroValue = minf(val, cfg.IsoValue - 0.1f);
-					zeroValue = lerpf(0.0f, zeroValue, 1 - cfg.FalloffAboveCeiling); // flattens noise at ceiling as falloff approaches zero
-					val = lerpf(val, zeroValue, Easing::InCubic(MG::GetAboveCeilAmount(ctx, y, 1 - cfg.FalloffAboveCeiling)));
-				}
-				float zeroValue = minf(val, cfg.IsoValue - 0.1f);
-				if (MG::IsAtBoundaryY(ctx, y)) {
-					// apply y bounds
-					val = zeroValue;
-				} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
-					// apply xz bounds
-					val = zeroValue;
-				} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && cfg.ShowFloor) {
-					// apply floor
-					val = maxf(val, cfg.IsoValue + 0.1f);
-				} else if (
-					MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, z)) &&
-					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
-					// apply border
-					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
-						// un-comment the following to remove noise contribution to border:
-						// val = cfg.IsoValue + 0.1f;
-						// apply border tilt
-						float tilt = clamp01(ctx.cfg.BorderTilt);
-						float py = (1 - clamp01(GetFloorToCeilAmount(ctx, y)));
-						float size = lerpf(mini(ctx.cfg.BorderSize, 1), ctx.cfg.BorderSize, clamp01(py));
-						size = lerpf(ctx.cfg.BorderSize, size, tilt);
-						float pdist = clamp01(MG::SignedDistFromBorder2(ctx, x, z, size)) / maxf(size, 1);
-						val = lerpf(maxf(val, cfg.IsoValue + 0.1f), val, pdist);
-						// subtract from border if close to an empty border tile
-						// calculate y thresholds
-						// t = 0   => y = 0
-						// t = 0.5 => y = activeY
-						// t = 1   => y = ceiling
-						float activeY = (float)MG::GetActivePlaneY(ctx);
-						float vfloor = cfg.TileFloor; // user-selected range [0,1]
-						float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
-						float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
-						float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
-						float t = clamp01(t0 + t1);
-						float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
-						float borderGapSize = maxf((float)MAX_TILE_ERASE_SIZE * cfg.TileEraseSize, 1) + 1;
-						float dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, borderGapSize);
-						float distPct = clamp01(dist / borderGapSize);
-						t_floor = lerpf(t_floor, 0, distPct);
-						val = lerpf(val, 0, Easing::OutQuad(t_floor));
-					} else {
+					float zeroValue = minf(val, isoValue - 0.1f);
+					if (MG::IsAtBoundaryY(ctx, y)) {
+						// apply y bounds
 						val = zeroValue;
+					} else if (MG::IsAtBoundaryXZ(ctx, x, z) && (cfg.ShowOuterWalls || !MG::IsBelowCeiling(ctx, y))) {
+						// apply xz bounds
+						val = zeroValue;
+					} else if (y <= lerpf(1, ceiling, cfg.FloorLevel) && cfg.ShowFloor) {
+						// apply floor
+						val = maxf(val, isoValue + 0.1f);
+					} else if (
+						MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, z)) &&
+						MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
+						// apply border
+						if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
+							// un-comment the following to remove noise contribution to border:
+							// val = isoValue + 0.1f;
+							// apply border tilt
+							float tilt = clamp01(ctx.cfg.BorderTilt);
+							float py = (1 - clamp01(GetFloorToCeilAmount(ctx, y)));
+							float size = lerpf(mini(ctx.cfg.BorderSize, 1), ctx.cfg.BorderSize, clamp01(py));
+							size = lerpf(ctx.cfg.BorderSize, size, tilt);
+							float pdist = clamp01(MG::SignedDistFromBorder2(ctx, x, z, size)) / maxf(size, 1);
+							val = lerpf(maxf(val, isoValue + 0.1f), val, pdist);
+							// subtract from border if close to an empty border tile
+							// calculate y thresholds
+							// t = 0   => y = 0
+							// t = 0.5 => y = activeY
+							// t = 1   => y = ceiling
+							float activeY = (float)MG::GetActivePlaneY(ctx);
+							float vfloor = cfg.TileFloor; // user-selected range [0,1]
+							float vfloorFalloff = lerpf(vfloor - CMP_EPSILON, 0, cfg.TileFloorFalloff);
+							float t0 = clamp01(inverse_lerpf(0, activeY, y)) * 0.5f;
+							float t1 = clamp01(inverse_lerpf(activeY, ceiling + CMP_EPSILON, y)) * 0.5f;
+							float t = clamp01(t0 + t1);
+							float t_floor = clamp01(inverse_lerpf(vfloorFalloff, vfloor, t));
+							float borderGapSize = maxf((float)MAX_TILE_ERASE_SIZE * cfg.TileEraseSize, 1) + 1;
+							float dist = MG::GetDistanceToEmptyBorderTile(ctx, x, z, borderGapSize);
+							float distPct = clamp01(dist / borderGapSize);
+							t_floor = lerpf(t_floor, 0, distPct);
+							val = lerpf(val, 0, Easing::OutQuad(t_floor));
+						} else {
+							val = zeroValue;
+						}
+					} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
+						// apply falloff to noise above ceil && near border
+						int borderSize = cfg.UseBorderNoise ? 1 : cfg.BorderSize;
+						float dist = MG::DistFromBorder(ctx, x, z, borderSize);
+						float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
+						float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
+						float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
+						val = lerpf(val, zeroValue, t);
 					}
-				} else if (!MG::IsBelowCeiling(ctx, y) && cfg.FalloffNearBorder > 0) {
-					// apply falloff to noise above ceil && near border
-					int borderSize = cfg.UseBorderNoise ? 1 : cfg.BorderSize;
-					float dist = MG::DistFromBorder(ctx, x, z, borderSize);
-					float size = minf(ctx.numCells.x, ctx.numCells.z) - cfg.BorderSize * 2;
-					float distPct = dist / maxf(1, size * cfg.FalloffNearBorder);
-					float t = MG::GetAboveCeilAmount(ctx, y, distPct) * (1 - clamp01(distPct));
-					val = lerpf(val, zeroValue, t);
+					noiseSamples[MG::NoiseIndex(ctx, x, y, z)] = val;
 				}
-				noiseSamples[MG::NoiseIndex(ctx, x, y, z)] = val;
 			}
 		}
 	}
@@ -416,6 +480,12 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// apply border noise
 	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+		};
 		bool normalize = cfg.NormalizeBorder;
 		float ceiling = GetCeiling(ctx);
 		float tilt = clamp01(ctx.cfg.BorderTilt);
@@ -435,6 +505,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					if (step >= 2) {
 						x = numCells.x - 1;
 					}
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
 					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
@@ -450,7 +521,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							? clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]))
 							: clamp01(inverse_lerpf(-1, 1, noiseBuffer[i]));
 						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
-							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+							val = minf(noiseSamples[i], isoValue - 0.1f);
 						}
 						noiseBuffer[i] = val;
 					}
@@ -473,6 +544,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					if (step >= 2) {
 						z = numCells.z - 1;
 					}
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
 					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
@@ -488,7 +560,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							? clamp01(inverse_lerpf(minV, maxV, noiseBuffer[i]))
 							: clamp01(inverse_lerpf(-1, 1, noiseBuffer[i]));
 						if (MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_EMPTY) [[unlikely]] {
-							val = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+							val = minf(noiseSamples[i], isoValue - 0.1f);
 						}
 						noiseBuffer[i] = val;
 					}
@@ -620,6 +692,12 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// apply tile data
 	//
 	{
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
+			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
+			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
+			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+		};
 		int activeY = int(MG::GetActivePlaneY(ctx));
 		int ceiling = round(MG::GetCeiling(ctx));
 		float tSmooth = cfg.TileSmoothing; // range [0,1]
@@ -630,6 +708,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (int z = 2; z < numCells.z - 2; z++) {
 			for (int y = 2; y < numCells.y - 2; y++) {
 				for (int x = 2; x < numCells.x - 2; x++) {
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					auto currentTile = MG::GetTile(ctx, x, z);
 					float unsetNoiseVal = 1;
@@ -669,16 +748,16 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float t_ceil = clamp01(inverse_lerpf(vceil, vceilFalloff, t));
 					// calc empty noise target
 					float targ_empty = 0.0f;
-					targ_empty = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					targ_empty = minf(noiseSamples[i], isoValue - 0.1f);
 					targ_empty = lerpf(noiseSamples[i], targ_empty, clamp01(cfg.TileStrength));
 					targ_empty = lerpf(targ_empty, 0.0f, clamp01(cfg.TileStrength - 1));
 					targ_empty = lerpf(noiseSamples[i], targ_empty, t_floor);
 					// calc filled noise target
 					float targ_filled = 0.0f;
-					float zero = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+					float zero = minf(noiseSamples[i], isoValue - 0.1f);
 					// as tile strength approaches 2, reduce noise above ceil
 					float fallback = lerpf(noiseSamples[i], zero, clamp01(cfg.TileStrength - 1));
-					targ_filled = maxf(noiseSamples[i], cfg.IsoValue + 0.1f);
+					targ_filled = maxf(noiseSamples[i], isoValue + 0.1f);
 					targ_filled = lerpf(noiseSamples[i], targ_filled, clamp01(cfg.TileStrength));
 					targ_filled = lerpf(targ_filled, 1.0f, clamp01(cfg.TileStrength - 1));
 					targ_filled = lerpf(fallback, targ_filled, t_ceil);
@@ -697,6 +776,12 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// remove orphans / islands - flood fill
 	//
 	if (cfg.RemoveOrphans) {
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			shouldBlendFrom.up ? room->nodes.up->IsoValue : MAXVAL,
+			shouldBlendFrom.down ? room->nodes.down->IsoValue : MAXVAL,
+			shouldBlendFrom.left ? room->nodes.left->IsoValue : MAXVAL,
+			shouldBlendFrom.right ? room->nodes.right->IsoValue : MAXVAL,
+		};
 		float orphanY = MG::GetActivePlaneY(ctx) * ctx.cfg.OrphanThreshold;
 		// pick likely start point candidates
 		auto candidates = PackedVector3Array();
@@ -729,7 +814,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		int numCandidatesFound = 0;
 		for (size_t i = 0; i < candidates.size() && numCandidatesFound < 5; i++) {
 			Vector3 candidate = candidates.get(i);
-			bool found = MG::IsPointActive(ctx, noiseSamples, candidate.x, candidate.y, candidate.z);
+			bool found = MG::IsPointActive(ctx, neighborIsoValue, noiseSamples, candidate.x, candidate.y, candidate.z);
 			if (found) {
 				floodStarts.append(candidate);
 				numCandidatesFound++;
@@ -740,11 +825,11 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 1; y < numCells.y - 1; y++) {
 				for (int x = 1; x < numCells.x - 1; x++) {
-					if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
+					if (!foundCandidate && MG::IsPointActive(ctx, neighborIsoValue, noiseSamples, x, y, z)) {
 						floodStarts.append(Vector3i(x, y, z));
 						foundCandidate = true;
 					}
-					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = y <= orphanY || MG::IsPointActive(ctx, noiseSamples, x, y, z);
+					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = y <= orphanY || MG::IsPointActive(ctx, neighborIsoValue, noiseSamples, x, y, z);
 				}
 			}
 		}
@@ -757,9 +842,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			for (int z = 1; z < numCells.z - 1; z++) {
 				for (int y = 1; y < numCells.y - 1; y++) {
 					for (int x = 1; x < numCells.x - 1; x++) {
+						float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, ctx.cfg.IsoValue, neighborIsoValue);
 						int i = MG::NoiseIndex(ctx, x, y, z);
 						if (floodFillScreen[i]) {
-							float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+							float zeroValue = minf(noiseSamples[i], isoValue - 0.1f);
 							noiseSamples[i] = zeroValue;
 						}
 					}
@@ -781,7 +867,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 // march cubes
 //
 #pragma region march_cubes
-void MeshGen::march_cubes(MG::Context ctx, Vector2i roomGridPosition, float noiseSamples[]) {
+void MeshGen::march_cubes(MG::Context ctx, RoomConfig *room, float noiseSamples[]) {
 	auto ref = get_mesh();
 	auto ptr = *(ref);
 	ArrayMesh *mesh = Object::cast_to<ArrayMesh>(ptr);
@@ -791,10 +877,22 @@ void MeshGen::march_cubes(MG::Context ctx, Vector2i roomGridPosition, float nois
 	auto surface_array = godot::Array();
 	surface_array.resize(Mesh::ARRAY_MAX);
 
+	MG::NeighborPropertyBool shouldBlendFrom = {
+		room->nodes.up.is_valid() && room->nodes.up->roomIdx < room->roomIdx,
+		room->nodes.down.is_valid() && room->nodes.down->roomIdx < room->roomIdx,
+		room->nodes.left.is_valid() && room->nodes.left->roomIdx < room->roomIdx,
+		room->nodes.right.is_valid() && room->nodes.right->roomIdx < room->roomIdx,
+	};
+	MG::NeighborPropertyFloat neighborIsoValue = {
+		shouldBlendFrom.up ? room->nodes.up->IsoValue : MAXVAL,
+		shouldBlendFrom.down ? room->nodes.down->IsoValue : MAXVAL,
+		shouldBlendFrom.left ? room->nodes.left->IsoValue : MAXVAL,
+		shouldBlendFrom.right ? room->nodes.right->IsoValue : MAXVAL,
+	};
 	Vector3 roomPos = Vector3(
-		(ctx.cfg.RoomWidth - ctx.cfg.CellSize) * roomGridPosition.x,
+		(ctx.cfg.RoomWidth - ctx.cfg.CellSize) * room->GridPosition.x,
 		0,
-		(ctx.cfg.RoomDepth - ctx.cfg.CellSize) * roomGridPosition.y);
+		(ctx.cfg.RoomDepth - ctx.cfg.CellSize) * room->GridPosition.y);
 
 	auto verts = PackedVector3Array();
 	auto uvs = PackedVector2Array();
@@ -809,7 +907,7 @@ void MeshGen::march_cubes(MG::Context ctx, Vector2i roomGridPosition, float nois
 		for (int y = 0; y < numCells.y - 1; y++) {
 			for (int x = 0; x < numCells.x - 1; x++) {
 				int pointIndex = 0;
-				int triIdx = MG::GetTriangulation(ctx, noiseSamples, x, y, z);
+				int triIdx = MG::GetTriangulation(ctx, neighborIsoValue, noiseSamples, x, y, z);
 				auto uv = Vector2(
 					(x + 1) / (float)numCells.x,
 					maxf(
@@ -835,7 +933,7 @@ void MeshGen::march_cubes(MG::Context ctx, Vector2i roomGridPosition, float nois
 					int z1 = POINTS[p1 * 3 + 2];
 					Vector3 a = Vector3i(x + x0, y + y0, z + z0);
 					Vector3 b = Vector3i(x + x1, y + y1, z + z1);
-					Vector3 p = MG::InterpolateMeshPoints(ctx, noiseSamples, a, b);
+					Vector3 p = MG::InterpolateMeshPoints(ctx, neighborIsoValue, noiseSamples, a, b);
 					p = MG::ClampMeshBorderPoint(ctx, p);
 					points[pointIndex] = Vector3(p.x, p.y, p.z);
 					pointIndex++;
