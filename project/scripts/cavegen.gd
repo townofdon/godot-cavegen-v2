@@ -201,7 +201,7 @@ func _setup_room() -> void:
 	var cfg := save_data.cfg
 	var room:RoomConfig = save_data.arr_room.get(current_room_idx)
 	var noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
-	var border_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
+	var border_noise:FastNoiseLite = save_data.arr_border_noise.get(current_room_idx)
 	var meshgen:MeshGen = arr_meshgen.get(current_room_idx)
 	assert(meshgen)
 	# connect room signal
@@ -233,7 +233,7 @@ func regenerate(idx: int) -> void:
 	var cfg := save_data.cfg
 	var room:RoomConfig = save_data.arr_room.get(idx)
 	var noise:FastNoiseLite = save_data.arr_noise.get(idx)
-	var border_noise:FastNoiseLite = save_data.arr_noise.get(idx)
+	var border_noise:FastNoiseLite = save_data.arr_border_noise.get(idx)
 	var meshgen:MeshGen = arr_meshgen.get(idx)
 	assert(meshgen)
 	meshgen.generate(cfg, room, noise, border_noise)
@@ -329,7 +329,7 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 		0,
 		(cfg.room_depth - cfg.get_adjusted_cell_size()) * dir.y)
 	# duplicate border noise
-	var existing_border_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)
+	var existing_border_noise:FastNoiseLite = save_data.arr_border_noise.get(current_room_idx)
 	var new_border_noise := existing_border_noise.duplicate()
 	# duplicate meshgen
 	var new_meshgen := _clone_meshgen()

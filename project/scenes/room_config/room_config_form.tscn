@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://b2qbmyypnnpmy"]
+[gd_scene load_steps=23 format=3 uid="uid://b2qbmyypnnpmy"]
 
 [ext_resource type="Script" uid="uid://dt1a2nd6b8oob" path="res://scripts/room_config_form.gd" id="1_bgtom"]
 [ext_resource type="Theme" uid="uid://cdva8136niyjv" path="res://theme/theme.tres" id="2_7shhj"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bn5k1xeydqtad" path="res://scenes/room_config/field_bool.tscn" id="3_bcw72"]
 [ext_resource type="PackedScene" uid="uid://dhuv0i3csm0jw" path="res://scenes/room_config/field_float.tscn" id="3_qr8kv"]
 [ext_resource type="PackedScene" uid="uid://hma4qpwg5r0a" path="res://scenes/room_config/edit_noise_form.tscn" id="5_p11vx"]
+[ext_resource type="PackedScene" uid="uid://cpt4mhjhdulyg" path="res://scenes/room_config/field_int.tscn" id="6_atutr"]
 [ext_resource type="Texture2D" uid="uid://dr1httlvlunnk" path="res://assets/buttons.png" id="7_g4x3x"]
 [ext_resource type="Script" uid="uid://dtu5wd7nmvxn" path="res://scripts/movable_window.gd" id="8_alpvi"]
 [ext_resource type="Texture2D" uid="uid://gy3vttp7mp0m" path="res://assets/button.png" id="8_f8ag3"]
@@ -62,16 +63,10 @@ draw_center = false
 border_width_left = 4
 border_width_top = 4
 border_width_right = 4
-border_width_bottom = 4
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
 corner_detail = 5
 expand_margin_left = 4.0
-expand_margin_top = 4.0
+expand_margin_top = 8.0
 expand_margin_right = 4.0
-expand_margin_bottom = 4.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_twy0m"]
 atlas = ExtResource("7_g4x3x")
@@ -138,11 +133,13 @@ theme_override_constants/margin_bottom = 30
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_selected_color = Color(0.87481856, 0.6958405, 0.6319951, 1)
+theme_override_colors/font_hovered_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
 theme_override_colors/font_unselected_color = Color(0.02745098, 0.03529412, 0.039215688, 1)
 theme_override_constants/side_margin = 12
 theme_override_constants/tab_separation = 6
 theme_override_styles/panel = SubResource("StyleBoxFlat_bcw72")
 theme_override_styles/tab_unselected = SubResource("StyleBoxFlat_53uoo")
+theme_override_styles/tab_hovered = SubResource("StyleBoxFlat_53uoo")
 theme_override_styles/tab_selected = SubResource("StyleBoxFlat_ghglp")
 theme_override_styles/tab_focus = SubResource("StyleBoxFlat_4op41")
 current_tab = 0
@@ -250,6 +247,87 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="HeadingBorderOptions" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("2_r5ufs")]
+layout_mode = 2
+
+[node name="Label" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingBorderOptions" index="0"]
+text = "BORDER OPTIONS"
+
+[node name="ToggleUseBorderNoise" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_bcw72")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ToggleNormalizeBorder" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_bcw72")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="IntBorderSize" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("6_atutr")]
+layout_mode = 2
+
+[node name="BorderNoiseOptions" type="VBoxContainer" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatBorderNoiseStrength" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/BorderNoiseOptions" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatSmoothBorderNoise" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/BorderNoiseOptions" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatBorderTilt" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeadingTileSettings" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("2_r5ufs")]
+layout_mode = 2
+
+[node name="Label" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingTileSettings" index="0"]
+text = "TILE SETTINGS"
+
+[node name="FloatTileStrength" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileSmoothing" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileCeiling" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileCeilBlend" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileFloor" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileFloorBlend" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatTileEraseSize" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HeadingNeighborOptions" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("2_r5ufs")]
+layout_mode = 2
+
+[node name="Label" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNeighborOptions" index="0"]
+text = "TILE SETTINGS"
+
+[node name="FloatNeighborBlend" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BottomPadding" type="Control" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
 [node name="Base Noise" type="ScrollContainer" parent="Panel/MarginContainer/TabContainer"]
 visible = false
 layout_mode = 2
@@ -268,16 +346,9 @@ theme = ExtResource("2_7shhj")
 horizontal_scroll_mode = 3
 metadata/_tab_index = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel/MarginContainer/TabContainer/Border Noise"]
+[node name="EditNoiseForm" parent="Panel/MarginContainer/TabContainer/Border Noise" instance=ExtResource("5_p11vx")]
+unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 0
-
-[node name="HeadingRoomConfig" parent="Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer" instance=ExtResource("2_r5ufs")]
-layout_mode = 2
-
-[node name="Label" parent="Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig" index="0"]
-text = "BORDER NOISE"
 
 [node name="NoisePreviewWindow" type="Panel" parent="."]
 layout_mode = 1
@@ -450,4 +521,6 @@ icon_alignment = 1
 
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
 [editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]
-[editable path="Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig"]
+[editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingBorderOptions"]
+[editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingTileSettings"]
+[editable path="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNeighborOptions"]

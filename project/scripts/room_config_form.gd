@@ -23,10 +23,29 @@ extends Control
 @onready var toggle_remove_orphans: BoolField = %ToggleRemoveOrphans
 @onready var float_orphan_threshold: FloatField = %FloatOrphanThreshold
 
+@onready var toggle_use_border_noise: BoolField = %ToggleUseBorderNoise
+@onready var toggle_normalize_border: BoolField = %ToggleNormalizeBorder
+@onready var int_border_size: IntField = $"Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/IntBorderSize"
+@onready var float_border_noise_strength: FloatField = %FloatBorderNoiseStrength
+@onready var float_smooth_border_noise: FloatField = %FloatSmoothBorderNoise
+@onready var float_border_tilt: FloatField = %FloatBorderTilt
+@onready var border_noise_options: VBoxContainer = %BorderNoiseOptions
+
+@onready var float_tile_strength: FloatField = %FloatTileStrength
+@onready var float_tile_smoothing: FloatField = %FloatTileSmoothing
+@onready var float_tile_ceiling: FloatField = %FloatTileCeiling
+@onready var float_tile_ceil_blend: FloatField = %FloatTileCeilBlend
+@onready var float_tile_floor: FloatField = %FloatTileFloor
+@onready var float_tile_floor_blend: FloatField = %FloatTileFloorBlend
+@onready var float_tile_erase_size: FloatField = %FloatTileEraseSize
+
+@onready var float_neighbor_blend: FloatField = %FloatNeighborBlend
+
 @onready var tab_container: TabContainer = %TabContainer
 @onready var noise_preview_window: MovableWindow = $NoisePreviewWindow
 @onready var noise_preview: TextureRect = $NoisePreviewWindow/MarginContainer/AspectRatioContainer/NoisePreview
 @onready var base_noise_form: EditNoiseForm = %BaseNoiseForm
+@onready var edit_noise_form: EditNoiseForm = %EditNoiseForm
 
 var default_room: RoomConfig
 var show_preview: bool = false
@@ -45,6 +64,7 @@ func _ready() -> void:
 	_on_tab_selected(tab_container.current_tab)
 
 func _on_tab_selected(tab: int) -> void:
+	print(tab)
 	_rerender_noise_preview(tab == Tab.BASE_NOISE || tab == Tab.BORDER_NOISE)
 
 func initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoiseLite) -> void:
@@ -74,9 +94,30 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_bool(toggle_remove_orphans, room, "room_noise__remove_orphans")
 	_setup_room_float(float_orphan_threshold, room, "room_noise__orphan_threshold", 0, 1, 0.01)
 
+	_setup_room_bool(toggle_use_border_noise, room, "room_border__use_border_noise")
+	_setup_room_bool(toggle_normalize_border, room, "room_border__normalize_border_noise")
+	_setup_room_int(int_border_size, room, "room_border__border_size", 0, 10, 1)
+	_setup_room_float(float_border_noise_strength, room, "room_border__border_noise_strength", 0, 1, 0.01)
+	_setup_room_float(float_smooth_border_noise, room, "room_border__smooth_border_noise", 0, 1, 0.01)
+	_setup_room_float(float_border_tilt, room, "room_border__border_tilt", 0, 1, 0.01)
+
+	_setup_room_float(float_tile_strength, room, "tile_apply__tile_strength", 0, 2, 0.01)
+	_setup_room_float(float_tile_smoothing, room, "tile_apply__tile_smoothing", 0, 1, 0.01)
+	_setup_room_float(float_tile_ceiling, room, "tile_apply__tile_ceiling", 0, 1, 0.01)
+	_setup_room_float(float_tile_ceil_blend, room, "tile_apply__tile_ceil_blend", 0, 1, 0.01)
+	_setup_room_float(float_tile_floor, room, "tile_apply__tile_floor", 0, 1, 0.01)
+	_setup_room_float(float_tile_floor_blend, room, "tile_apply__tile_floor_blend", 0, 1, 0.01)
+	_setup_room_float(float_tile_erase_size, room, "tile_apply__tile_erase_size", 0, 1, 0.01)
+
+	_setup_room_float(float_neighbor_blend, room, "neighbors__neighbor_blend", 0, 1, 0.001)
+
+	Utils.Conn.disconnect_all(noise_preview_window.closed)
 	_setup_noise_form(base_noise_form, noise, room)
+	_setup_noise_form(edit_noise_form, border_noise, room)
+
 	tab_container.current_tab = 0
 	_on_tab_selected(tab_container.current_tab)
+	_rerender_fields(room)
 
 func _rerender_noise_preview(is_noise_tab: bool) -> void:
 	if show_preview && is_noise_tab:
@@ -86,7 +127,6 @@ func _rerender_noise_preview(is_noise_tab: bool) -> void:
 
 func _setup_noise_form(form: EditNoiseForm, noise: FastNoiseLite, room: RoomConfig) -> void:
 	Utils.Conn.disconnect_all(form.noise_changed)
-	Utils.Conn.disconnect_all(noise_preview_window.closed)
 	form.noise_changed.connect(func()->void:
 		room.notify_changed()
 		room.set_dirty(true)
@@ -96,6 +136,7 @@ func _setup_noise_form(form: EditNoiseForm, noise: FastNoiseLite, room: RoomConf
 		if form.visible && form.is_visible_in_tree() && texture is NoiseTexture2D:
 			texture.in_3d_space = true
 			texture.noise = noise
+			form.sync_preview()
 	)
 	form.show_preview_changed.connect(func(showing: bool)->void:
 		show_preview = showing
@@ -108,7 +149,7 @@ func _setup_noise_form(form: EditNoiseForm, noise: FastNoiseLite, room: RoomConf
 	)
 
 func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, minv: float, maxv: float, step: float) -> void:
-	assert(field, fieldname)
+	assert(field && field is FloatField, fieldname)
 	assert(fieldname in room, fieldname)
 	assert(_room_get(room, fieldname) is float, fieldname)
 	field.initialize(
@@ -121,6 +162,22 @@ func _setup_room_float(field: FloatField, room: RoomConfig, fieldname: String, m
 	)
 	Utils.Conn.disconnect_all(field.value_changed)
 	field.value_changed.connect(func(val: float)->void: _room_set(room, fieldname, val))
+	room.on_changed.connect(func()->void: field.update_val())
+
+func _setup_room_int(field: IntField, room: RoomConfig, fieldname: String, minv: int, maxv: int, step: int) -> void:
+	assert(field && field is IntField, fieldname)
+	assert(fieldname in room, fieldname)
+	assert(_room_get(room, fieldname) is int, fieldname)
+	field.initialize(
+		fieldname.get_slice("__", 1),
+		Callable(self, "_room_get").bind(room, fieldname),
+		_room_get(default_room, fieldname),
+		minv,
+		maxv,
+		step,
+	)
+	Utils.Conn.disconnect_all(field.value_changed)
+	field.value_changed.connect(func(val: int)->void: _room_set(room, fieldname, val))
 	room.on_changed.connect(func()->void: field.update_val())
 
 func _setup_room_bool(field: BoolField, room: RoomConfig, fieldname: String) -> void:
@@ -145,3 +202,10 @@ func _room_set(room: RoomConfig, fieldname: String, val) -> void:
 	assert(typeof(val) == typeof(_room_get(room, fieldname)))
 	room.set(fieldname, val)
 	room.set_dirty(true)
+	_rerender_fields(room)
+
+func _rerender_fields(room: RoomConfig) -> void:
+	if room.room_border__use_border_noise:
+		border_noise_options.show()
+	else:
+		border_noise_options.hide()

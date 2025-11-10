@@ -240,6 +240,7 @@ RoomConfig::RoomConfig() {
 	TileCeilingFalloff = 0.2f;
 	TileFloor = 0.4f;
 	TileFloorFalloff = 0.2f;
+	TileEraseSize = 0.0f;
 	NeighborBlend = 0.25f;
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {

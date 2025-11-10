@@ -34,9 +34,10 @@ func _on_toggle_expand(toggled_on: bool) -> void:
 	_rerender()
 
 func _on_visibility_changed() -> void:
-	expanded = visible
-	_rerender()
+	call_deferred("_rerender")
+	pass
 
 func _rerender()->void:
+	collapse_button.button_pressed = expanded
 	for node:Control in siblings:
 		node.visible = expanded && visible

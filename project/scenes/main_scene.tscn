@@ -25,14 +25,13 @@
 [ext_resource type="Script" uid="uid://deyecj711gfg1" path="res://scripts/export_dialog.gd" id="22_jix7a"]
 [ext_resource type="Script" uid="uid://ckki041pumfln" path="res://scripts/confirm_dialog.gd" id="23_segjr"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_58gk3"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_u0fll"]
 resource_local_to_scene = true
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_to7gp"]
 resource_local_to_scene = true
 
 [sub_resource type="RoomConfig" id="RoomConfig_58gk3"]
-tile_apply__tile_erase_size = nan
 resource_local_to_scene = true
 
 [sub_resource type="GlobalConfig" id="GlobalConfig_58gk3"]
@@ -43,7 +42,7 @@ script = ExtResource("2_58gk3")
 cfg = SubResource("GlobalConfig_58gk3")
 arr_room = Array[RoomConfig]([SubResource("RoomConfig_58gk3")])
 arr_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_to7gp")])
-arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_58gk3")])
+arr_border_noise = Array[FastNoiseLite]([SubResource("FastNoiseLite_u0fll")])
 metadata/_custom_type_script = "uid://b1aph5h3epjbd"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_gyfs4"]
@@ -820,4 +819,6 @@ favorites_enabled = false
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm"]
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingRoomConfig"]
 [editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNoise"]
-[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Border Noise/VBoxContainer/HeadingRoomConfig"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingBorderOptions"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingTileSettings"]
+[editable path="SubViewportContainer2/UISubViewport/UI/RoomConfigForm/Panel/MarginContainer/TabContainer/Room Config/VBoxContainer/HeadingNeighborOptions"]
