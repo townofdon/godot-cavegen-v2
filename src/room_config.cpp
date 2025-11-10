@@ -89,6 +89,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_RemoveOrphans", "p_RemoveOrphans"), &RoomConfig::SetRemoveOrphans);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_noise__remove_orphans"), "set_RemoveOrphans", "get_RemoveOrphans");
 
+	ClassDB::bind_method(D_METHOD("get_OrphanLevel"), &RoomConfig::GetOrphanLevel);
+	ClassDB::bind_method(D_METHOD("set_OrphanLevel", "p_OrphanLevel"), &RoomConfig::SetOrphanLevel);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__orphan_level"), "set_OrphanLevel", "get_OrphanLevel");
+
 	ADD_GROUP("Room Border", "room_border__");
 
 	ClassDB::bind_method(D_METHOD("get_UseBorderNoise"), &RoomConfig::GetUseBorderNoise);
@@ -223,6 +227,7 @@ RoomConfig::RoomConfig() {
 	ActiveYSmoothing = 0.5f;
 	FloorLevel = 0;
 	RemoveOrphans = true;
+	OrphanLevel = 0.5;
 	UseBorderNoise = false;
 	NormalizeBorder = false;
 	BorderSize = 1;
@@ -310,6 +315,9 @@ float RoomConfig::GetInterpolate() {
 }
 bool RoomConfig::GetRemoveOrphans() {
 	return RemoveOrphans;
+}
+float RoomConfig::GetOrphanLevel() {
+	return OrphanLevel;
 }
 bool RoomConfig::GetUseBorderNoise() {
 	return UseBorderNoise;
@@ -432,6 +440,10 @@ void RoomConfig::SetInterpolate(float p_Interpolate) {
 }
 void RoomConfig::SetRemoveOrphans(bool p_RemoveOrphans) {
 	RemoveOrphans = p_RemoveOrphans;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetOrphanLevel(float p_OrphanLevel) {
+	OrphanLevel = p_OrphanLevel;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetUseBorderNoise(bool p_UseBorderNoise) {

@@ -33,7 +33,7 @@ static inline float *neighborNoiseSamples = new float[MAX_NOISE_NODES * 4];
 static inline float *noiseSamples = new float[MAX_NOISE_NODES];
 static inline float *rawSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
-static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
+static inline int *floodFillScreen = new int[MAX_NOISE_NODES];
 
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_noise, Noise *p_border_noise) {
 	ERR_FAIL_NULL_EDMSG(p_global_cfg, "null p_global_cfg");
@@ -335,7 +335,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					// apply floor
 					val = maxf(val, cfg.IsoValue + 0.1f);
 				} else if (
-					MG::IsAtBorder(ctx, x, y, z) && (MG::IsAtBorderEdge(ctx, x, z) || !cfg.UseBorderNoise) &&
+					MG::IsAtBorder(ctx, x, y, z) && (!cfg.UseBorderNoise || MG::IsAtBorderEdge(ctx, x, z)) &&
 					MG::GetBorderTile(ctx, x, z) != RoomConfig::TILE_STATE_UNSET) {
 					// apply border
 					if (MG::IsBelowCeiling(ctx, y) && cfg.ShowBorder) {
@@ -704,28 +704,26 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// remove orphans / islands - flood fill
 	//
 	if (cfg.RemoveOrphans) {
-		// pick likely start point candidate, at the middle of the grid - this will always be ON when a border is present
-		Vector3i floodStart = Vector3i((numCells.x - 1) / 2, 1, (numCells.z - 1) / 2);
-		bool foundCandidate = MG::IsPointActive(ctx, noiseSamples, floodStart.x, floodStart.y, floodStart.z);
-		// initialize flood screen and set floodStart if not yet found
+		// initialize flood screen - MAXVAL if not found, else the cell's idx
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 1; y < numCells.y - 1; y++) {
 				for (int x = 1; x < numCells.x - 1; x++) {
-					if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
-						floodStart = Vector3i(x, y, z);
-						foundCandidate = true;
+					int val = 0;
+					if (MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
+						val = MG::NoiseIndex(ctx, x, y, z) + 1;
 					}
-					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = MG::IsPointActive(ctx, noiseSamples, x, y, z);
+					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = val;
 				}
 			}
 		}
-		// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
-		flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
+		// iterate through entire screen, flagging cell if its neighbor count is too low
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 1; y < numCells.y - 1; y++) {
 				for (int x = 1; x < numCells.x - 1; x++) {
 					int i = MG::NoiseIndex(ctx, x, y, z);
-					if (floodFillScreen[i]) {
+					int val = floodFillScreen[i];
+					int neighborCount = flood_fill_3d(ctx, floodFillScreen, Vector3i(x, y, z), val, 3);
+					if (neighborCount < 3) {
 						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
 						noiseSamples[i] = zeroValue;
 					}
@@ -733,6 +731,78 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			}
 		}
 	}
+
+	// if (cfg.RemoveOrphans) {
+	// 	float orphanY = MG::GetActivePlaneY(ctx) * ctx.cfg.OrphanLevel;
+	// 	// pick likely start point candidates
+	// 	auto candidates = PackedVector3Array();
+	// 	{
+	// 		int xstart = 1;
+	// 		int xmid = (numCells.x - 1) / 2;
+	// 		int xend = (numCells.x - 2);
+	// 		int ystart = 1;
+	// 		int ymid = orphanY;
+	// 		int yend = (numCells.y - 2);
+	// 		int zstart = 1;
+	// 		int zmid = (numCells.z - 1) / 2;
+	// 		int zend = (numCells.z - 2);
+	// 		candidates.append(Vector3i(xmid, ystart, zmid));
+	// 		candidates.append(Vector3i(xstart, ymid, zmid));
+	// 		candidates.append(Vector3i(xend, ymid, zmid));
+	// 		candidates.append(Vector3i(xmid, ymid, zstart));
+	// 		candidates.append(Vector3i(xstart, ymid, zend));
+	// 		candidates.append(Vector3i(xend, ymid, zstart));
+	// 		candidates.append(Vector3i(xend, ymid, zend));
+	// 		candidates.append(Vector3i(xstart, ymid, zstart));
+	// 		candidates.append(Vector3i(xmid, ymid, zend));
+	// 		candidates.append(Vector3i(xmid, ymid, zmid));
+	// 		candidates.append(Vector3i(xstart, ystart, zmid));
+	// 		candidates.append(Vector3i(xend, ystart, zmid));
+	// 		candidates.append(Vector3i(xmid, ystart, zstart));
+	// 		candidates.append(Vector3i(xmid, ystart, zend));
+	// 	}
+	// 	auto floodStarts = PackedVector3Array();
+	// 	int numCandidatesFound = 0;
+	// 	for (size_t i = 0; i < candidates.size() && numCandidatesFound < 5; i++) {
+	// 		Vector3 candidate = candidates.get(i);
+	// 		bool found = MG::IsPointActive(ctx, noiseSamples, candidate.x, candidate.y, candidate.z);
+	// 		if (found) {
+	// 			floodStarts.append(candidate);
+	// 			numCandidatesFound++;
+	// 		}
+	// 	}
+	// 	bool foundCandidate = numCandidatesFound > 0;
+	// 	// initialize flood screen and set floodStart if not yet found
+	// 	for (int z = 1; z < numCells.z - 1; z++) {
+	// 		for (int y = 1; y < numCells.y - 1; y++) {
+	// 			for (int x = 1; x < numCells.x - 1; x++) {
+	// 				if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
+	// 					floodStarts.append(Vector3i(x, y, z));
+	// 					foundCandidate = true;
+	// 				}
+	// 				floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = y <= orphanY || MG::IsPointActive(ctx, noiseSamples, x, y, z);
+	// 			}
+	// 		}
+	// 	}
+	// 	if (foundCandidate) {
+	// 		// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
+	// 		for (size_t i = 0; i < floodStarts.size(); i++) {
+	// 			Vector3 floodStart = floodStarts.get(i);
+	// 			flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
+	// 		}
+	// 		for (int z = 1; z < numCells.z - 1; z++) {
+	// 			for (int y = 1; y < numCells.y - 1; y++) {
+	// 				for (int x = 1; x < numCells.x - 1; x++) {
+	// 					int i = MG::NoiseIndex(ctx, x, y, z);
+	// 					if (floodFillScreen[i]) {
+	// 						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+	// 						noiseSamples[i] = zeroValue;
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	// copy noise back to room noise fields
 	for (size_t i = 0; i < MAX_NOISE_NODES; i++) {

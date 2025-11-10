@@ -14,6 +14,14 @@ extends Control
 @onready var float_tilt_y: FloatField = %FloatTiltY
 @onready var float_tilt_x: FloatField = %FloatTiltX
 @onready var float_tilt_z: FloatField = %FloatTiltZ
+@onready var float_smooth_crystalize: FloatField = %FloatSmoothCrystalize
+@onready var float_falloff_above_ceiling: FloatField = %FloatFalloffAboveCeiling
+@onready var float_falloff_near_border: FloatField = %FloatFalloffNearBorder
+@onready var float_interpolate: FloatField = %FloatInterpolate
+@onready var float_active_y_smoothing: FloatField = %FloatActiveYSmoothing
+@onready var float_floor_level: FloatField = %FloatFloorLevel
+@onready var toggle_remove_orphans: BoolField = %ToggleRemoveOrphans
+@onready var float_orphan_level: FloatField = %FloatOrphanLevel
 
 @onready var tab_container: TabContainer = %TabContainer
 @onready var noise_preview_window: MovableWindow = $NoisePreviewWindow
@@ -56,6 +64,15 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_tilt_y, room, "room_noise__tilt_y", 0, 2, 0.001)
 	_setup_room_float(float_tilt_x, room, "room_noise__tilt_x", 0, 2, 0.001)
 	_setup_room_float(float_tilt_z, room, "room_noise__tilt_z", 0, 2, 0.001)
+
+	_setup_room_float(float_smooth_crystalize, room, "room_noise__smooth_crystalize", -10, 10, 0.01)
+	_setup_room_float(float_falloff_above_ceiling, room, "room_noise__falloff_above_ceiling", 0, 1, 0.01)
+	_setup_room_float(float_falloff_near_border, room, "room_noise__falloff_near_border", 0, 2, 0.01)
+	_setup_room_float(float_interpolate, room, "room_noise__interpolate", 0, 1, 0.01)
+	_setup_room_float(float_active_y_smoothing, room, "room_noise__active_y_smoothing", 0, 1, 0.01)
+	_setup_room_float(float_floor_level, room, "room_noise__floor_level", 0, 1, 0.01)
+	_setup_room_bool(toggle_remove_orphans, room, "room_noise__remove_orphans")
+	_setup_room_float(float_orphan_level, room, "room_noise__orphan_level", 0, 1, 0.01)
 
 	_setup_noise_form(base_noise_form, noise, room)
 	tab_container.current_tab = 0

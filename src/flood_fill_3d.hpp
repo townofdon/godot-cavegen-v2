@@ -8,13 +8,13 @@
 namespace godot {
 
 // note - this mutates `screen`
-inline void flood_fill_3d(MG::Context ctx, bool screen[], Vector3i start, bool prev, bool next) {
+inline int flood_fill_3d(MG::Context ctx, int screen[], Vector3i start, int next, int maxIterations = 5) {
 	int sx = ctx.numCells.x;
 	int sy = ctx.numCells.y;
 	int sz = ctx.numCells.z;
 
 	// lambda function
-	auto apply = [&, sx, sy, sz, prev, next](int x, int y, int z) {
+	auto apply = [&, sx, sy, sz, next](int x, int y, int z) {
 		int i = x + y * sx + z * sy * sx;
 		if (
 			x < 0 ||
@@ -23,7 +23,7 @@ inline void flood_fill_3d(MG::Context ctx, bool screen[], Vector3i start, bool p
 			y >= sy ||
 			z < 0 ||
 			z >= sz ||
-			screen[i] != prev ||
+			screen[i] == 0 ||
 			screen[i] == next) {
 			return false;
 		}
@@ -34,11 +34,14 @@ inline void flood_fill_3d(MG::Context ctx, bool screen[], Vector3i start, bool p
 	Vector3i queue[MAX_NOISE_NODES] = {
 		start,
 	};
+	int iter = 0;
+	int neighborsFound = 0;
 	int queueSize = 1;
 
 	screen[MG::NoiseIndex(ctx, start.x, start.y, start.z)] = next;
 
-	while (queueSize > 0) {
+	while (queueSize > 0 && iter < maxIterations) {
+		iter++;
 		Vector3i currPixel = queue[queueSize - 1];
 		queueSize--;
 
@@ -49,28 +52,35 @@ inline void flood_fill_3d(MG::Context ctx, bool screen[], Vector3i start, bool p
 		if (apply(x + 1, y, z)) {
 			queue[queueSize] = Vector3i(x + 1, y, z);
 			queueSize++;
+			neighborsFound++;
 		}
 		if (apply(x - 1, y, z)) {
 			queue[queueSize] = Vector3i(x - 1, y, z);
 			queueSize++;
+			neighborsFound++;
 		}
 		if (apply(x, y + 1, z)) {
 			queue[queueSize] = Vector3i(x, y + 1, z);
 			queueSize++;
+			neighborsFound++;
 		}
 		if (apply(x, y - 1, z)) {
 			queue[queueSize] = Vector3i(x, y - 1, z);
 			queueSize++;
+			neighborsFound++;
 		}
 		if (apply(x, y, z + 1)) {
 			queue[queueSize] = Vector3i(x, y, z + 1);
 			queueSize++;
+			neighborsFound++;
 		}
 		if (apply(x, y, z - 1)) {
 			queue[queueSize] = Vector3i(x, y, z - 1);
 			queueSize++;
+			neighborsFound++;
 		}
 	}
+	return neighborsFound;
 }
 
 } //namespace godot
