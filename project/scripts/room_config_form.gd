@@ -21,7 +21,7 @@ extends Control
 @onready var float_active_y_smoothing: FloatField = %FloatActiveYSmoothing
 @onready var float_floor_level: FloatField = %FloatFloorLevel
 @onready var toggle_remove_orphans: BoolField = %ToggleRemoveOrphans
-@onready var float_orphan_level: FloatField = %FloatOrphanLevel
+@onready var float_orphan_threshold: FloatField = %FloatOrphanThreshold
 
 @onready var tab_container: TabContainer = %TabContainer
 @onready var noise_preview_window: MovableWindow = $NoisePreviewWindow
@@ -72,7 +72,7 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_active_y_smoothing, room, "room_noise__active_y_smoothing", 0, 1, 0.01)
 	_setup_room_float(float_floor_level, room, "room_noise__floor_level", 0, 1, 0.01)
 	_setup_room_bool(toggle_remove_orphans, room, "room_noise__remove_orphans")
-	_setup_room_float(float_orphan_level, room, "room_noise__orphan_level", 0, 1, 0.01)
+	_setup_room_float(float_orphan_threshold, room, "room_noise__orphan_threshold", 0, 1, 0.01)
 
 	_setup_noise_form(base_noise_form, noise, room)
 	tab_container.current_tab = 0

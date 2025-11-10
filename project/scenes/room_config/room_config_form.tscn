@@ -190,6 +190,10 @@ text = "NOISE OPTIONS"
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="FloatInterpolate" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="FloatIsoValue" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -230,10 +234,6 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="FloatInterpolate" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
-unique_name_in_owner = true
-layout_mode = 2
-
 [node name="FloatActiveYSmoothing" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
 unique_name_in_owner = true
 layout_mode = 2
@@ -246,7 +246,7 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="FloatOrphanLevel" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+[node name="FloatOrphanThreshold" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
 unique_name_in_owner = true
 layout_mode = 2
 

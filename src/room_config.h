@@ -40,7 +40,7 @@ public:
 	float ActiveYSmoothing;
 	float FloorLevel;
 	bool RemoveOrphans;
-	float OrphanLevel;
+	float OrphanThreshold;
 	// room border
 	bool UseBorderNoise;
 	bool NormalizeBorder;
@@ -79,7 +79,7 @@ public:
 	float GetFloorLevel();
 	float GetInterpolate();
 	bool GetRemoveOrphans();
-	float GetOrphanLevel();
+	float GetOrphanThreshold();
 	bool GetUseBorderNoise();
 	bool GetNormalizeBorder();
 	int GetBorderSize();
@@ -115,7 +115,7 @@ public:
 	void SetFloorLevel(float p_FloorLevel);
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
-	void SetOrphanLevel(float p_OrphansLevel);
+	void SetOrphanThreshold(float p_OrphansLevel);
 	void SetUseBorderNoise(bool p_UseBorderNoise);
 	void SetNormalizeBorder(bool p_NormalizeBorder);
 	void SetBorderSize(int p_BorderSize);

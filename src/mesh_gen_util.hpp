@@ -86,7 +86,7 @@ struct Context {
 		float ActiveYSmoothing;
 		float FloorLevel;
 		bool RemoveOrphans;
-		float OrphanLevel;
+		float OrphanThreshold;
 		// room border
 		bool UseBorderNoise;
 		bool NormalizeBorder;
@@ -150,7 +150,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->ActiveYSmoothing,
 		p_room->FloorLevel,
 		p_room->RemoveOrphans,
-		p_room->OrphanLevel,
+		p_room->OrphanThreshold,
 		// border
 		p_room->UseBorderNoise,
 		p_room->NormalizeBorder,

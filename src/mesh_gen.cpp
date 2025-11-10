@@ -33,7 +33,7 @@ static inline float *neighborNoiseSamples = new float[MAX_NOISE_NODES * 4];
 static inline float *noiseSamples = new float[MAX_NOISE_NODES];
 static inline float *rawSamples = new float[MAX_NOISE_NODES];
 static inline float *noiseBuffer = new float[MAX_NOISE_NODES];
-static inline int *floodFillScreen = new int[MAX_NOISE_NODES];
+static inline bool *floodFillScreen = new bool[MAX_NOISE_NODES];
 
 void MeshGen::generate(GlobalConfig *p_global_cfg, RoomConfig *p_room, Noise *p_noise, Noise *p_border_noise) {
 	ERR_FAIL_NULL_EDMSG(p_global_cfg, "null p_global_cfg");
@@ -704,105 +704,76 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// remove orphans / islands - flood fill
 	//
 	if (cfg.RemoveOrphans) {
-		// initialize flood screen - MAXVAL if not found, else the cell's idx
+		float orphanY = MG::GetActivePlaneY(ctx) * ctx.cfg.OrphanThreshold;
+		// pick likely start point candidates
+		auto candidates = PackedVector3Array();
+		{
+			int xstart = 1;
+			int xmid = (numCells.x - 1) / 2;
+			int xend = (numCells.x - 2);
+			int ystart = 1;
+			int ymid = MG::GetActivePlaneY(ctx) / 2;
+			int yend = (numCells.y - 2);
+			int zstart = 1;
+			int zmid = (numCells.z - 1) / 2;
+			int zend = (numCells.z - 2);
+			candidates.append(Vector3i(xmid, ystart, zmid));
+			candidates.append(Vector3i(xstart, ymid, zmid));
+			candidates.append(Vector3i(xend, ymid, zmid));
+			candidates.append(Vector3i(xmid, ymid, zstart));
+			candidates.append(Vector3i(xstart, ymid, zend));
+			candidates.append(Vector3i(xend, ymid, zstart));
+			candidates.append(Vector3i(xend, ymid, zend));
+			candidates.append(Vector3i(xstart, ymid, zstart));
+			candidates.append(Vector3i(xmid, ymid, zend));
+			candidates.append(Vector3i(xmid, ymid, zmid));
+			candidates.append(Vector3i(xstart, ystart, zmid));
+			candidates.append(Vector3i(xend, ystart, zmid));
+			candidates.append(Vector3i(xmid, ystart, zstart));
+			candidates.append(Vector3i(xmid, ystart, zend));
+		}
+		auto floodStarts = PackedVector3Array();
+		int numCandidatesFound = 0;
+		for (size_t i = 0; i < candidates.size() && numCandidatesFound < 5; i++) {
+			Vector3 candidate = candidates.get(i);
+			bool found = MG::IsPointActive(ctx, noiseSamples, candidate.x, candidate.y, candidate.z);
+			if (found) {
+				floodStarts.append(candidate);
+				numCandidatesFound++;
+			}
+		}
+		bool foundCandidate = numCandidatesFound > 0;
+		// initialize flood screen and set floodStart if not yet found
 		for (int z = 1; z < numCells.z - 1; z++) {
 			for (int y = 1; y < numCells.y - 1; y++) {
 				for (int x = 1; x < numCells.x - 1; x++) {
-					int val = 0;
-					if (MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
-						val = MG::NoiseIndex(ctx, x, y, z) + 1;
+					if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
+						floodStarts.append(Vector3i(x, y, z));
+						foundCandidate = true;
 					}
-					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = val;
+					floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = y <= orphanY || MG::IsPointActive(ctx, noiseSamples, x, y, z);
 				}
 			}
 		}
-		// iterate through entire screen, flagging cell if its neighbor count is too low
-		for (int z = 1; z < numCells.z - 1; z++) {
-			for (int y = 1; y < numCells.y - 1; y++) {
-				for (int x = 1; x < numCells.x - 1; x++) {
-					int i = MG::NoiseIndex(ctx, x, y, z);
-					int val = floodFillScreen[i];
-					int neighborCount = flood_fill_3d(ctx, floodFillScreen, Vector3i(x, y, z), val, 3);
-					if (neighborCount < 3) {
-						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-						noiseSamples[i] = zeroValue;
+		if (foundCandidate) {
+			// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
+			for (size_t i = 0; i < floodStarts.size(); i++) {
+				Vector3 floodStart = floodStarts.get(i);
+				flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
+			}
+			for (int z = 1; z < numCells.z - 1; z++) {
+				for (int y = 1; y < numCells.y - 1; y++) {
+					for (int x = 1; x < numCells.x - 1; x++) {
+						int i = MG::NoiseIndex(ctx, x, y, z);
+						if (floodFillScreen[i]) {
+							float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
+							noiseSamples[i] = zeroValue;
+						}
 					}
 				}
 			}
 		}
 	}
-
-	// if (cfg.RemoveOrphans) {
-	// 	float orphanY = MG::GetActivePlaneY(ctx) * ctx.cfg.OrphanLevel;
-	// 	// pick likely start point candidates
-	// 	auto candidates = PackedVector3Array();
-	// 	{
-	// 		int xstart = 1;
-	// 		int xmid = (numCells.x - 1) / 2;
-	// 		int xend = (numCells.x - 2);
-	// 		int ystart = 1;
-	// 		int ymid = orphanY;
-	// 		int yend = (numCells.y - 2);
-	// 		int zstart = 1;
-	// 		int zmid = (numCells.z - 1) / 2;
-	// 		int zend = (numCells.z - 2);
-	// 		candidates.append(Vector3i(xmid, ystart, zmid));
-	// 		candidates.append(Vector3i(xstart, ymid, zmid));
-	// 		candidates.append(Vector3i(xend, ymid, zmid));
-	// 		candidates.append(Vector3i(xmid, ymid, zstart));
-	// 		candidates.append(Vector3i(xstart, ymid, zend));
-	// 		candidates.append(Vector3i(xend, ymid, zstart));
-	// 		candidates.append(Vector3i(xend, ymid, zend));
-	// 		candidates.append(Vector3i(xstart, ymid, zstart));
-	// 		candidates.append(Vector3i(xmid, ymid, zend));
-	// 		candidates.append(Vector3i(xmid, ymid, zmid));
-	// 		candidates.append(Vector3i(xstart, ystart, zmid));
-	// 		candidates.append(Vector3i(xend, ystart, zmid));
-	// 		candidates.append(Vector3i(xmid, ystart, zstart));
-	// 		candidates.append(Vector3i(xmid, ystart, zend));
-	// 	}
-	// 	auto floodStarts = PackedVector3Array();
-	// 	int numCandidatesFound = 0;
-	// 	for (size_t i = 0; i < candidates.size() && numCandidatesFound < 5; i++) {
-	// 		Vector3 candidate = candidates.get(i);
-	// 		bool found = MG::IsPointActive(ctx, noiseSamples, candidate.x, candidate.y, candidate.z);
-	// 		if (found) {
-	// 			floodStarts.append(candidate);
-	// 			numCandidatesFound++;
-	// 		}
-	// 	}
-	// 	bool foundCandidate = numCandidatesFound > 0;
-	// 	// initialize flood screen and set floodStart if not yet found
-	// 	for (int z = 1; z < numCells.z - 1; z++) {
-	// 		for (int y = 1; y < numCells.y - 1; y++) {
-	// 			for (int x = 1; x < numCells.x - 1; x++) {
-	// 				if (!foundCandidate && MG::IsPointActive(ctx, noiseSamples, x, y, z)) {
-	// 					floodStarts.append(Vector3i(x, y, z));
-	// 					foundCandidate = true;
-	// 				}
-	// 				floodFillScreen[MG::NoiseIndex(ctx, x, y, z)] = y <= orphanY || MG::IsPointActive(ctx, noiseSamples, x, y, z);
-	// 			}
-	// 		}
-	// 	}
-	// 	if (foundCandidate) {
-	// 		// flood fill from start, setting true nodes to false - remaining true nodes will be zeroed.
-	// 		for (size_t i = 0; i < floodStarts.size(); i++) {
-	// 			Vector3 floodStart = floodStarts.get(i);
-	// 			flood_fill_3d(ctx, floodFillScreen, floodStart, true, false);
-	// 		}
-	// 		for (int z = 1; z < numCells.z - 1; z++) {
-	// 			for (int y = 1; y < numCells.y - 1; y++) {
-	// 				for (int x = 1; x < numCells.x - 1; x++) {
-	// 					int i = MG::NoiseIndex(ctx, x, y, z);
-	// 					if (floodFillScreen[i]) {
-	// 						float zeroValue = minf(noiseSamples[i], cfg.IsoValue - 0.1f);
-	// 						noiseSamples[i] = zeroValue;
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
 
 	// copy noise back to room noise fields
 	for (size_t i = 0; i < MAX_NOISE_NODES; i++) {
