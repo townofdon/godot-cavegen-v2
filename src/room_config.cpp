@@ -151,9 +151,21 @@ void RoomConfig::_bind_methods() {
 
 	ADD_GROUP("Neighbors", "neighbors__");
 
-	ClassDB::bind_method(D_METHOD("get_NeighborBlend"), &RoomConfig::GetNeighborBlend);
-	ClassDB::bind_method(D_METHOD("set_NeighborBlend", "p_NeighborBlend"), &RoomConfig::SetNeighborBlend);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlend", "get_NeighborBlend");
+	ClassDB::bind_method(D_METHOD("get_NeighborBlendUp"), &RoomConfig::GetNeighborBlendUp);
+	ClassDB::bind_method(D_METHOD("set_NeighborBlendUp", "p_blend"), &RoomConfig::SetNeighborBlendUp);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend_up", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlendUp", "get_NeighborBlendUp");
+
+	ClassDB::bind_method(D_METHOD("get_NeighborBlendDown"), &RoomConfig::GetNeighborBlendDown);
+	ClassDB::bind_method(D_METHOD("set_NeighborBlendDown", "p_blend"), &RoomConfig::SetNeighborBlendDown);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend_down", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlendDown", "get_NeighborBlendDown");
+
+	ClassDB::bind_method(D_METHOD("get_NeighborBlendLeft"), &RoomConfig::GetNeighborBlendLeft);
+	ClassDB::bind_method(D_METHOD("set_NeighborBlendLeft", "p_blend"), &RoomConfig::SetNeighborBlendLeft);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend_left", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlendLeft", "get_NeighborBlendLeft");
+
+	ClassDB::bind_method(D_METHOD("get_NeighborBlendRight"), &RoomConfig::GetNeighborBlendRight);
+	ClassDB::bind_method(D_METHOD("set_NeighborBlendRight", "p_blend"), &RoomConfig::SetNeighborBlendRight);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "neighbors__neighbor_blend_right", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_NeighborBlendRight", "get_NeighborBlendRight");
 
 	ADD_GROUP("Internal", "internal__");
 
@@ -256,7 +268,7 @@ RoomConfig::RoomConfig() {
 	TileFloor = 0.4f;
 	TileFloorFalloff = 0.2f;
 	TileEraseSize = 0.0f;
-	NeighborBlend = 0.25f;
+	Blend = { 0, 0, 0, 0 };
 	// initialize tiles
 	for (size_t i = 0; i < MAX_NOISE_NODES_2D; i++) {
 		tiles[i] = 0;
@@ -375,8 +387,17 @@ float RoomConfig::GetTileFloorFalloff() {
 float RoomConfig::GetTileEraseSize() {
 	return TileEraseSize;
 }
-float RoomConfig::GetNeighborBlend() {
-	return NeighborBlend;
+float RoomConfig::GetNeighborBlendUp() {
+	return Blend.up;
+}
+float RoomConfig::GetNeighborBlendDown() {
+	return Blend.down;
+}
+float RoomConfig::GetNeighborBlendLeft() {
+	return Blend.left;
+}
+float RoomConfig::GetNeighborBlendRight() {
+	return Blend.right;
 }
 
 void RoomConfig::SetShowNoise(bool p_ShowNoise) {
@@ -515,8 +536,20 @@ void RoomConfig::SetTileEraseSize(float p_TileEraseSize) {
 	TileEraseSize = p_TileEraseSize;
 	emit_signal("on_changed");
 }
-void RoomConfig::SetNeighborBlend(float p_NeighborBlend) {
-	NeighborBlend = p_NeighborBlend;
+void RoomConfig::SetNeighborBlendUp(float p_blend) {
+	Blend.up = p_blend;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNeighborBlendDown(float p_blend) {
+	Blend.down = p_blend;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNeighborBlendLeft(float p_blend) {
+	Blend.left = p_blend;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetNeighborBlendRight(float p_blend) {
+	Blend.right = p_blend;
 	emit_signal("on_changed");
 }
 

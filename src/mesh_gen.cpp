@@ -154,11 +154,11 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		room->nodes.left,
 		room->nodes.right,
 	};
-	MG::NeighborPropertyBool shouldBlendFrom = {
-		room->nodes.up.is_valid() && nodes.up->roomIdx < room->roomIdx,
-		room->nodes.down.is_valid() && nodes.down->roomIdx < room->roomIdx,
-		room->nodes.left.is_valid() && nodes.left->roomIdx < room->roomIdx,
-		room->nodes.right.is_valid() && nodes.right->roomIdx < room->roomIdx,
+	MG::NeighborPropertyBool hasNeighbor = {
+		room->nodes.up.is_valid(),
+		room->nodes.down.is_valid(),
+		room->nodes.left.is_valid(),
+		room->nodes.right.is_valid(),
 	};
 
 	// setup noise
@@ -172,7 +172,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	//
 	// - first pass - initialize && sample all noise values in grid
 	{
-		float blend = clamp01(ctx.cfg.NeighborBlend);
 		bool noiseCached = room->noiseCached;
 		int numx = numCells.x;
 		int numy = numCells.y;
@@ -241,7 +240,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 							nLf,
 							nRt,
 						};
-						val = MG::GetNeighborWeightedField(ctx, x, y, z, val, otherNoise);
+						val = MG::GetNeighborWeightedField(ctx, x, z, val, otherNoise);
 						rawSamples[i] = val;
 						// record min/max for normalization
 						if (val < minV) {
@@ -259,34 +258,34 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// - second pass - normalize noise values, apply mods
 	if (cfg.ShowNoise) {
 		MG::NeighborPropertyFloat neighborNoiseFloor = {
-			shouldBlendFrom.up ? nodes.up->NoiseFloor : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->NoiseFloor : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->NoiseFloor : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->NoiseFloor : MAXVAL,
+			hasNeighbor.up ? nodes.up->NoiseFloor : MAXVAL,
+			hasNeighbor.down ? nodes.down->NoiseFloor : MAXVAL,
+			hasNeighbor.left ? nodes.left->NoiseFloor : MAXVAL,
+			hasNeighbor.right ? nodes.right->NoiseFloor : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborNoiseCeil = {
-			shouldBlendFrom.up ? nodes.up->NoiseCeil : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->NoiseCeil : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->NoiseCeil : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->NoiseCeil : MAXVAL,
+			hasNeighbor.up ? nodes.up->NoiseCeil : MAXVAL,
+			hasNeighbor.down ? nodes.down->NoiseCeil : MAXVAL,
+			hasNeighbor.left ? nodes.left->NoiseCeil : MAXVAL,
+			hasNeighbor.right ? nodes.right->NoiseCeil : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborCurve = {
-			shouldBlendFrom.up ? nodes.up->Curve : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->Curve : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->Curve : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->Curve : MAXVAL,
+			hasNeighbor.up ? nodes.up->Curve : MAXVAL,
+			hasNeighbor.down ? nodes.down->Curve : MAXVAL,
+			hasNeighbor.left ? nodes.left->Curve : MAXVAL,
+			hasNeighbor.right ? nodes.right->Curve : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborTiltY = {
-			shouldBlendFrom.up ? nodes.up->TiltY : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->TiltY : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->TiltY : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->TiltY : MAXVAL,
+			hasNeighbor.up ? nodes.up->TiltY : MAXVAL,
+			hasNeighbor.down ? nodes.down->TiltY : MAXVAL,
+			hasNeighbor.left ? nodes.left->TiltY : MAXVAL,
+			hasNeighbor.right ? nodes.right->TiltY : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborIsoValue = {
-			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
 		};
 		for (size_t z = 0; z < numCells.z; z++) {
 			for (size_t y = 0; y < numCells.y; y++) {
@@ -299,11 +298,11 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					} else {
 						val = inverse_lerpf(-1, 1, noiseBuffer[i]);
 					}
-					float noiseFloor = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.NoiseFloor, neighborNoiseFloor);
-					float noiseCeil = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.NoiseCeil, neighborNoiseCeil);
-					float curve = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.Curve, neighborCurve);
-					float tiltY = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.TiltY, neighborTiltY);
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.TiltY, neighborTiltY);
+					float noiseFloor = MG::GetNeighborWeightedField(ctx, x, z, cfg.NoiseFloor, neighborNoiseFloor);
+					float noiseCeil = MG::GetNeighborWeightedField(ctx, x, z, cfg.NoiseCeil, neighborNoiseCeil);
+					float curve = MG::GetNeighborWeightedField(ctx, x, z, cfg.Curve, neighborCurve);
+					float tiltY = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltY, neighborTiltY);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltY, neighborIsoValue);
 					val = clamp01(val);
 					val = lerpf(noiseFloor, noiseCeil, val);
 					// apply noise curve
@@ -327,34 +326,46 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	}
 	// - third pass - apply bounds, borders, offsets/tilt, smoothing
 	{
+		MG::NeighborPropertyFloat neighborTiltX = {
+			hasNeighbor.up ? nodes.up->TiltX : MAXVAL,
+			hasNeighbor.down ? nodes.down->TiltX : MAXVAL,
+			MAXVAL,
+			MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborTiltZ = {
+			MAXVAL,
+			MAXVAL,
+			hasNeighbor.left ? nodes.left->TiltZ : MAXVAL,
+			hasNeighbor.right ? nodes.right->TiltZ : MAXVAL,
+		};
 		MG::NeighborPropertyFloat neighborOffsetY = {
-			shouldBlendFrom.up && nodes.up->TiltZ <= 1 ? nodes.up->OffsetY : MAXVAL,
-			shouldBlendFrom.down && nodes.down->TiltZ >= 1 ? nodes.down->OffsetY : MAXVAL,
-			shouldBlendFrom.left && nodes.left->TiltX <= 1 ? nodes.left->OffsetY : MAXVAL,
-			shouldBlendFrom.right && nodes.right->TiltX >= 1 ? nodes.right->OffsetY : MAXVAL,
+			hasNeighbor.up && nodes.up->TiltZ <= 1 ? nodes.up->OffsetY : MAXVAL,
+			hasNeighbor.down && nodes.down->TiltZ >= 1 ? nodes.down->OffsetY : MAXVAL,
+			hasNeighbor.left && nodes.left->TiltX <= 1 ? nodes.left->OffsetY : MAXVAL,
+			hasNeighbor.right && nodes.right->TiltX >= 1 ? nodes.right->OffsetY : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborIsoValue = {
-			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
 		};
 		float ceiling = MG::GetCeiling(ctx);
 		for (size_t z = 0; z < numCells.z; z++) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t x = 0; x < numCells.x; x++) {
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
 					float val = noiseBuffer[MG::NoiseIndex(ctx, x, y, z)];
 					if (!MG::IsAtBorderEdge(ctx, x, z) || MG::GetBorderTile(ctx, x, z) == RoomConfig::TILE_STATE_UNSET) {
 						// apply tilt x/z - sample different xyz
-						float tiltX = clampf(ctx.cfg.TiltX - 1, -1, 1);
-						float tiltZ = clampf(ctx.cfg.TiltZ - 1, -1, 1);
+						float tiltX = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltX, neighborTiltX) - 1;
+						float tiltZ = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltZ, neighborTiltZ) - 1;
 						float px = x / float(numCells.x - 1);
 						float pz = z / float(numCells.z - 1);
 						float y0 = lerpf(y + numCells.y * clamp01(-tiltX), y + numCells.y * clamp01(tiltX), px);
 						float y1 = lerpf(y0 + numCells.y * clamp01(-tiltZ), y0 + numCells.y * clamp01(tiltZ), pz);
 						// apply offsetY
-						float offsetY = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.OffsetY, neighborOffsetY);
+						float offsetY = MG::GetNeighborWeightedField(ctx, x, z, cfg.OffsetY, neighborOffsetY);
 						float y2 = lerpf(y1 + numCells.y * 0.85f, y1 - numCells.y * 0.85f, offsetY);
 						// interpolate
 						int i0 = MG::ClampedNoiseIndex(ctx, x, floor(y2), z);
@@ -481,10 +492,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	//
 	if (cfg.ShowBorder && cfg.UseBorderNoise && cfg.BorderSize > 1) {
 		MG::NeighborPropertyFloat neighborIsoValue = {
-			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
 		};
 		bool normalize = cfg.NormalizeBorder;
 		float ceiling = GetCeiling(ctx);
@@ -505,7 +516,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					if (step >= 2) {
 						x = numCells.x - 1;
 					}
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
 					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
@@ -544,7 +555,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					if (step >= 2) {
 						z = numCells.z - 1;
 					}
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
 					int i = NoiseIndex(ctx, x, y, z);
 					if (step == 0 || step == 2) {
 						float val = ctx.borderNoise.get_noise_3d(x, y, z);
@@ -693,10 +704,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	//
 	{
 		MG::NeighborPropertyFloat neighborIsoValue = {
-			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->IsoValue : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->IsoValue : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->IsoValue : MAXVAL,
+			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
 		};
 		int activeY = int(MG::GetActivePlaneY(ctx));
 		int ceiling = round(MG::GetCeiling(ctx));
@@ -708,7 +719,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 		for (int z = 2; z < numCells.z - 2; z++) {
 			for (int y = 2; y < numCells.y - 2; y++) {
 				for (int x = 2; x < numCells.x - 2; x++) {
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, cfg.IsoValue, neighborIsoValue);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
 					int i = MG::NoiseIndex(ctx, x, y, z);
 					auto currentTile = MG::GetTile(ctx, x, z);
 					float unsetNoiseVal = 1;
@@ -777,10 +788,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	//
 	if (cfg.RemoveOrphans) {
 		MG::NeighborPropertyFloat neighborIsoValue = {
-			shouldBlendFrom.up ? room->nodes.up->IsoValue : MAXVAL,
-			shouldBlendFrom.down ? room->nodes.down->IsoValue : MAXVAL,
-			shouldBlendFrom.left ? room->nodes.left->IsoValue : MAXVAL,
-			shouldBlendFrom.right ? room->nodes.right->IsoValue : MAXVAL,
+			hasNeighbor.up ? room->nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? room->nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? room->nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? room->nodes.right->IsoValue : MAXVAL,
 		};
 		float orphanY = MG::GetActivePlaneY(ctx) * ctx.cfg.OrphanThreshold;
 		// pick likely start point candidates
@@ -842,7 +853,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			for (int z = 1; z < numCells.z - 1; z++) {
 				for (int y = 1; y < numCells.y - 1; y++) {
 					for (int x = 1; x < numCells.x - 1; x++) {
-						float isoValue = MG::GetNeighborWeightedField(ctx, x, y, z, ctx.cfg.IsoValue, neighborIsoValue);
+						float isoValue = MG::GetNeighborWeightedField(ctx, x, z, ctx.cfg.IsoValue, neighborIsoValue);
 						int i = MG::NoiseIndex(ctx, x, y, z);
 						if (floodFillScreen[i]) {
 							float zeroValue = minf(noiseSamples[i], isoValue - 0.1f);
@@ -877,17 +888,11 @@ void MeshGen::march_cubes(MG::Context ctx, RoomConfig *room, float noiseSamples[
 	auto surface_array = godot::Array();
 	surface_array.resize(Mesh::ARRAY_MAX);
 
-	MG::NeighborPropertyBool shouldBlendFrom = {
-		room->nodes.up.is_valid() && room->nodes.up->roomIdx < room->roomIdx,
-		room->nodes.down.is_valid() && room->nodes.down->roomIdx < room->roomIdx,
-		room->nodes.left.is_valid() && room->nodes.left->roomIdx < room->roomIdx,
-		room->nodes.right.is_valid() && room->nodes.right->roomIdx < room->roomIdx,
-	};
 	MG::NeighborPropertyFloat neighborIsoValue = {
-		shouldBlendFrom.up ? room->nodes.up->IsoValue : MAXVAL,
-		shouldBlendFrom.down ? room->nodes.down->IsoValue : MAXVAL,
-		shouldBlendFrom.left ? room->nodes.left->IsoValue : MAXVAL,
-		shouldBlendFrom.right ? room->nodes.right->IsoValue : MAXVAL,
+		room->nodes.up.is_valid() ? room->nodes.up->IsoValue : MAXVAL,
+		room->nodes.down.is_valid() ? room->nodes.down->IsoValue : MAXVAL,
+		room->nodes.left.is_valid() ? room->nodes.left->IsoValue : MAXVAL,
+		room->nodes.right.is_valid() ? room->nodes.right->IsoValue : MAXVAL,
 	};
 	Vector3 roomPos = Vector3(
 		(ctx.cfg.RoomWidth - ctx.cfg.CellSize) * room->GridPosition.x,

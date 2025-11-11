@@ -14,6 +14,7 @@ extends Control
 @onready var float_tilt_y: FloatField = %FloatTiltY
 @onready var float_tilt_x: FloatField = %FloatTiltX
 @onready var float_tilt_z: FloatField = %FloatTiltZ
+@onready var float_offset_y: FloatField = %FloatOffsetY
 @onready var float_smooth_crystalize: FloatField = %FloatSmoothCrystalize
 @onready var float_falloff_above_ceiling: FloatField = %FloatFalloffAboveCeiling
 @onready var float_falloff_near_border: FloatField = %FloatFalloffNearBorder
@@ -39,7 +40,10 @@ extends Control
 @onready var float_tile_floor_blend: FloatField = %FloatTileFloorBlend
 @onready var float_tile_erase_size: FloatField = %FloatTileEraseSize
 
-@onready var float_neighbor_blend: FloatField = %FloatNeighborBlend
+@onready var float_neighbor_blend_up: FloatField = %FloatNeighborBlendUp
+@onready var float_neighbor_blend_down: FloatField = %FloatNeighborBlendDown
+@onready var float_neighbor_blend_left: FloatField = %FloatNeighborBlendLeft
+@onready var float_neighbor_blend_right: FloatField = %FloatNeighborBlendRight
 
 @onready var tab_container: TabContainer = %TabContainer
 @onready var noise_preview_window: MovableWindow = $NoisePreviewWindow
@@ -83,6 +87,7 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_tilt_y, room, "room_noise__tilt_y", 0, 2, 0.001)
 	_setup_room_float(float_tilt_x, room, "room_noise__tilt_x", 0, 2, 0.001)
 	_setup_room_float(float_tilt_z, room, "room_noise__tilt_z", 0, 2, 0.001)
+	_setup_room_float(float_offset_y, room, "room_noise__offset_y", 0, 1, 0.001)
 
 	_setup_room_float(float_smooth_crystalize, room, "room_noise__smooth_crystalize", -10, 10, 0.01)
 	_setup_room_float(float_falloff_above_ceiling, room, "room_noise__falloff_above_ceiling", 0, 1, 0.01)
@@ -108,7 +113,10 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_tile_floor_blend, room, "tile_apply__tile_floor_blend", 0, 1, 0.01)
 	_setup_room_float(float_tile_erase_size, room, "tile_apply__tile_erase_size", 0, 1, 0.01)
 
-	_setup_room_float(float_neighbor_blend, room, "neighbors__neighbor_blend", 0, 1, 0.001)
+	_setup_room_float(float_neighbor_blend_up, room, "neighbors__neighbor_blend_up", 0, 1, 0.001)
+	_setup_room_float(float_neighbor_blend_down, room, "neighbors__neighbor_blend_down", 0, 1, 0.001)
+	_setup_room_float(float_neighbor_blend_left, room, "neighbors__neighbor_blend_left", 0, 1, 0.001)
+	_setup_room_float(float_neighbor_blend_right, room, "neighbors__neighbor_blend_right", 0, 1, 0.001)
 
 	Utils.Conn.disconnect_all(noise_preview_window.closed)
 	_setup_noise_form(base_noise_form, noise, room)

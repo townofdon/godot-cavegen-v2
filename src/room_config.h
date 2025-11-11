@@ -58,11 +58,13 @@ public:
 	float TileFloorFalloff;
 	float TileEraseSize;
 	// neighbors
-	float NeighborBlend;
-	float NeighborBlendUp;
-	float NeighborBlendDn;
-	float NeighborBlendLf;
-	float NeighborBlendRt;
+	struct NeighborBlend {
+		float up;
+		float down;
+		float left;
+		float right;
+	};
+	NeighborBlend Blend;
 
 	bool GetShowNoise();
 	bool GetShowBorder();
@@ -98,11 +100,10 @@ public:
 	float GetTileFloor();
 	float GetTileFloorFalloff();
 	float GetTileEraseSize();
-	float GetNeighborBlend();
 	float GetNeighborBlendUp();
-	float GetNeighborBlendDn();
-	float GetNeighborBlendLf();
-	float GetNeighborBlendRt();
+	float GetNeighborBlendDown();
+	float GetNeighborBlendLeft();
+	float GetNeighborBlendRight();
 
 	void SetShowNoise(bool p_ShowNoise);
 	void SetShowBorder(bool p_ShowBorder);
@@ -138,11 +139,10 @@ public:
 	void SetTileFloor(float p_TileFloor);
 	void SetTileFloorFalloff(float p_TileFloorFalloff);
 	void SetTileEraseSize(float p_TileEraseSize);
-	void SetNeighborBlend(float p_NeighborBlend);
 	void SetNeighborBlendUp(float p_NeighborBlendUp);
-	void SetNeighborBlendDn(float p_NeighborBlendDn);
-	void SetNeighborBlendLf(float p_NeighborBlendLf);
-	void SetNeighborBlendRt(float p_NeighborBlendRt);
+	void SetNeighborBlendDown(float p_NeighborBlendDn);
+	void SetNeighborBlendLeft(float p_NeighborBlendLf);
+	void SetNeighborBlendRight(float p_NeighborBlendRt);
 
 	// static methods
 	static float GetOffsetYFromTilt(float tilt, float offsetY);

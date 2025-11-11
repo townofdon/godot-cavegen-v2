@@ -304,13 +304,25 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	new_room.internal__grid_position = coords
 	new_room.tilemap__tiles = new_room.tilemap__tiles.duplicate()
 	new_room.init_tiles_for_new_room(cfg.get_num_cells_2d(), dir, border_mask)
+	new_room.neighbors__neighbor_blend_up = 0
+	new_room.neighbors__neighbor_blend_down = 0
+	new_room.neighbors__neighbor_blend_left = 0
+	new_room.neighbors__neighbor_blend_right = 0
+	if dir == Vector2i.UP:
+		new_room.neighbors__neighbor_blend_down = 0.25
+	if dir == Vector2i.DOWN:
+		new_room.neighbors__neighbor_blend_up = 0.25
+	if dir == Vector2i.LEFT:
+		new_room.neighbors__neighbor_blend_right = 0.25
+	if dir == Vector2i.RIGHT:
+		new_room.neighbors__neighbor_blend_left = 0.25
 	if absi(dir.x) == 1:
 		if dir.x == Vector2i.RIGHT.x && new_room.room_noise__tilt_x > 1:
 			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_x, new_room.room_noise__offset_y)
 		elif dir.x == Vector2i.LEFT.x && new_room.room_noise__tilt_x < 1:
 			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_x, new_room.room_noise__offset_y)
 		new_room.room_noise__tilt_x = 1
-	else:
+	if absi(dir.y) == 1:
 		if dir.y == Vector2i.UP.y && new_room.room_noise__tilt_z < 1:
 			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_z, new_room.room_noise__offset_y)
 		elif dir.y == Vector2i.DOWN.y && new_room.room_noise__tilt_z > 1:
@@ -338,6 +350,37 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	existing_room.set_dirty(true)
 	new_room.set_dirty(true)
 	_recalculate_room_mappings()
+	# try your best to blend into society and act normal.
+	if new_room.get_node_up():
+		new_room.neighbors__neighbor_blend_up = 0.25
+	if new_room.get_node_down():
+		new_room.neighbors__neighbor_blend_down = 0.25
+	if new_room.get_node_left():
+		new_room.neighbors__neighbor_blend_left = 0.25
+	if new_room.get_node_right():
+		new_room.neighbors__neighbor_blend_right = 0.25
+	if absi(dir.x) == 1:
+		var tilt_x:float = 0
+		var count:float = 0
+		if new_room.get_node_up():
+			tilt_x += new_room.get_node_up().room_noise__tilt_x
+			count += 1
+		if new_room.get_node_down():
+			tilt_x += new_room.get_node_down().room_noise__tilt_x
+			count += 1
+		if count > 0:
+			new_room.room_noise__tilt_x = tilt_x / count
+	if absi(dir.y) == 1:
+		var tilt_z:float = 0
+		var count:float = 0
+		if new_room.get_node_up():
+			tilt_z += new_room.get_node_up().room_noise__tilt_z
+			count += 1
+		if new_room.get_node_down():
+			tilt_z += new_room.get_node_down().room_noise__tilt_z
+			count += 1
+		if count > 0:
+			new_room.room_noise__tilt_z = tilt_z / count
 	new_room.set_dirty(true)
 	save_data.validate(new_idx, room_idx_lookup)
 	current_room_idx = new_idx

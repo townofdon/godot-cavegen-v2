@@ -103,7 +103,7 @@ struct Context {
 		float TileFloorFalloff;
 		float TileEraseSize;
 		// neighbors
-		float NeighborBlend;
+		RoomConfig::NeighborBlend Blend;
 	};
 	Config cfg;
 	Noise noise;
@@ -167,7 +167,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->TileFloorFalloff,
 		p_room->TileEraseSize,
 		// neighbors
-		p_room->NeighborBlend,
+		p_room->Blend,
 	};
 	struct MG::Context ctx = {
 		ctxCfg,
@@ -227,21 +227,19 @@ inline int ClampedNoiseIndex(Context ctx, int x, int y, int z, int offset = 0) {
 	return i;
 }
 
-inline float GetNeighborWeightedField(Context ctx, int x, int y, int z, float valSelf, NeighborPropertyFloat valOther) {
-	float blend = clamp01(ctx.cfg.NeighborBlend);
+inline float GetNeighborWeightedField(Context ctx, int x, int z, float valSelf, NeighborPropertyFloat valOther) {
+	RoomConfig::NeighborBlend blend = ctx.cfg.Blend;
 	int numx = ctx.numCells.x - 1;
-	int numy = ctx.numCells.y - 1;
 	int numz = ctx.numCells.z - 1;
 	// calc percentage progression for x,z
-	// subtract 1 so that we are evaluating, for example, x=1 evaluates to 100%
-	float px0 = clamp01(inverse_lerpf(maxf(2, numx * blend), 1, x));
-	float pz0 = clamp01(inverse_lerpf(maxf(2, numz * blend), 1, z));
-	float px1 = clamp01(inverse_lerpf(numx - maxf(2, numx * blend), numx - 1, x));
-	float pz1 = clamp01(inverse_lerpf(numz - maxf(2, numz * blend), numz - 1, z));
-	valSelf = lerpf(valSelf, valOther.up, pz0 * int(valOther.up != MAXVAL) * int(blend > 0));
-	valSelf = lerpf(valSelf, valOther.down, pz1 * int(valOther.down != MAXVAL) * int(blend > 0));
-	valSelf = lerpf(valSelf, valOther.left, px0 * int(valOther.left != MAXVAL) * int(blend > 0));
-	valSelf = lerpf(valSelf, valOther.right, px1 * int(valOther.right != MAXVAL) * int(blend > 0));
+	float pz0 = clamp01(inverse_lerpf(maxf(2, numz * blend.up), 1, z));
+	float px0 = clamp01(inverse_lerpf(maxf(2, numx * blend.left), 1, x));
+	float pz1 = clamp01(inverse_lerpf(numz - maxf(2, numz * blend.down), numz - 1, z));
+	float px1 = clamp01(inverse_lerpf(numx - maxf(2, numx * blend.right), numx - 1, x));
+	valSelf = lerpf(valSelf, valOther.up, pz0 * int(valOther.up != MAXVAL) * int(blend.up > 0));
+	valSelf = lerpf(valSelf, valOther.down, pz1 * int(valOther.down != MAXVAL) * int(blend.down > 0));
+	valSelf = lerpf(valSelf, valOther.left, px0 * int(valOther.left != MAXVAL) * int(blend.left > 0));
+	valSelf = lerpf(valSelf, valOther.right, px1 * int(valOther.right != MAXVAL) * int(blend.right > 0));
 	return valSelf;
 }
 
@@ -393,7 +391,7 @@ inline bool IsBelowCeiling(Context ctx, int y) {
 }
 
 inline bool IsPointActive(Context ctx, NeighborPropertyFloat neighborIsoValue, float noiseSamples[], int x, int y, int z) {
-	float isoValue = GetNeighborWeightedField(ctx, x, y, z, ctx.cfg.IsoValue, neighborIsoValue);
+	float isoValue = GetNeighborWeightedField(ctx, x, z, ctx.cfg.IsoValue, neighborIsoValue);
 	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
 	auto active = val >= isoValue;
 	return active;
@@ -427,8 +425,8 @@ inline Vector3 InterpolateMeshPoints(Context ctx, NeighborPropertyFloat neighbor
 	// 	return (Vector3(a) + Vector3(b)) * 0.5f;
 	// 	return Vector3(b);
 	// }
-	float isoValueA = GetNeighborWeightedField(ctx, a.x, a.y, a.z, ctx.cfg.IsoValue, neighborIsoValue);
-	float isoValueB = GetNeighborWeightedField(ctx, b.x, b.y, b.z, ctx.cfg.IsoValue, neighborIsoValue);
+	float isoValueA = GetNeighborWeightedField(ctx, a.x, a.z, ctx.cfg.IsoValue, neighborIsoValue);
+	float isoValueB = GetNeighborWeightedField(ctx, b.x, b.z, ctx.cfg.IsoValue, neighborIsoValue);
 	float isovalue = (isoValueA + isoValueB) * 0.5;
 	float noise_a = noiseSamples[NoiseIndex(ctx, a.x, a.y, a.z)];
 	float noise_b = noiseSamples[NoiseIndex(ctx, b.x, b.y, b.z)];
