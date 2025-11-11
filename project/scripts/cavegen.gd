@@ -253,23 +253,13 @@ func regenerate(idx: int) -> void:
 # iterate through dirty rooms in order to blend rooms
 func _regen_dirty_rooms() -> void:
 	await get_tree().process_frame
-	if !dirty_timer.is_stopped: return
-	if !notif_timer.is_stopped(): return
-	if initializing: return
-	var dirty_rooms:Array[RoomConfig] = []
 	for room:RoomConfig in save_data.arr_room:
+		if initializing: return
+		if !dirty_timer.is_stopped: return
+		if !notif_timer.is_stopped(): return
 		if room.get_dirty():
-			dirty_rooms.append(room)
-	if len(dirty_rooms) == 0: return
-	for i in range(4):
-		for room:RoomConfig in dirty_rooms:
-			if initializing: return
-			if !dirty_timer.is_stopped: return
-			if !notif_timer.is_stopped(): return
 			regenerate(room.get_room_idx())
 			await get_tree().process_frame
-		regenerate(current_room_idx)
-		await get_tree().process_frame
 
 func _clear_meshes()->void:
 	for i in range(1, len(arr_meshgen)):
@@ -314,23 +304,17 @@ func _add_room(dir: Vector2i, border_mask: int) -> void:
 	new_room.internal__grid_position = coords
 	new_room.tilemap__tiles = new_room.tilemap__tiles.duplicate()
 	new_room.init_tiles_for_new_room(cfg.get_num_cells_2d(), dir, border_mask)
-	# TODO: move this to c++
-	# set new offset, tilt based on dir
 	if absi(dir.x) == 1:
 		if dir.x == Vector2i.RIGHT.x && new_room.room_noise__tilt_x > 1:
-			new_room.room_noise__offset_y = (1 - (new_room.room_noise__tilt_x - 1)) * 0.5
+			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_x, new_room.room_noise__offset_y)
 		elif dir.x == Vector2i.LEFT.x && new_room.room_noise__tilt_x < 1:
-			new_room.room_noise__offset_y = new_room.room_noise__tilt_x * 0.5
-		else:
-			new_room.room_noise__offset_y = 0.5
+			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_x, new_room.room_noise__offset_y)
 		new_room.room_noise__tilt_x = 1
 	else:
-		if dir.y == Vector2i.UP.y && new_room.room_noise__tilt_z > 1:
-			new_room.room_noise__offset_y = (1 - (new_room.room_noise__tilt_z - 1)) * 0.5
-		elif dir.y == Vector2i.DOWN.y && new_room.room_noise__tilt_z < 1:
-			new_room.room_noise__offset_y = new_room.room_noise__tilt_z * 0.5
-		else:
-			new_room.room_noise__offset_y = 0.5
+		if dir.y == Vector2i.UP.y && new_room.room_noise__tilt_z < 1:
+			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_z, new_room.room_noise__offset_y)
+		elif dir.y == Vector2i.DOWN.y && new_room.room_noise__tilt_z > 1:
+			new_room.room_noise__offset_y = RoomConfig.get_offset_y_from_tilt(new_room.room_noise__tilt_z, new_room.room_noise__offset_y)
 		new_room.room_noise__tilt_z = 1
 	# duplicate noise
 	var existing_noise:FastNoiseLite = save_data.arr_noise.get(current_room_idx)

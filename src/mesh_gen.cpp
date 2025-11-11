@@ -328,10 +328,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 	// - third pass - apply bounds, borders, offsets/tilt, smoothing
 	{
 		MG::NeighborPropertyFloat neighborOffsetY = {
-			shouldBlendFrom.up ? nodes.up->OffsetY : MAXVAL,
-			shouldBlendFrom.down ? nodes.down->OffsetY : MAXVAL,
-			shouldBlendFrom.left ? nodes.left->OffsetY : MAXVAL,
-			shouldBlendFrom.right ? nodes.right->OffsetY : MAXVAL,
+			shouldBlendFrom.up && nodes.up->TiltZ <= 1 ? nodes.up->OffsetY : MAXVAL,
+			shouldBlendFrom.down && nodes.down->TiltZ >= 1 ? nodes.down->OffsetY : MAXVAL,
+			shouldBlendFrom.left && nodes.left->TiltX <= 1 ? nodes.left->OffsetY : MAXVAL,
+			shouldBlendFrom.right && nodes.right->TiltX >= 1 ? nodes.right->OffsetY : MAXVAL,
 		};
 		MG::NeighborPropertyFloat neighborIsoValue = {
 			shouldBlendFrom.up ? nodes.up->IsoValue : MAXVAL,

@@ -196,6 +196,9 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("notify_changed"), &RoomConfig::NotifyChanged);
 
+	// static methods
+	ClassDB::bind_static_method("RoomConfig", D_METHOD("get_offset_y_from_tilt", "tilt", "offset_y"), &RoomConfig::GetOffsetYFromTilt);
+
 	//
 	// Tilemap Data
 	//
@@ -729,4 +732,22 @@ void RoomConfig::SetNoiseNodeRight(const Ref<Noise> &p_noise) {
 		SetDirty(true);
 	}
 	noiseNodes.right = p_noise;
+}
+
+// static methods
+float RoomConfig::GetOffsetYFromTilt(float tilt, float offsetY) {
+	if (std::abs(tilt - 1) < UNIT_EPSILON) {
+		return offsetY;
+	}
+	float diff = offsetY - 0.5;
+	// one of the rare instances I use a magic number and can't be bothered to figure out the correct derivation.
+	float mod = 1.0 / 0.88;
+	float offset = mod - 1.0;
+	if (tilt > 1) {
+		return ((1 - (tilt - 1)) * mod - offset) * 0.5 + diff;
+	}
+	if (tilt < 1) {
+		return (tilt * mod - offset) * 0.5 + diff;
+	}
+	return offsetY;
 }

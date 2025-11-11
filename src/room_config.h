@@ -144,6 +144,9 @@ public:
 	void SetNeighborBlendLf(float p_NeighborBlendLf);
 	void SetNeighborBlendRt(float p_NeighborBlendRt);
 
+	// static methods
+	static float GetOffsetYFromTilt(float tilt, float offsetY);
+
 	void NotifyChanged();
 
 	//

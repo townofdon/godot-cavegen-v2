@@ -234,14 +234,14 @@ inline float GetNeighborWeightedField(Context ctx, int x, int y, int z, float va
 	int numz = ctx.numCells.z - 1;
 	// calc percentage progression for x,z
 	// subtract 1 so that we are evaluating, for example, x=1 evaluates to 100%
-	float px0 = clamp01(inverse_lerpf((numx - 1) * blend, 1, x));
-	float pz0 = clamp01(inverse_lerpf((numz - 1) * blend, 1, z));
-	float px1 = clamp01(inverse_lerpf(numx - (numx - 1) * blend, numx - 1, x));
-	float pz1 = clamp01(inverse_lerpf(numz - (numz - 1) * blend, numz - 1, z));
-	valSelf = lerpf(valSelf, valOther.up, pz0 * int(valOther.up != MAXVAL));
-	valSelf = lerpf(valSelf, valOther.down, pz1 * int(valOther.down != MAXVAL));
-	valSelf = lerpf(valSelf, valOther.left, px0 * int(valOther.left != MAXVAL));
-	valSelf = lerpf(valSelf, valOther.right, px1 * int(valOther.right != MAXVAL));
+	float px0 = clamp01(inverse_lerpf(maxf(2, numx * blend), 1, x));
+	float pz0 = clamp01(inverse_lerpf(maxf(2, numz * blend), 1, z));
+	float px1 = clamp01(inverse_lerpf(numx - maxf(2, numx * blend), numx - 1, x));
+	float pz1 = clamp01(inverse_lerpf(numz - maxf(2, numz * blend), numz - 1, z));
+	valSelf = lerpf(valSelf, valOther.up, pz0 * int(valOther.up != MAXVAL) * int(blend > 0));
+	valSelf = lerpf(valSelf, valOther.down, pz1 * int(valOther.down != MAXVAL) * int(blend > 0));
+	valSelf = lerpf(valSelf, valOther.left, px0 * int(valOther.left != MAXVAL) * int(blend > 0));
+	valSelf = lerpf(valSelf, valOther.right, px1 * int(valOther.right != MAXVAL) * int(blend > 0));
 	return valSelf;
 }
 
