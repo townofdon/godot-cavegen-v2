@@ -75,6 +75,7 @@ struct Context {
 		float NoiseFloor;
 		float NoiseCeil;
 		float Curve;
+		float BassBoost;
 		float TiltY;
 		float TiltX;
 		float TiltZ;
@@ -141,6 +142,7 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->NoiseFloor,
 		p_room->NoiseCeil,
 		p_room->Curve,
+		p_room->BassBoost,
 		p_room->TiltY,
 		p_room->TiltX,
 		p_room->TiltZ,

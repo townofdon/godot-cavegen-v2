@@ -281,6 +281,13 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
 			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
 		};
+		MG::NeighborPropertyFloat neighborBassBoost = {
+			hasNeighbor.up ? nodes.up->BassBoost : MAXVAL,
+			hasNeighbor.down ? nodes.down->BassBoost : MAXVAL,
+			hasNeighbor.left ? nodes.left->BassBoost : MAXVAL,
+			hasNeighbor.right ? nodes.right->BassBoost : MAXVAL,
+		};
+		float activeY = (float)MG::GetActivePlaneY(ctx);
 		for (size_t z = 0; z < numCells.z; z++) {
 			for (size_t y = 0; y < numCells.y; y++) {
 				for (size_t x = 0; x < numCells.x; x++) {
@@ -297,6 +304,7 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					float curve = MG::GetNeighborWeightedField(ctx, x, z, cfg.Curve, neighborCurve);
 					float tiltY = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltY, neighborTiltY);
 					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.TiltY, neighborIsoValue);
+					float bassBoost = MG::GetNeighborWeightedField(ctx, x, z, cfg.BassBoost, neighborBassBoost);
 					val = clamp01(val);
 					val = lerpf(noiseFloor, noiseCeil, val);
 					// apply noise curve
@@ -307,6 +315,10 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					// apply falloff above ceiling (gradual, flattening happens below)
 					float zeroValue = minf(noiseBuffer[i], isoValue - 0.001f);
 					val = lerpf(val, zeroValue, Easing::InQuint(MG::GetAboveCeilAmount(ctx, y, 1)));
+					// apply bass boost
+					float bassPrg = clamp01(inverse_lerpf(0, activeY, y));
+					float bassVal = lerpf(1.0, val, bassPrg);
+					val = lerpf(val, bassVal, bassBoost);
 					// apply tilt y
 					float yPct = MG::GetFloorToCeilAmount(ctx, y);
 					float valTiltTop = val * lerpf(0.0f, 1.0f, yPct);

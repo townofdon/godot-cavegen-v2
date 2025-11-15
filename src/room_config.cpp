@@ -45,6 +45,10 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_Curve", "p_Curve"), &RoomConfig::SetCurve);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__curve", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_Curve", "get_Curve");
 
+	ClassDB::bind_method(D_METHOD("get_BassBoost"), &RoomConfig::GetBassBoost);
+	ClassDB::bind_method(D_METHOD("set_BassBoost", "p_BassBoost"), &RoomConfig::SetBassBoost);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__bass_boost", PROPERTY_HINT_RANGE, "0,1,0.001"), "set_BassBoost", "get_BassBoost");
+
 	ClassDB::bind_method(D_METHOD("get_TiltY"), &RoomConfig::GetTiltY);
 	ClassDB::bind_method(D_METHOD("set_TiltY", "p_TiltY"), &RoomConfig::SetTiltY);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__tilt_y", PROPERTY_HINT_RANGE, "0,2,0.001"), "set_TiltY", "get_TiltY");
@@ -251,6 +255,7 @@ RoomConfig::RoomConfig() {
 	NoiseFloor = 0;
 	NoiseCeil = 1;
 	Curve = 1.0f;
+	BassBoost = 0.5f;
 	TiltY = 1.0f;
 	TiltX = 1.0f;
 	TiltZ = 1.0f;
@@ -321,6 +326,9 @@ float RoomConfig::GetNoiseCeil() {
 }
 float RoomConfig::GetCurve() {
 	return Curve;
+}
+float RoomConfig::GetBassBoost() {
+	return BassBoost;
 }
 float RoomConfig::GetTiltY() {
 	return TiltY;
@@ -450,6 +458,10 @@ void RoomConfig::SetNoiseCeil(float p_NoiseCeil) {
 }
 void RoomConfig::SetCurve(float p_Curve) {
 	Curve = p_Curve;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetBassBoost(float p_BassBoost) {
+	BassBoost = p_BassBoost;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetTiltY(float p_TiltY) {

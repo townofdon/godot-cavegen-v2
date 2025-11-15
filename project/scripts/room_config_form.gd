@@ -11,6 +11,7 @@ extends Control
 @onready var float_noise_floor: FloatField = %FloatNoiseFloor
 @onready var float_noise_ceil: FloatField = %FloatNoiseCeil
 @onready var float_curve: FloatField = %FloatCurve
+@onready var float_bass_boost: FloatField = %FloatBassBoost
 @onready var float_tilt_y: FloatField = %FloatTiltY
 @onready var float_tilt_x: FloatField = %FloatTiltX
 @onready var float_tilt_z: FloatField = %FloatTiltZ
@@ -86,6 +87,7 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_noise_floor, room, "room_noise__noise_floor", 0, 1, 0.001)
 	_setup_room_float(float_noise_ceil, room, "room_noise__noise_ceil", 0, 1, 0.001)
 	_setup_room_float(float_curve, room, "room_noise__curve", 0, 2, 0.001)
+	_setup_room_float(float_bass_boost, room, "room_noise__bass_boost", 0, 1, 0.001)
 	_setup_room_float(float_tilt_y, room, "room_noise__tilt_y", 0, 2, 0.001)
 	_setup_room_float(float_tilt_x, room, "room_noise__tilt_x", 0, 2, 0.001)
 	_setup_room_float(float_tilt_z, room, "room_noise__tilt_z", 0, 2, 0.001)

@@ -30,6 +30,7 @@ public:
 	float NoiseFloor;
 	float NoiseCeil;
 	float Curve;
+	float BassBoost;
 	float TiltY;
 	float TiltX;
 	float TiltZ;
@@ -77,6 +78,7 @@ public:
 	float GetNoiseFloor();
 	float GetNoiseCeil();
 	float GetCurve();
+	float GetBassBoost();
 	float GetTiltY();
 	float GetTiltX();
 	float GetTiltZ();
@@ -118,6 +120,7 @@ public:
 	void SetNoiseFloor(float p_NoiseFloor);
 	void SetNoiseCeil(float p_NoiseCeil);
 	void SetCurve(float p_Curve);
+	void SetBassBoost(float p_BassBoost);
 	void SetTiltY(float p_TiltY);
 	void SetTiltX(float p_TiltX);
 	void SetTiltZ(float p_TiltZ);
