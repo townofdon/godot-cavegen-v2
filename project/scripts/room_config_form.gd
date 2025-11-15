@@ -21,6 +21,8 @@ extends Control
 @onready var float_interpolate: FloatField = %FloatInterpolate
 @onready var float_active_y_smoothing: FloatField = %FloatActiveYSmoothing
 @onready var float_floor_level: FloatField = %FloatFloorLevel
+@onready var float_rm_overhangs_blend: FloatField = %FloatRmOverhangsBlend
+@onready var float_rm_overhangs_slope: FloatField = %FloatRmOverhangsSlope
 @onready var toggle_remove_orphans: BoolField = %ToggleRemoveOrphans
 @onready var float_orphan_threshold: FloatField = %FloatOrphanThreshold
 
@@ -95,6 +97,8 @@ func _initialize(room: RoomConfig, noise: FastNoiseLite, border_noise: FastNoise
 	_setup_room_float(float_interpolate, room, "room_noise__interpolate", 0, 1, 0.01)
 	_setup_room_float(float_active_y_smoothing, room, "room_noise__active_y_smoothing", 0, 1, 0.01)
 	_setup_room_float(float_floor_level, room, "room_noise__floor_level", 0, 1, 0.01)
+	_setup_room_float(float_rm_overhangs_blend, room, "room_noise__remove_overhangs_blend", 0, 1, 0.01)
+	_setup_room_float(float_rm_overhangs_slope, room, "room_noise__remove_overhangs_slope", 0, 1, 0.01)
 	_setup_room_bool(toggle_remove_orphans, room, "room_noise__remove_orphans")
 	_setup_room_float(float_orphan_threshold, room, "room_noise__orphan_threshold", 0, 1, 0.01)
 

@@ -40,6 +40,8 @@ public:
 	float Interpolate;
 	float ActiveYSmoothing;
 	float FloorLevel;
+	float RemoveOverhangsBlend; // [0,1]
+	float RemoveOverhangsSlope; // [0,1] 0 => no slope (INF), 1 => flat (0)
 	bool RemoveOrphans;
 	float OrphanThreshold;
 	// room border
@@ -84,6 +86,8 @@ public:
 	float GetFalloffNearBorder();
 	float GetActiveYSmoothing();
 	float GetFloorLevel();
+	float GetRemoveOverhangsBlend();
+	float GetRemoveOverhangsSlope();
 	float GetInterpolate();
 	bool GetRemoveOrphans();
 	float GetOrphanThreshold();
@@ -123,6 +127,8 @@ public:
 	void SetFalloffNearBorder(float p_FalloffNearBorder);
 	void SetActiveYSmoothing(float p_ActiveYSmoothing);
 	void SetFloorLevel(float p_FloorLevel);
+	void SetRemoveOverhangsBlend(float p_RemoveOverhangsBlend);
+	void SetRemoveOverhangsSlope(float p_RemoveOverhangsSlope);
 	void SetInterpolate(float p_Interpolate);
 	void SetRemoveOrphans(bool p_RemoveOrphans);
 	void SetOrphanThreshold(float p_OrphansLevel);

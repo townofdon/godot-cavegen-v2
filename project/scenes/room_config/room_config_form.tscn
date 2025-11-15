@@ -243,6 +243,14 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 
+[node name="FloatRmOverhangsBlend" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="FloatRmOverhangsSlope" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_qr8kv")]
+unique_name_in_owner = true
+layout_mode = 2
+
 [node name="ToggleRemoveOrphans" parent="Panel/MarginContainer/TabContainer/Room Config/VBoxContainer" instance=ExtResource("3_bcw72")]
 unique_name_in_owner = true
 layout_mode = 2

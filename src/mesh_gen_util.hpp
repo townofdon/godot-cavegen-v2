@@ -85,6 +85,8 @@ struct Context {
 		float Interpolate;
 		float ActiveYSmoothing;
 		float FloorLevel;
+		float RemoveOverhangsBlend;
+		float RemoveOverhangsSlope;
 		bool RemoveOrphans;
 		float OrphanThreshold;
 		// room border
@@ -149,6 +151,8 @@ inline Context SetupContext(GlobalConfig *p_global_cfg, RoomConfig *p_room, Nois
 		p_room->Interpolate,
 		p_room->ActiveYSmoothing,
 		p_room->FloorLevel,
+		p_room->RemoveOverhangsBlend,
+		p_room->RemoveOverhangsSlope,
 		p_room->RemoveOrphans,
 		p_room->OrphanThreshold,
 		// border
@@ -392,8 +396,8 @@ inline bool IsBelowCeiling(Context ctx, int y) {
 
 inline bool IsPointActive(Context ctx, NeighborPropertyFloat neighborIsoValue, float noiseSamples[], int x, int y, int z) {
 	float isoValue = GetNeighborWeightedField(ctx, x, z, ctx.cfg.IsoValue, neighborIsoValue);
-	auto val = noiseSamples[NoiseIndex(ctx, x, y, z)];
-	auto active = val >= isoValue;
+	float val = noiseSamples[NoiseIndex(ctx, x, y, z)];
+	bool active = val >= isoValue;
 	return active;
 }
 
@@ -584,6 +588,43 @@ inline float GetActivePlaneYF(Context ctx) {
 	float ceiling = GetCeiling(ctx) + 1;
 	float activeY = ceiling - ctx.cfg.ActivePlaneOffset;
 	return maxf(activeY, 2);
+}
+
+inline bool AtEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D], int x, int z) {
+	int sx = ctx.numCells.x;
+	int sz = ctx.numCells.z;
+	int i = x + z * sx;
+	if (x < 0 || x >= sx ||
+		z < 0 || z >= sz ||
+		i < 0 || i >= sx * sz ||
+		i > MAX_NOISE_NODES_2D) {
+		return false;
+	}
+	return grid[i] == 0;
+}
+
+inline int GetDistanceToEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D], int x, int z) {
+	int sx = ctx.numCells.x;
+	int sz = ctx.numCells.z;
+	int i = x + z * sx;
+	ERR_FAIL_INDEX_V_EDMSG(i, (sx * sz), 0, "noise index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(x, sx, 0, "x index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(z, sz, 0, "y index out of bounds");
+	if (AtEmptyGridCell(ctx, grid, x, z)) {
+		return 0;
+	}
+	int spread = maxi(sx, sz);
+	for (int i = 1; i <= spread; i++) {
+		for (int j = -i; j <= i; j++) {
+			if ((AtEmptyGridCell(ctx, grid, x + i, z + j)) ||
+				(AtEmptyGridCell(ctx, grid, x - i, z + j)) ||
+				(AtEmptyGridCell(ctx, grid, x + j, z + i)) ||
+				(AtEmptyGridCell(ctx, grid, x + j, z - i))) {
+				return i;
+			}
+		}
+	}
+	return INT_MAX;
 }
 
 } //namespace MG

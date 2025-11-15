@@ -85,6 +85,14 @@ void RoomConfig::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_FloorLevel", "p_FloorLevel"), &RoomConfig::SetFloorLevel);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__floor_level", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_FloorLevel", "get_FloorLevel");
 
+	ClassDB::bind_method(D_METHOD("get_RemoveOverhangsBlend"), &RoomConfig::GetRemoveOverhangsBlend);
+	ClassDB::bind_method(D_METHOD("set_RemoveOverhangsBlend", "p_RemoveOverhangsBlend"), &RoomConfig::SetRemoveOverhangsBlend);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__remove_overhangs_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_RemoveOverhangsBlend", "get_RemoveOverhangsBlend");
+
+	ClassDB::bind_method(D_METHOD("get_RemoveOverhangsSlope"), &RoomConfig::GetRemoveOverhangsSlope);
+	ClassDB::bind_method(D_METHOD("set_RemoveOverhangsSlope", "p_RemoveOverhangsSlope"), &RoomConfig::SetRemoveOverhangsSlope);
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__remove_overhangs_slope", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_RemoveOverhangsSlope", "get_RemoveOverhangsSlope");
+
 	ClassDB::bind_method(D_METHOD("get_RemoveOrphans"), &RoomConfig::GetRemoveOrphans);
 	ClassDB::bind_method(D_METHOD("set_RemoveOrphans", "p_RemoveOrphans"), &RoomConfig::SetRemoveOrphans);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "room_noise__remove_orphans"), "set_RemoveOrphans", "get_RemoveOrphans");
@@ -253,8 +261,10 @@ RoomConfig::RoomConfig() {
 	Interpolate = 1.0f;
 	ActiveYSmoothing = 0.5f;
 	FloorLevel = 0;
+	RemoveOverhangsBlend = 0.1f;
+	RemoveOverhangsSlope = 0.5f;
 	RemoveOrphans = true;
-	OrphanThreshold = 0.5;
+	OrphanThreshold = 0.5f;
 	UseBorderNoise = false;
 	NormalizeBorder = false;
 	BorderSize = 1;
@@ -338,6 +348,12 @@ float RoomConfig::GetActiveYSmoothing() {
 }
 float RoomConfig::GetFloorLevel() {
 	return FloorLevel;
+}
+float RoomConfig::GetRemoveOverhangsBlend() {
+	return RemoveOverhangsBlend;
+}
+float RoomConfig::GetRemoveOverhangsSlope() {
+	return RemoveOverhangsSlope;
 }
 float RoomConfig::GetInterpolate() {
 	return Interpolate;
@@ -470,6 +486,14 @@ void RoomConfig::SetActiveYSmoothing(float p_ActiveYSmoothing) {
 }
 void RoomConfig::SetFloorLevel(float p_FloorLevel) {
 	FloorLevel = p_FloorLevel;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetRemoveOverhangsBlend(float p_RemoveOverhangsBlend) {
+	RemoveOverhangsBlend = p_RemoveOverhangsBlend;
+	emit_signal("on_changed");
+}
+void RoomConfig::SetRemoveOverhangsSlope(float p_RemoveOverhangsSlope) {
+	RemoveOverhangsSlope = p_RemoveOverhangsSlope;
 	emit_signal("on_changed");
 }
 void RoomConfig::SetInterpolate(float p_Interpolate) {
