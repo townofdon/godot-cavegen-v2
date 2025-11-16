@@ -91,7 +91,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("get_RemoveOverhangsBlend"), &RoomConfig::GetRemoveOverhangsBlend);
 	ClassDB::bind_method(D_METHOD("set_RemoveOverhangsBlend", "p_RemoveOverhangsBlend"), &RoomConfig::SetRemoveOverhangsBlend);
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__remove_overhangs_blend", PROPERTY_HINT_RANGE, "0,1,0.01"), "set_RemoveOverhangsBlend", "get_RemoveOverhangsBlend");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "room_noise__remove_overhangs_blend", PROPERTY_HINT_RANGE, "0,2,0.01"), "set_RemoveOverhangsBlend", "get_RemoveOverhangsBlend");
 
 	ClassDB::bind_method(D_METHOD("get_RemoveOverhangsSlope"), &RoomConfig::GetRemoveOverhangsSlope);
 	ClassDB::bind_method(D_METHOD("set_RemoveOverhangsSlope", "p_RemoveOverhangsSlope"), &RoomConfig::SetRemoveOverhangsSlope);
@@ -266,8 +266,8 @@ RoomConfig::RoomConfig() {
 	Interpolate = 1.0f;
 	ActiveYSmoothing = 0.5f;
 	FloorLevel = 0;
-	RemoveOverhangsBlend = 0.1f;
-	RemoveOverhangsSlope = 0.5f;
+	RemoveOverhangsBlend = 0.5f;
+	RemoveOverhangsSlope = 0.25f;
 	RemoveOrphans = true;
 	OrphanThreshold = 0.5f;
 	UseBorderNoise = false;

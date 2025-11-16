@@ -592,7 +592,7 @@ inline float GetActivePlaneYF(Context ctx) {
 	return maxf(activeY, 2);
 }
 
-inline bool AtEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D], int x, int z) {
+inline bool AtEmptyGridCell(Context ctx, float grid[MAX_NOISE_NODES_2D], int x, int z) {
 	int sx = ctx.numCells.x;
 	int sz = ctx.numCells.z;
 	int i = x + z * sx;
@@ -605,7 +605,7 @@ inline bool AtEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D], int x, in
 	return grid[i] == 0;
 }
 
-inline int GetDistanceToEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D], int x, int z) {
+inline int GetManhattanDistanceToEmptyGridCell(Context ctx, float grid[MAX_NOISE_NODES_2D], int x, int z) {
 	int sx = ctx.numCells.x;
 	int sz = ctx.numCells.z;
 	int i = x + z * sx;
@@ -615,9 +615,9 @@ inline int GetDistanceToEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D],
 	if (AtEmptyGridCell(ctx, grid, x, z)) {
 		return 0;
 	}
-	int spread = maxi(sx, sz);
+	int spread = maxi(maxi(sx, sz), 10);
 	for (int i = 1; i <= spread; i++) {
-		for (int j = -i; j <= i; j++) {
+		for (int j = -(i - 1); j <= i - 1; j++) {
 			if ((AtEmptyGridCell(ctx, grid, x + i, z + j)) ||
 				(AtEmptyGridCell(ctx, grid, x - i, z + j)) ||
 				(AtEmptyGridCell(ctx, grid, x + j, z + i)) ||
@@ -627,6 +627,36 @@ inline int GetDistanceToEmptyGridCell(Context ctx, int grid[MAX_NOISE_NODES_2D],
 		}
 	}
 	return INT_MAX;
+}
+
+inline float GetDistanceToEmptyGridCell(Context ctx, float grid[MAX_NOISE_NODES_2D], int x, int z) {
+	int sx = ctx.numCells.x;
+	int sz = ctx.numCells.z;
+	int i = x + z * sx;
+	ERR_FAIL_INDEX_V_EDMSG(i, (sx * sz), 0, "noise index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(x, sx, 0, "x index out of bounds");
+	ERR_FAIL_INDEX_V_EDMSG(z, sz, 0, "y index out of bounds");
+	if (AtEmptyGridCell(ctx, grid, x, z)) {
+		return 0;
+	}
+	int spread = maxi(maxi(sx, sz), 10);
+	for (int i = 1; i <= spread; i++) {
+		for (int j = -i; j <= i; j++) {
+			if (AtEmptyGridCell(ctx, grid, x + i, z + j)) {
+				return Vector2i(i, j).length();
+			}
+			if (AtEmptyGridCell(ctx, grid, x - i, z + j)) {
+				return Vector2i(i, j).length();
+			}
+			if (AtEmptyGridCell(ctx, grid, x + j, z + i)) {
+				return Vector2i(j, i).length();
+			}
+			if (AtEmptyGridCell(ctx, grid, x + j, z - i)) {
+				return Vector2i(j, i).length();
+			}
+		}
+	}
+	return MAXVAL;
 }
 
 } //namespace MG
