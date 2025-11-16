@@ -455,107 +455,6 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 			}
 		}
 	}
-	// - 4 - remove overhangs
-	{
-		float distanceGrid2d[MAX_NOISE_NODES_2D];
-		MG::NeighborPropertyFloat neighborIsoValue = {
-			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
-			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
-			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
-			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
-		};
-		MG::NeighborPropertyFloat neighborRemoveOverhangsBlend = {
-			hasNeighbor.up ? nodes.up->RemoveOverhangsBlend : MAXVAL,
-			hasNeighbor.down ? nodes.down->RemoveOverhangsBlend : MAXVAL,
-			hasNeighbor.left ? nodes.left->RemoveOverhangsBlend : MAXVAL,
-			hasNeighbor.right ? nodes.right->RemoveOverhangsBlend : MAXVAL,
-		};
-		MG::NeighborPropertyFloat neighborRemoveOverhangsSlope = {
-			hasNeighbor.up ? nodes.up->RemoveOverhangsSlope : MAXVAL,
-			hasNeighbor.down ? nodes.down->RemoveOverhangsSlope : MAXVAL,
-			hasNeighbor.left ? nodes.left->RemoveOverhangsSlope : MAXVAL,
-			hasNeighbor.right ? nodes.right->RemoveOverhangsSlope : MAXVAL,
-		};
-		int activeY = int(MG::GetActivePlaneY(ctx));
-		// sample noise grid at activeY, where 0=active, 1=empty
-		for (size_t z = 0; z < numCells.z; z++) {
-			for (size_t x = 0; x < numCells.x; x++) {
-				int i2d = x + z * ctx.numCells.x;
-				bool active = MG::IsPointActive(ctx, neighborIsoValue, noiseSamples, x, activeY, z);
-				distanceGrid2d[i2d] = int(active);
-			}
-		}
-		// get manhattan distance of nearest empty cell
-		for (size_t z = 0; z < numCells.z; z++) {
-			for (size_t x = 0; x < numCells.x; x++) {
-				int i2d = x + z * ctx.numCells.x;
-				distanceGrid2d[i2d] = MG::GetDistanceToEmptyGridCell(ctx, distanceGrid2d, x, z);
-			}
-		}
-		// remove overhangs above activeY
-		for (size_t z = 0; z < numCells.z; z++) {
-			for (size_t y = maxi(activeY + 2, 1); y < numCells.y - 1; y++) {
-				for (size_t x = 0; x < numCells.x; x++) {
-					int i = MG::NoiseIndex(ctx, x, y, z);
-					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
-					float removeOverhangsBlend = MG::GetNeighborWeightedField(ctx, x, z, cfg.RemoveOverhangsBlend, neighborRemoveOverhangsBlend);
-					float removeOverhangsSlope = MG::GetNeighborWeightedField(ctx, x, z, cfg.RemoveOverhangsSlope, neighborRemoveOverhangsSlope);
-					if (removeOverhangsBlend <= 0) {
-						continue;
-					}
-					int i2d = x + z * ctx.numCells.x;
-					float dist = distanceGrid2d[i2d];
-					removeOverhangsSlope = clampf(removeOverhangsSlope, 0.001f, 0.999f);
-					// convert angle to slope
-					float slope = maxf(tanf((1.0 - removeOverhangsSlope) * 0.5 * M_PI), 0.001);
-					// y = mx + b
-					float y2 = slope * float(dist) + activeY;
-					float zeroVal = minf(noiseSamples[i], isoValue - 0.1f);
-					float val = noiseSamples[i];
-					float ymod = float(y - y2) / (slope * 4.0);
-					val = lerpf(val, zeroVal, maxf(ymod, 0));
-					noiseSamples[i] = lerpf(noiseSamples[i], val, removeOverhangsBlend);
-				}
-			}
-		}
-	}
-	// - 4b - adjust areas around action y plane to improve readability
-	{
-		int activeY = int(MG::GetActivePlaneY(ctx)) + 1;
-		float activeYSmoothing = cfg.ActiveYSmoothing;
-		if (activeY > 1 && activeY + 1 < numCells.y - 1) {
-			for (size_t z = 0; z < numCells.z; z++) {
-				for (size_t x = 0; x < numCells.x; x++) {
-					int y = activeY - 1;
-					// clang-format off
-					noiseBuffer[MG::NoiseIndex(ctx, x, y, z)] = (
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
-					);
-					noiseBuffer[MG::NoiseIndex(ctx, x, y + 1, z)] = (
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
-					);
-					noiseBuffer[MG::NoiseIndex(ctx, x, y + 2, z)] = (
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
-						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(1, 0.33333333f, activeYSmoothing)
-					);
-					// clang-format on
-				}
-			}
-			for (size_t z = 0; z < numCells.z; z++) {
-				for (size_t y = maxi(activeY - 1, 1); y <= activeY + 1 && y < numCells.y - 1; y++) {
-					for (size_t x = 0; x < numCells.x; x++) {
-						int i = MG::NoiseIndex(ctx, x, y, z);
-						noiseSamples[i] = noiseBuffer[i];
-					}
-				}
-			}
-		}
-	}
 
 	//
 	// - 5 - apply border noise
@@ -848,6 +747,113 @@ void MeshGen::process_noise(MG::Context ctx, RoomConfig *room) {
 					targ = lerpf(targ_empty, targ_unset, clamp01(kernel));
 					targ = lerpf(targ, targ_filled, clamp01(kernel - 1));
 					noiseSamples[i] = targ;
+				}
+			}
+		}
+	}
+
+	//
+	// remove overhangs
+	//
+	{
+		float distanceGrid2d[MAX_NOISE_NODES_2D];
+		MG::NeighborPropertyFloat neighborIsoValue = {
+			hasNeighbor.up ? nodes.up->IsoValue : MAXVAL,
+			hasNeighbor.down ? nodes.down->IsoValue : MAXVAL,
+			hasNeighbor.left ? nodes.left->IsoValue : MAXVAL,
+			hasNeighbor.right ? nodes.right->IsoValue : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborRemoveOverhangsBlend = {
+			hasNeighbor.up ? nodes.up->RemoveOverhangsBlend : MAXVAL,
+			hasNeighbor.down ? nodes.down->RemoveOverhangsBlend : MAXVAL,
+			hasNeighbor.left ? nodes.left->RemoveOverhangsBlend : MAXVAL,
+			hasNeighbor.right ? nodes.right->RemoveOverhangsBlend : MAXVAL,
+		};
+		MG::NeighborPropertyFloat neighborRemoveOverhangsSlope = {
+			hasNeighbor.up ? nodes.up->RemoveOverhangsSlope : MAXVAL,
+			hasNeighbor.down ? nodes.down->RemoveOverhangsSlope : MAXVAL,
+			hasNeighbor.left ? nodes.left->RemoveOverhangsSlope : MAXVAL,
+			hasNeighbor.right ? nodes.right->RemoveOverhangsSlope : MAXVAL,
+		};
+		int activeY = int(MG::GetActivePlaneY(ctx));
+		// sample noise grid at activeY, where 0=active, 1=empty
+		for (size_t z = 0; z < numCells.z; z++) {
+			for (size_t x = 0; x < numCells.x; x++) {
+				int i2d = x + z * ctx.numCells.x;
+				bool active = MG::IsPointActive(ctx, neighborIsoValue, noiseSamples, x, activeY, z);
+				distanceGrid2d[i2d] = int(active);
+			}
+		}
+		// get manhattan distance of nearest empty cell
+		for (size_t z = 0; z < numCells.z; z++) {
+			for (size_t x = 0; x < numCells.x; x++) {
+				int i2d = x + z * ctx.numCells.x;
+				distanceGrid2d[i2d] = MG::GetDistanceToEmptyGridCell(ctx, distanceGrid2d, x, z);
+			}
+		}
+		// remove overhangs above activeY
+		for (size_t z = 0; z < numCells.z; z++) {
+			for (size_t y = maxi(activeY + 2, 1); y < numCells.y - 1; y++) {
+				for (size_t x = 0; x < numCells.x; x++) {
+					int i = MG::NoiseIndex(ctx, x, y, z);
+					float isoValue = MG::GetNeighborWeightedField(ctx, x, z, cfg.IsoValue, neighborIsoValue);
+					float removeOverhangsBlend = MG::GetNeighborWeightedField(ctx, x, z, cfg.RemoveOverhangsBlend, neighborRemoveOverhangsBlend);
+					float removeOverhangsSlope = MG::GetNeighborWeightedField(ctx, x, z, cfg.RemoveOverhangsSlope, neighborRemoveOverhangsSlope);
+					if (removeOverhangsBlend <= 0) {
+						continue;
+					}
+					int i2d = x + z * ctx.numCells.x;
+					float dist = distanceGrid2d[i2d];
+					removeOverhangsSlope = clampf(removeOverhangsSlope, 0.001f, 0.999f);
+					// convert angle to slope
+					float slope = maxf(tanf((1.0 - removeOverhangsSlope) * 0.5 * M_PI), 0.001);
+					// y = mx + b
+					float y2 = slope * float(dist) + activeY;
+					float zeroVal = minf(noiseSamples[i], isoValue - 0.1f);
+					float val = noiseSamples[i];
+					float ymod = float(y - y2) / (slope * 4.0);
+					val = lerpf(val, zeroVal, maxf(ymod, 0));
+					noiseSamples[i] = lerpf(noiseSamples[i], val, removeOverhangsBlend);
+				}
+			}
+		}
+	}
+
+	//
+	// adjust areas around action y plane to improve readability
+	//
+	{
+		int activeY = int(MG::GetActivePlaneY(ctx)) + 1;
+		float activeYSmoothing = cfg.ActiveYSmoothing;
+		if (activeY > 1 && activeY + 1 < numCells.y - 1) {
+			for (size_t z = 0; z < numCells.z; z++) {
+				for (size_t x = 0; x < numCells.x; x++) {
+					int y = activeY - 1;
+					// clang-format off
+					noiseBuffer[MG::NoiseIndex(ctx, x, y, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
+					);
+					noiseBuffer[MG::NoiseIndex(ctx, x, y + 1, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(1, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(0, 0.33333333f, activeYSmoothing)
+					);
+					noiseBuffer[MG::NoiseIndex(ctx, x, y + 2, z)] = (
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 0, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 1, z)] * lerpf(0, 0.33333333f, activeYSmoothing) +
+						noiseSamples[MG::NoiseIndex(ctx, x, y + 2, z)] * lerpf(1, 0.33333333f, activeYSmoothing)
+					);
+					// clang-format on
+				}
+			}
+			for (size_t z = 0; z < numCells.z; z++) {
+				for (size_t y = maxi(activeY - 1, 1); y <= activeY + 1 && y < numCells.y - 1; y++) {
+					for (size_t x = 0; x < numCells.x; x++) {
+						int i = MG::NoiseIndex(ctx, x, y, z);
+						noiseSamples[i] = noiseBuffer[i];
+					}
 				}
 			}
 		}

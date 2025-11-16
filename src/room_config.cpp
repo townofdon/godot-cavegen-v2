@@ -278,7 +278,7 @@ RoomConfig::RoomConfig() {
 	BorderTilt = 0.5f;
 	TileStrength = 1.0f;
 	TileSmoothing = 0.0f;
-	TileCeiling = 0.6f;
+	TileCeiling = 0.75f;
 	TileCeilingFalloff = 0.2f;
 	TileFloor = 0.4f;
 	TileFloorFalloff = 0.2f;
