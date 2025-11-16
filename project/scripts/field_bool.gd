@@ -18,7 +18,7 @@ func _ready() -> void:
 	spin_box.hide()
 	h_slider.hide()
 	option_button.hide()
-	check_button.toggled.connect(_on_internal_change)
+	check_button.toggled.connect(_on_user_change)
 
 func initialize(field_name: String, p_get_value: Callable) -> void:
 	_get_value = p_get_value
@@ -34,7 +34,7 @@ func update_val() -> void:
 	@warning_ignore("untyped_declaration")
 	var newval = _get_value.call()
 	if !(newval is bool): return
-	check_button.button_pressed = newval
+	check_button.set_pressed_no_signal(newval)
 
-func _on_internal_change(newval: bool) -> void:
+func _on_user_change(newval: bool) -> void:
 	value_changed.emit(!!newval)

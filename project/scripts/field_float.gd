@@ -18,9 +18,9 @@ func _ready() -> void:
 	line_edit.hide()
 	check_button.hide()
 	option_button.hide()
-	spin_box.value_changed.connect(_on_internal_change)
-	h_slider.value_changed.connect(_on_internal_change)
-	reset_button.pressed.connect(func() -> void: _on_internal_change(_default_value))
+	spin_box.value_changed.connect(_on_user_change)
+	h_slider.value_changed.connect(_on_user_change)
+	reset_button.pressed.connect(func() -> void: _on_user_change(_default_value))
 
 func initialize(field_name: String, p_get_value: Callable, p_default_value: float, min_value: float, max_value: float, step: float) -> void:
 	_get_value = p_get_value
@@ -52,7 +52,7 @@ func update_val() -> void:
 	h_slider.set_value_no_signal(newval)
 	_render_reset_button(!is_equal_approx(newval, _default_value))
 
-func _on_internal_change(newval: float) -> void:
+func _on_user_change(newval: float) -> void:
 	spin_box.set_value_no_signal(newval)
 	h_slider.set_value_no_signal(newval)
 	value_changed.emit(newval)
