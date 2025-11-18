@@ -25,14 +25,17 @@ enum RenderState {
 }
 
 var state := RenderState.ReadyToExport
+var initial_msg: String
 
 func initialize(p_cavegen: CaveGen) -> void:
 	cavegen = p_cavegen
 	cavegen.export_started.connect(_on_export_started)
 	cavegen.export_progress.connect(_on_export_progress)
+	cavegen.export_step_started.connect(_on_export_step_started)
 	cavegen.export_completed.connect(_on_export_completed)
 
 func _ready() -> void:
+	initial_msg = text_description.text
 	button_export_start.pressed.connect(_on_start_pressed)
 	button_export_cancel.pressed.connect(_on_close_pressed)
 	button_export_close.pressed.connect(_on_close_pressed)
@@ -54,6 +57,7 @@ func _set_state(p_state: RenderState) -> void:
 
 func _rerender() -> void:
 	if state == RenderState.ReadyToExport:
+		text_description.text = initial_msg
 		text_description.show()
 		export_buttons.show()
 		export_progress_label.hide()
@@ -82,7 +86,7 @@ func _on_start_pressed() -> void:
 	user_start_export.emit()
 
 func _on_close_pressed() -> void:
-	if cavegen && cavegen.saving:
+	if cavegen && cavegen.has_method("saving") && cavegen.saving:
 		return
 	close()
 	_set_state(RenderState.ReadyToExport)
@@ -93,6 +97,9 @@ func _on_export_started() -> void:
 func _on_export_completed(files: PackedStringArray) -> void:
 	text_detail.text = "File(s) saved as:\n- " + "\n- ".join(files)
 	_set_state(RenderState.ExportCompleted)
+
+func _on_export_step_started(msg: String) -> void:
+	text_description.text = "\n" + msg
 
 func _on_export_progress(pct: float) -> void:
 	export_progress_bar.value = pct

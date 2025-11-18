@@ -309,6 +309,7 @@ layout_mode = 1
 
 [node name="RoomConfigForm" parent="SubViewportContainer2/UISubViewport/UI" instance=ExtResource("14_to7gp")]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -571,7 +572,6 @@ texture_normal = SubResource("AtlasTexture_ghshe")
 
 [node name="ExportDialog" type="Panel" parent="SubViewportContainer2/UISubViewport/UI"]
 unique_name_in_owner = true
-visible = false
 custom_minimum_size = Vector2(500, 300)
 layout_mode = 1
 anchors_preset = 15
@@ -624,7 +624,6 @@ theme_override_font_sizes/font_size = 24
 text = "Export Level"
 
 [node name="TextExportDescription" type="Label" parent="SubViewportContainer2/UISubViewport/UI/ExportDialog/Panel/MarginContainer/VBoxContainer"]
-visible = false
 custom_minimum_size = Vector2(100, 30)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8495564, 0.897892, 0.90178615, 1)

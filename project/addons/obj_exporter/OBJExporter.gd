@@ -1,6 +1,7 @@
 extends Node
 
 signal export_started
+signal export_step_started(msg: String)
 signal export_progress_updated(surf_idx, progress_value)
 signal export_completed(object_file, material_file)
 
@@ -22,7 +23,9 @@ func save_mesh_to_files(mesh: Mesh, file_path: String, object_name: String):
 	
 	# Write all surfaces in mesh (obj file indices start from 1)
 	var index_base := 1
-	for s in range(mesh.get_surface_count()):
+	var surf_count := mesh.get_surface_count()
+	for s in range(surf_count):
+		export_step_started.emit("Exporting surface %s of %s" % [s+1, surf_count])
 		
 		var surface := mesh.surface_get_arrays(s)
 		if surface[ArrayMesh.ARRAY_INDEX] == null:
@@ -88,7 +91,8 @@ func save_mesh_to_files(mesh: Mesh, file_path: String, object_name: String):
 			output.append("\n")
 			
 			if (i % 60) == 0: # Modulo must be multiple of 3 as it's the step
-				emit_signal("export_progress_updated", s, i / float(indices_count))
+				var progress:float = (s + (i / float(indices_count))) / surf_count
+				emit_signal("export_progress_updated", s, progress)
 				await get_tree().process_frame
 			i += 3
 		

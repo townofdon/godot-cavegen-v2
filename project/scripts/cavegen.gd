@@ -28,6 +28,7 @@ extends Node3D
 @onready var load_file_dialog: FileDialog = %LoadFileDialog
 
 signal export_started
+signal export_step_started(msg: String)
 signal export_progress(pct: float)
 signal export_completed(files: PackedStringArray)
 signal mode_changed(mode: Mode)
@@ -171,6 +172,7 @@ func _ready() -> void:
 	dirty_timer.timeout.connect(_regen_dirty_rooms)
 	dirty_timer.stop()
 	# setup meshsaver
+	OBJExporter.export_step_started.connect(_on_export_step_started)
 	OBJExporter.export_progress_updated.connect(_on_export_progress_updated)
 	OBJExporter.export_completed.connect(_on_export_completed)
 	# load data
@@ -502,31 +504,50 @@ func _on_dirtied() -> void:
 	dirty_timer.start()
 
 var time_export_started:float = 0
+var saving_mesh_idx := 0
 var exporting:bool = false
 func _export_mesh() -> void:
-	# TODO: save meshes
-	# - combine all meshes
-	# - add each as a separate surface
-	# - if > 256 surfaces, start a new mesh
-	# save all newly-created meshes
-	pass
-	#if exporting:
-		#return
-	#assert(meshgen)
-	#assert(meshgen.mesh)
-	#var mesh := meshgen.mesh
-#
-	#var dir := DirAccess.open("user://")
-	#if !dir.dir_exists("model"):
-		#dir.make_dir("model")
-	#export_started.emit()
-	#export_progress.emit(0)
-	#time_export_started = Time.get_unix_time_from_system();
-	#OBJExporter.save_mesh_to_files(mesh, "user://model/", "cave")
-	#exporting = true
+	if exporting: return
+	if initializing: return
+
+	exporting = true
+	var meshes:Array[ArrayMesh] = [ArrayMesh.new()]
+	var mesh_idx := 0
+
+	for meshgen:MeshGen in arr_meshgen:
+		assert(meshgen)
+		assert(meshgen.mesh)
+		assert(meshgen.mesh is ArrayMesh)
+		var mesh := meshgen.mesh
+		if !(mesh is ArrayMesh):
+			continue
+		if meshes[mesh_idx].get_surface_count() > 256:
+			meshes.append(ArrayMesh.new())
+			mesh_idx += 1
+		meshes[mesh_idx].add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh.surface_get_arrays(0))
+
+	export_started.emit()
+	export_progress.emit(0)
+	saving_mesh_idx = 0
+
+	for mesh:ArrayMesh in meshes:
+		var dir := DirAccess.open("user://")
+		if !dir.dir_exists("model"):
+			dir.make_dir("model")
+		time_export_started = Time.get_unix_time_from_system();
+		OBJExporter.save_mesh_to_files(mesh, "user://model/", "cave")
+		saving_mesh_idx += 1
+
+func _on_export_step_started(msg: String) -> void:
+	var num_full_meshes := int(floori(arr_meshgen.size() / 256.0)) + 1
+	var add_msg := "..."
+	if num_full_meshes > 1:
+		add_msg = " in %s of %s objects..." % [saving_mesh_idx+1, num_full_meshes]
+	export_step_started.emit(msg + add_msg)
 
 func _on_export_progress_updated(_surf_idx:int, progress_value:float) -> void:
-	export_progress.emit(progress_value)
+	var num_full_meshes := int(floori(arr_meshgen.size() / 256.0)) + 1
+	export_progress.emit(progress_value / float(num_full_meshes))
 
 func _on_export_completed(object_file: String, material_file: String) -> void:
 	var time_export_ended := Time.get_unix_time_from_system()
