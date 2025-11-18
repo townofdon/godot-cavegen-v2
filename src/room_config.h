@@ -213,7 +213,7 @@ public:
 	};
 	void InitTiles(Vector2i numCells2d);
 	void InitTilesForNewRoom(Vector2i numCells2d, Vector2i dir, int borderMask);
-	void SetTile(Vector2i numCells2d, Vector2i coords, int tile);
+	void SetTile(Vector2i numCells2d, Vector2i coords, int tile, bool updateNeighbor = false);
 	int GetTileAt(Vector2i numCells2d, Vector2i coords);
 	int GetNumTiles();
 	int *GetTiles();

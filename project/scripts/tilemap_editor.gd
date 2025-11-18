@@ -219,14 +219,14 @@ func _line_at(from: Vector2i, to: Vector2i, tile: Tile) -> void:
 	var num_cells:Vector2i = cfg.get_num_cells_2d()
 	var numSteps := maxi(absi(from.x - to.x), absi(from.y - to.y)) * 2
 	if (numSteps <= 0):
-		if tile != Tile.Null: _set_cell_at(from, tile, num_cells)
+		if tile != Tile.Null: _set_cell_at(from, tile, num_cells, true)
 		lastTileDrawnCoords = from
 	else:
 		for i in range(numSteps):
 			var x := roundi(lerpf(from.x, to.x, i / float(numSteps - 1)))
 			var y := roundi(lerpf(from.y, to.y, i / float(numSteps - 1)))
 			var coords := Vector2i(x, y)
-			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells)
+			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells, true)
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
@@ -235,7 +235,7 @@ func _rect_at(from: Vector2i, to: Vector2i, tile: Tile) -> void:
 	for y in range(mini(from.y, to.y), maxi(from.y, to.y) + 1):
 		for x in range(mini(from.x, to.x), maxi(from.x, to.x) + 1):
 			var coords := Vector2i(x, y)
-			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells)
+			if tile != Tile.Null: _set_cell_at(coords, tile, num_cells, true)
 			lastTileDrawnCoords = coords
 	if room: room.notify_changed()
 
@@ -290,7 +290,7 @@ func _user_set_cell_at(coords: Vector2i, tile: Tile) -> void:
 	if coords == lastTileDrawnCoords: return
 	if tile == Tile.Null: return
 	var num_cells:Vector2i = cfg.get_num_cells_2d()
-	_set_cell_at(coords, tile, num_cells)
+	_set_cell_at(coords, tile, num_cells, true)
 	lastTileDrawnCoords = coords
 	room.notify_changed()
 
@@ -303,21 +303,21 @@ func _get_tile_to_place(coords: Vector2i, tile: Tile) -> Tile:
 	tile = _maybe_convert_tile(tile, isWall)
 	return tile	
 
-func _set_cell_at(coords: Vector2i, tile: Tile, num_cells: Vector2i) -> void:
+func _set_cell_at(coords: Vector2i, tile: Tile, num_cells: Vector2i, update_neighbor: bool = false) -> void:
 	if num_cells == Vector2i.ZERO: return
 	if coords.x < 0 || coords.x >= num_cells.x || coords.y < 0 || coords.y >= num_cells.y:
 		return
 	var isWall := coords.x==0 || coords.x==num_cells.x-1 || coords.y==0 || coords.y==num_cells.y-1
 	tile = _maybe_convert_tile(tile, isWall)
 	set_cell(coords, TILEMAP_SOURCE_ID, Vector2i(tile, 0))
-	_set_room_tile(num_cells, coords, _get_tile_state_from_atlas_x(tile))
+	_set_room_tile(num_cells, coords, _get_tile_state_from_atlas_x(tile), update_neighbor)
 
-func _erase_cell_at(coords: Vector2i, num_cells: Vector2i) -> void:
+func _erase_cell_at(coords: Vector2i, num_cells: Vector2i, update_neighbor: bool = false) -> void:
 	if num_cells == Vector2i.ZERO: return
 	if coords.x < 0 || coords.x >= num_cells.x || coords.y < 0 || coords.y >= num_cells.y:
 		return
 	erase_cell(coords)
-	_set_room_tile(num_cells, coords, RoomConfig.TILE_STATE_UNSET)
+	_set_room_tile(num_cells, coords, RoomConfig.TILE_STATE_UNSET, update_neighbor)
 
 func _maybe_convert_tile(atlasX:Tile, isWall:bool) -> Tile:
 	if atlasX == Tile.InnerNoise && isWall:
@@ -496,6 +496,6 @@ func set_tilemap_container_size(num_cells: Vector2i) -> void:
 	tilemapUI.pivot_offset.y = 0
 	tilemapScale = tilemapScale
 
-func _set_room_tile(num_cells_2d: Vector2i, coords: Vector2i, tile: int) -> void:
+func _set_room_tile(num_cells_2d: Vector2i, coords: Vector2i, tile: int, update_neighbor: bool = false) -> void:
 	if !room: return
-	room.set_tile(num_cells_2d, coords, tile)
+	room.set_tile(num_cells_2d, coords, tile, update_neighbor)

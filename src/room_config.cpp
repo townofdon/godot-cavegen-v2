@@ -235,7 +235,7 @@ void RoomConfig::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("init_tiles", "num_cells_2d"), &RoomConfig::InitTiles);
 	ClassDB::bind_method(D_METHOD("init_tiles_for_new_room", "num_cells_2d", "dir", "border_mask"), &RoomConfig::InitTilesForNewRoom);
-	ClassDB::bind_method(D_METHOD("set_tile", "num_cells_2d", "coords", "tile"), &RoomConfig::SetTile);
+	ClassDB::bind_method(D_METHOD("set_tile", "num_cells_2d", "coords", "tile", "update_neighbor"), &RoomConfig::SetTile);
 	ClassDB::bind_method(D_METHOD("get_tile_at", "num_cells_2d", "coords"), &RoomConfig::GetTileAt);
 	ClassDB::bind_method(D_METHOD("get_num_tiles"), &RoomConfig::GetNumTiles);
 
@@ -650,16 +650,41 @@ void RoomConfig::InitTilesForNewRoom(Vector2i numCells2d, Vector2i dir, int bord
 	}
 	numTiles = numCells2d.x * numCells2d.y;
 }
-void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile) {
+void RoomConfig::SetTile(Vector2i numCells2d, Vector2i coords, int tile, bool updateNeighbor) {
 	int x = coords.x;
 	int y = coords.y;
 	int i = x + y * numCells2d.x;
 
 	ERR_FAIL_INDEX_EDMSG(i, MAX_NOISE_NODES_2D, "tile index out of bounds");
+	ERR_FAIL_INDEX_EDMSG(x, numCells2d.x, "tile coords.x out of bounds");
+	ERR_FAIL_INDEX_EDMSG(y, numCells2d.y, "tile coords.x out of bounds");
 	ERR_FAIL_INDEX_EDMSG(tile, RoomConfig::TileState::_TILE_STATE_MAX_, "invalid tile");
 
 	tiles[i] = tile;
 	numTiles = numCells2d.x * numCells2d.y;
+
+	bool isBorderTile = x == 0 || y == 0 || x == numCells2d.x - 1 || y == numCells2d.y - 1;
+	if (isBorderTile && updateNeighbor) {
+		Vector2i adjacentCoordsV = Vector2i(coords.x, numCells2d.y - 1 - coords.y);
+		Vector2i adjacentCoordsH = Vector2i(numCells2d.x - 1 - coords.x, coords.y);
+		if (y == 0 && nodes.up.is_valid()) {
+			nodes.up->SetTile(numCells2d, adjacentCoordsV, tile, false);
+			nodes.up->dirty = true;
+		}
+		if (y == numCells2d.y - 1 && nodes.down.is_valid()) {
+			nodes.down->SetTile(numCells2d, adjacentCoordsV, tile, false);
+			nodes.down->dirty = true;
+		}
+		if (x == 0 && nodes.left.is_valid()) {
+			nodes.left->SetTile(numCells2d, adjacentCoordsH, tile, false);
+			nodes.left->dirty = true;
+		}
+		if (numCells2d.x - 1 && nodes.right.is_valid()) {
+			nodes.right->SetTile(numCells2d, adjacentCoordsH, tile, false);
+			nodes.right->dirty = true;
+		}
+		emit_signal("dirtied");
+	}
 }
 int RoomConfig::GetTileAt(Vector2i numCells2d, Vector2i coords) {
 	int x = coords.x;
