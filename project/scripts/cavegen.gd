@@ -64,13 +64,16 @@ func set_mode(p_mode: Mode) -> void:
 
 func notify_mode_changed(p_mode: Mode) -> void:
 	mode_changed.emit(p_mode)
+	StatusBarNotifs.mode_changed.emit(p_mode)
 
 func _on_new_file_pressed() -> void:
 	if initializing: return
+	if exporting: return
 	_initialize(SaveUtil.clone(initial_save_data))
 
 func _on_open_file_pressed() -> void:
 	if initializing: return
+	if exporting: return
 	if OS.has_feature("web"):
 		tilemap_editor.disable()
 		var ok := await SaveUtil.import_from_file_web()
@@ -94,11 +97,13 @@ func _on_open_file(path: String) -> void:
 
 func _on_save_file_pressed() -> void:
 	if initializing: return
+	if exporting: return
 	SaveUtil.save(save_data)
 	_notify_success("File saved")
 
 func _on_save_file_as_pressed() -> void:
 	if initializing: return
+	if exporting: return
 	assert(save_data)
 	assert(save_data.cfg)
 	var cfg := save_data.cfg
@@ -138,6 +143,22 @@ func _notify_error(text: String) -> void:
 		"color": toast_error,
 		"text_size": 18,
 	})
+
+func _process(_delta: float) -> void:
+	if initializing: return
+	if exporting: return
+	if Input.is_action_just_pressed("cmd_mode_room_select"):
+		set_mode(Mode.RoomSelect)
+	elif Input.is_action_just_pressed("cmd_mode_room_config"):
+		set_mode(Mode.RoomConfig)
+	elif Input.is_action_just_pressed("cmd_mode_tile_editor"):
+		set_mode(Mode.TileEditor)
+	elif Input.is_action_just_pressed("cmd_mode_preview"):
+		set_mode(Mode.Preview)
+	elif Input.is_action_just_pressed("cmd"):
+		StatusBarNotifs.cmd_key_just_pressed.emit()
+	elif Input.is_action_just_released("cmd"):
+		StatusBarNotifs.cmd_key_released.emit()
 
 func _ready() -> void:
 	test_cube.queue_free()

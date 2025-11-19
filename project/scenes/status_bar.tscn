@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbcudn8rpp1hl"]
+
+[ext_resource type="StyleBox" uid="uid://b5261omgr67f1" path="res://theme/tool_panel_style_box.tres" id="1_tndxx"]
+[ext_resource type="Script" uid="uid://c0mocrqtlo8xt" path="res://scripts/status_bar.gd" id="2_feayc"]
+
+[node name="StatusBar" type="Panel"]
+custom_minimum_size = Vector2(0, 40)
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("1_tndxx")
+script = ExtResource("2_feayc")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+metadata/_edit_use_anchors_ = true
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="RichTextLabel1" type="RichTextLabel" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "1=Select Room, 2=Config, 3=Tilemap Editor, 3=Preview"
+fit_content = true
+autowrap_trim_flags = 64
+vertical_alignment = 1
+
+[node name="RichTextLabel2" type="RichTextLabel" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "[img region=144,0,16,16]res://assets/icons.png[/img][img region=160,0,16,16]res://assets/icons.png[/img][img region=128,0,16,16]res://assets/icons.png[/img][img region=112,0,16,16]res://assets/icons.png[/img] Add / Select Room"
+fit_content = true
+vertical_alignment = 1
+
+[node name="RichTextLabel3" type="RichTextLabel" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = " [img region=176,0,16,16]res://assets/icons.png[/img] Look"
+fit_content = true
+vertical_alignment = 1
+
+[node name="RichTextLabel4" type="RichTextLabel" parent="MarginContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "B - Brush	L - Line	R - Rect	G - Fill"
+fit_content = true
+vertical_alignment = 1
