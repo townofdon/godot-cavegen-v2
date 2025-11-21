@@ -12,16 +12,16 @@ const HELPER_TEXT_TILE_MODE = "B - Brush		L - Line		R - Rect		G - Fill"
 const HELPER_TEXT_TILE_ERASE = "ALT - Erase"
 const HELPER_TEXT_WASD = "WASD - Move"
 
-const LABELS_EMPTY = [" "]
-const LABELS_CHOOSE_MODE = [HELPER_TEXT_MODE]
-const LABELS_CHOOSE_TILE = [HELPER_TEXT_TILE_MODE, HELPER_TEXT_TILE_ERASE]
-const LABELS_SELECT_ROOM = [HELPER_TEXT_ROOM_SELECT]
-const LABELS_PREVIEW_FLY = [HELPER_TEXT_WASD, HELPER_TEXT_LMOUSE_LOOK]
+const TEXT_GROUP_SPACER := "				"
+const LABELS_EMPTY: Array[Array] = [[" "]]
+const LABELS_CHOOSE_MODE: Array[Array] = [[HELPER_TEXT_MODE]]
+const LABELS_CHOOSE_TILE: Array[Array] = [[HELPER_TEXT_TILE_MODE, HELPER_TEXT_TILE_ERASE]]
+const LABELS_SELECT_ROOM: Array[Array] = [[HELPER_TEXT_ROOM_SELECT]]
+const LABELS_PREVIEW_FLY: Array[Array] = [[HELPER_TEXT_WASD, HELPER_TEXT_LMOUSE_LOOK]]
 
 @onready var rich_text_label_1: RichTextLabel = %RichTextLabel1
 @onready var rich_text_label_2: RichTextLabel = %RichTextLabel2
 @onready var rich_text_label_3: RichTextLabel = %RichTextLabel3
-@onready var rich_text_label_4: RichTextLabel = %RichTextLabel4
 
 var mode:CaveGen.Mode
 # TODO: ADD VIEW MODE
@@ -36,6 +36,9 @@ func _ready() -> void:
 	StatusBarNotifs.export_finished.connect(_enable)
 	StatusBarNotifs.cmd_key_just_pressed.connect(_on_cmd_key_pressed.bind(true))
 	StatusBarNotifs.cmd_key_released.connect(_on_cmd_key_pressed.bind(false))
+	rich_text_label_1.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	rich_text_label_2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rich_text_label_3.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 func _on_mode_changed(p_mode:CaveGen.Mode) -> void:
 	mode = p_mode
@@ -57,7 +60,6 @@ func _rerender() -> void:
 	rich_text_label_1.hide()
 	rich_text_label_2.hide()
 	rich_text_label_3.hide()
-	rich_text_label_4.hide()
 	if !enabled:
 		return
 	if cmd_key_pressed:
@@ -73,17 +75,19 @@ func _rerender() -> void:
 	else:
 		_render_labels(LABELS_EMPTY)
 
-func _render_labels(labels: Array) -> void:
+func _render_labels(text_groups: Array[Array]) -> void:
 	var i:int = 1
-	for label:String in labels:
-		assert(label is String)
-		assert(i <= 4)
-		if i == 1: _display_label(rich_text_label_1, label)
-		if i == 2: _display_label(rich_text_label_2, label)
-		if i == 3: _display_label(rich_text_label_3, label)
-		if i == 4: _display_label(rich_text_label_4, label)
+	for group:Array[String] in text_groups:
+		if !group || len(group) == 0: continue
+		assert(group is Array)
+		assert(i <= 3)
+		if i == 1: _display_label(rich_text_label_1, group)
+		if i == 2: _display_label(rich_text_label_2, group)
+		if i == 3: _display_label(rich_text_label_3, group)
 		i += 1
 
-func _display_label(label: RichTextLabel, text: String) -> void:
+func _display_label(label: RichTextLabel, text_group: Array) -> void:
+	assert(text_group.get(0) && text_group.get(0) is String)
+	var text := TEXT_GROUP_SPACER.join(text_group)
 	label.show()
 	label.text = text
