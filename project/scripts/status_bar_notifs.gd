@@ -5,6 +5,9 @@ extends Node
 signal mode_changed(p_mode:CaveGen.Mode)
 
 @warning_ignore("unused_signal")
+signal room_select_mode_changed(p_mode:RoomSelectOverlay.Mode)
+
+@warning_ignore("unused_signal")
 signal cmd_key_just_pressed()
 
 @warning_ignore("unused_signal")

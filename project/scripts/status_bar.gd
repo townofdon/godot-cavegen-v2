@@ -17,6 +17,7 @@ const LABELS_EMPTY: Array[Array] = [[" "]]
 const LABELS_CHOOSE_MODE: Array[Array] = [[HELPER_TEXT_MODE]]
 const LABELS_CHOOSE_TILE: Array[Array] = [[HELPER_TEXT_TILE_MODE, HELPER_TEXT_TILE_ERASE]]
 const LABELS_SELECT_ROOM: Array[Array] = [[HELPER_TEXT_ROOM_SELECT]]
+const LABELS_MOVE_ROOM: Array[Array] = [[HELPER_TEXT_ROOM_MOVE]]
 const LABELS_PREVIEW_FLY: Array[Array] = [[HELPER_TEXT_WASD, HELPER_TEXT_LMOUSE_LOOK]]
 
 @onready var rich_text_label_1: RichTextLabel = %RichTextLabel1
@@ -24,12 +25,14 @@ const LABELS_PREVIEW_FLY: Array[Array] = [[HELPER_TEXT_WASD, HELPER_TEXT_LMOUSE_
 @onready var rich_text_label_3: RichTextLabel = %RichTextLabel3
 
 var mode:CaveGen.Mode
+var room_select_mode:RoomSelectOverlay.Mode
 # TODO: ADD VIEW MODE
 var enabled:bool = true
 var cmd_key_pressed:bool = false
 
 func _ready() -> void:
 	StatusBarNotifs.mode_changed.connect(_on_mode_changed)
+	StatusBarNotifs.room_select_mode_changed.connect(_on_room_select_mode_changed)
 	StatusBarNotifs.load_started.connect(_disable)
 	StatusBarNotifs.load_finished.connect(_enable)
 	StatusBarNotifs.export_started.connect(_disable)
@@ -42,6 +45,10 @@ func _ready() -> void:
 
 func _on_mode_changed(p_mode:CaveGen.Mode) -> void:
 	mode = p_mode
+	_rerender()
+
+func _on_room_select_mode_changed(p_mode:RoomSelectOverlay.Mode) -> void:
+	room_select_mode = p_mode
 	_rerender()
 
 func _on_cmd_key_pressed(p_pressed:bool) -> void:
@@ -65,7 +72,10 @@ func _rerender() -> void:
 	if cmd_key_pressed:
 		_render_labels(LABELS_CHOOSE_MODE)
 	elif mode == CaveGen.Mode.RoomSelect:
-		_render_labels(LABELS_SELECT_ROOM)
+		if room_select_mode == RoomSelectOverlay.Mode.Select:
+			_render_labels(LABELS_SELECT_ROOM)
+		elif room_select_mode == RoomSelectOverlay.Mode.Move:
+			_render_labels(LABELS_MOVE_ROOM)
 	elif mode == CaveGen.Mode.RoomConfig:
 		_render_labels(LABELS_EMPTY)
 	elif mode == CaveGen.Mode.TileEditor:

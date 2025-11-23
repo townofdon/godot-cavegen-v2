@@ -71,6 +71,7 @@ func set_room(p_room: RoomConfig)->void:
 
 func _set_mode(p_mode: Mode, should_rerender: bool = true)->void:
 	mode = p_mode
+	StatusBarNotifs.room_select_mode_changed.emit(p_mode)
 	if should_rerender: _rerender()
 
 func _set_full_mask(p_mask: int) -> void:
@@ -120,6 +121,49 @@ func _ready() -> void:
 	visibility_changed.connect(_on_visibility_changed)
 	_rerender()
 	_rerender_mask_buttons()
+
+func _process(_delta: float) -> void:
+	# handle input
+	if !visible || !is_visible_in_tree():
+		return
+	if !room:
+		return
+	var dir := Vector2i.ZERO
+	if Input.is_action_just_pressed("ui_up"):
+		dir = Vector2i.UP
+	elif Input.is_action_just_pressed("ui_down"):
+		dir = Vector2i.DOWN
+	elif Input.is_action_just_pressed("ui_left"):
+		dir = Vector2i.LEFT
+	elif Input.is_action_just_pressed("ui_right"):
+		dir = Vector2i.RIGHT
+	if dir == Vector2i.ZERO:
+		return
+	if mode == Mode.Select:
+		if _has_neighbor(dir):
+			_on_select_neighbor(dir)
+		else:
+			_on_add_neighbor(dir)
+	elif mode == Mode.Move:
+		if !_has_neighbor(dir):
+			_on_move_room_requested(dir)
+
+func _has_neighbor(dir: Vector2i) -> bool:
+	if !room:
+		return false
+	var has_neighbor_north: bool = !!room.get_node_up()
+	var has_neighbor_south: bool = !!room.get_node_down()
+	var has_neighbor_west: bool = !!room.get_node_left()
+	var has_neighbor_east: bool = !!room.get_node_right()
+	if dir == Vector2i.UP:
+		return has_neighbor_north
+	if dir == Vector2i.DOWN:
+		return has_neighbor_south
+	if dir == Vector2i.LEFT:
+		return has_neighbor_west
+	if dir == Vector2i.RIGHT:
+		return has_neighbor_east
+	return false
 
 func _on_toggle_full_mask() -> void:
 	if border_mask < 15:
